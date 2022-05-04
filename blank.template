@@ -1,0 +1,37 @@
+// 
+//
+
+[main]
+name=
+entrancex=0
+entrancey=0
+fastpasttype=
+ridecount=
+
+// blank entry for a show type ride
+
+[ride1]
+name=
+type=s
+length=
+starttimemins=
+hourlythroughput=
+showcapacity=
+popularity=
+x=
+y=
+isfastpass=
+fpreservepercent=
+
+// blank entry for a continuous type ride
+
+[ride2]
+name=
+type=c
+length=
+hourlythroughput=
+popularity=
+x=
+y=
+isfastpass=
+fpreservepercent=
