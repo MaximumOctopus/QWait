@@ -1,0 +1,32 @@
+// =======================================================================
+// =======================================================================
+//     To-do
+// =======================================================================
+// =======================================================================
+
+in progress:
+
+- New visitor types. the current options seem very unrealistic. the next update will have a complete rewrite, including groups, families, singles 
+
+- visitor spending information. how much they pay etc.
+
+- more park types (hopefully using real-world data) (ongoing research)
+
+
+
+
+- travelling/waiting when accessing new fastpass ticket
+
+- more visitor autonomy - less rigid mechanisms of ride selection and park navigation
+
+- ensure Ride::WaitTime() is accurate in both modes
+
+- ensure fastpass tickets are given out to visitors so that they don't overlap or prevent from being used due to times
+
+- tool to visually display visitor positions
+
+- tweak visitor logic
+
+- better opening and closing park and ride logic
+
+- simulate at a higher resolution (is a minute too long?!)
