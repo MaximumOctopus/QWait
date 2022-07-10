@@ -5,33 +5,36 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
 
 #include <iostream>
 #include <random>
+
 #include "Constants.h"
 #include "Engine.h"
-#include "RideController.h"
+#include "ParkController.h"
 #include "Utility.h"
 #include "VisitorController.h"
 
 
-extern RideController* GRideController;
+extern ParkController* GParkController;
 extern VisitorController* GVisitorController;
 
 
-Engine::Engine(int fast_pass, int park_open_time, int park_close_time, bool show_output)
+Engine::Engine(FastPassType fast_pass, int park_open_time, int park_close_time, bool show_output, int update_rate)
 {
+	UpdateRate = update_rate;
+
 	ParkOpen = true;
 
 	ShowOutput = show_output;
 
 	FastPassMode = fast_pass;
 
-	GRideController->FastPassMode = FastPassMode;
+	GParkController->FastPassMode = FastPassMode;
 
 	CurrentTime.hours = park_open_time;
 	CurrentTime.minutes = 0;
@@ -43,7 +46,7 @@ Engine::Engine(int fast_pass, int park_open_time, int park_close_time, bool show
 }
 
 
-void Engine::OutputStatus(std::string status)
+void Engine::OutputStatus(const std::string status)
 {
 	if (ShowOutput)
 	{
@@ -54,7 +57,7 @@ void Engine::OutputStatus(std::string status)
 
 void Engine::Run(bool report_mxm, bool report_visitor_location)
 {
-	if (FastPassMode != Constants::FastPassModeNone)
+	if (FastPassMode != FastPassType::None)
 	{
 		PreArrivalFastPass();
 	}
@@ -67,68 +70,68 @@ void Engine::Run(bool report_mxm, bool report_visitor_location)
 		// == Visitor Processing ==================================================================================
 		// ========================================================================================================
 
-		for (int v = 0; v < GVisitorController->Visitors.size(); v++)
+		for (int g = 0; g < GVisitorController->Groups.size(); g++)
 		{
-			switch (GVisitorController->Visitors[v].ParkStatus)
+			switch (GVisitorController->Groups[g].Behaviour.parkStatus)
 			{
 				// let's see if the visitor should enter the park
-			case Constants::ParkStatusOnWay:
+			case GroupParkStatus::OnWay:
 
-				if (Utility::IsTimeEqual(CurrentTime, GVisitorController->Visitors[v].ArrivalTime))
+				if (Utility::IsTimeEqual(CurrentTime, GVisitorController->Groups[g].Configuration.arrivalTime))
 				{
-					GVisitorController->Visitors[v].ParkStatus = Constants::ParkStatusAtEntrance;
+					GVisitorController->Groups[g].SetStatusForAllVisitors(GroupParkStatus::AtEntrance, VisitorParkStatus::AtEntrance);
 
-					GVisitorController->Visitors[v].UpdateLocation(GRideController->entrance.position.x, 
-						                                           GRideController->entrance.position.y);
+					GVisitorController->Groups[g].UpdateLocation(GParkController->entrance.position.x,
+						                                        GParkController->entrance.position.y);
 				}
 
 				break;
 
-			case Constants::ParkStatusAtEntrance:
+			case GroupParkStatus::AtEntrance:
 
-				ParkStatusEntrance(v);
-
-				break;
-
-			case Constants::ParkStatusIdle:
-
-				ParkStatusIdle(v);
+				ParkStatusEntrance(g);
 
 				break;
 
-			case Constants::ParkStatusRiding:
+			case GroupParkStatus::Idle:
 
-				ParkStatusRiding(v);
-
-				break;
-
-			case Constants::ParkStatusQueuing:
-			case Constants::ParkStatusQueuingFastPass:
-
-				GVisitorController->Visitors[v].TimeSpent.queuing++;
+				ParkStatusIdle(g);
 
 				break;
 
-			case Constants::ParkStatusTravelling:
+			case GroupParkStatus::Riding:
 
-				ParkStatusTravelling(v);
-
-				break;
-
-			case Constants::ParkStatusWaiting:
-
-				ParkStatusWaiting(v);
+				ParkStatusRiding(g);
 
 				break;
 
-			case Constants::ParkStatusExited:
+			case GroupParkStatus::Queuing:
+			case GroupParkStatus::QueuingFastPass:
+
+				GVisitorController->Groups[g].SetStatForAllVisitors(GroupVisitorStat::TimeSpentQueuing);
+
+				break;
+
+			case GroupParkStatus::Travelling:
+
+				ParkStatusTravelling(g);
+
+				break;
+
+			case GroupParkStatus::Waiting:
+
+				ParkStatusWaiting(g);
+
+				break;
+
+			case GroupParkStatus::Exited:
 
 				break;
 			}
 
 			if (report_visitor_location)
 			{
-				GVisitorController->Visitors[v].SaveMinuteStats();
+				GVisitorController->Groups[g].SaveMinuteStats();
 			}
 		}
 
@@ -136,7 +139,7 @@ void Engine::Run(bool report_mxm, bool report_visitor_location)
 		// == Entrance Queue Processing ===========================================================================
 		// ========================================================================================================
 
-		if (GRideController->EntranceQueueSize() != 0)
+		if (GParkController->EntranceQueueSize() != 0)
 		{
 			EntranceProcessQueue();
 		}
@@ -145,16 +148,16 @@ void Engine::Run(bool report_mxm, bool report_visitor_location)
 		// == Ride Processing =====================================================================================
 		// ========================================================================================================
 
-		for (int r = 0; r < GRideController->Rides.size(); r++)
+		for (int r = 0; r < GParkController->Rides.size(); r++)
 		{
-			if (!GRideController->Rides[r].RideOperation.isShutdown)
+			if (!GParkController->Rides[r].RideOperation.isShutdown)
 			{
 				ProcessRide(r);
 			}
 
 			if (report_mxm)
 			{
-				GRideController->Rides[r].UpdateMinuteStats();
+				GParkController->Rides[r].UpdateMinuteStats();
 			}
 		}
 
@@ -165,22 +168,22 @@ void Engine::Run(bool report_mxm, bool report_visitor_location)
 
 		// ========================================================================================================
 
-		GRideController->Minutes++;
+		GParkController->Minutes++;
 
 		// ========================================================================================================
 
 		UpdateClock();
 	}
 
-	GRideController->Minutes--;
+	GParkController->Minutes--;
 
-	OutputStatus("Park closed!");
+	OutputStatus("\nPark closed!");
 }
 
 
 void Engine::UpdateClock()
 {
-	if (CurrentTime.minutes % 15 == 0)
+	if (CurrentTime.minutes % UpdateRate == 0)
 	{
 		ShowLiveStats();
 	}
@@ -200,10 +203,10 @@ void Engine::UpdateClock()
 }
 
 
-QWaitTypes::GetRide Engine::GetRide(int visitor)
+QWaitTypes::GetRide Engine::GetRide(int group)
 {
-	int SelectedRide = kNoSelectedRide;
-	size_t CheckingRides = GRideController->Rides.size() * 2;
+	int SelectedRide = Constants::kNoSelectedRide;
+	size_t CheckingRides = GParkController->Rides.size() * 2;
 
 	// == ride selection "magic" ================================================
 
@@ -211,19 +214,19 @@ QWaitTypes::GetRide Engine::GetRide(int visitor)
 	{
 		int num = rand() % kSelectionChoiceCacheCount;
 
-		SelectedRide = GRideController->SelectionChoiceCache[GVisitorController->Visitors[visitor].Type][num];
+		SelectedRide = GParkController->SelectionChoiceCache[GVisitorController->Groups[group].GetGroupLeaderType()][num];
 
-		if (GRideController->Rides[SelectedRide].WaitTime(kNoSelectedFastPassTicket) < GVisitorController->Visitors[visitor].Rides.maxWaitTime)
+		if (GParkController->Rides[SelectedRide].WaitTime(kNoSelectedFastPassTicket) <= GVisitorController->Groups[group].Behaviour.maximumRideWaitingTime)
 		{
-			int isbetteravailable = IsRideAvailableCloser(visitor, SelectedRide);
+			int isbetteravailable = IsRideAvailableCloser(group, SelectedRide);
 
-			QWaitTypes::FastPass FastPassDetails = IsFastPassTicketSoon(visitor, SelectedRide);
+			QWaitTypes::FastPass FastPassDetails = IsFastPassTicketSoon(group, SelectedRide);
 
-			if (isbetteravailable != kNoSelectedRide && FastPassDetails.ride == kNoSelectedRide)
+			if (isbetteravailable != Constants::kNoSelectedRide && FastPassDetails.ride == Constants::kNoSelectedRide)
 			{
 				return { isbetteravailable, kNoSelectedFastPassTicket };
 			}
-			else if (FastPassDetails.ride != kNoSelectedRide)
+			else if (FastPassDetails.ride != Constants::kNoSelectedRide)
 			{
 				return { FastPassDetails.ride, FastPassDetails.ticket.hours };
 			}
@@ -232,6 +235,7 @@ QWaitTypes::GetRide Engine::GetRide(int visitor)
 		}
 		else
 		{
+			//std::cout << "- " << SelectedRide << " NO \n";
 		}
 
 		CheckingRides--;
@@ -239,66 +243,38 @@ QWaitTypes::GetRide Engine::GetRide(int visitor)
 
 	// ==========================================================================
 
-	return { kNoDestinationRide, kNoSelectedFastPassTicket };
+	return { Constants::kNoDestinationRide, kNoSelectedFastPassTicket };
 }
 
 
 // if there's a ride which has better popularity, lower wait time, and is closer, then select this instead
-int Engine::IsRideAvailableCloser(int visitor, int possible_destination)
+int Engine::IsRideAvailableCloser(int group, int possible_destination)
 {
-	if (GVisitorController->Visitors[visitor].Rides.current == kNoCurrentRide)
+	if (GVisitorController->Groups[group].Behaviour.currentRide == Constants::kNoCurrentRide)
 	{
-		return kNoSelectedRide;
+		return Constants::kNoSelectedRide;
 	}
 
-	int CurrentRide = GVisitorController->Visitors[visitor].Rides.current;
+	int CurrentRide = GVisitorController->Groups[group].Behaviour.currentRide;
 
-	Ride r = GRideController->Rides[CurrentRide];
-	Ride d = GRideController->Rides[possible_destination];
+	Ride r = GParkController->Rides[CurrentRide];
+	Ride d = GParkController->Rides[possible_destination];
 
 	for (int i = 0; i < 5; i++)
 	{
-		Ride c = GRideController->Rides[r.ClosestCache[i]];
+		Ride c = GParkController->Rides[r.ClosestCache[i]];
 
 		if (c.RideOperation.Popularity > d.RideOperation.Popularity &&
-			GRideController->GetDistanceBetweenInMinutes(r.ClosestCache[i], CurrentRide) < GRideController->GetDistanceBetweenInMinutes(possible_destination, CurrentRide) &&
+			GParkController->GetDistanceBetweenInMinutes(r.ClosestCache[i], CurrentRide) < GParkController->GetDistanceBetweenInMinutes(possible_destination, CurrentRide) &&
 			c.WaitTime(kNoSelectedFastPassTicket) < d.WaitTime(kNoSelectedFastPassTicket) &&
-			r.ClosestCache[i] != GVisitorController->Visitors[visitor].LastThreeRides[2] &&
-			r.ClosestCache[i] != GVisitorController->Visitors[visitor].LastThreeRides[1])
+			r.ClosestCache[i] != GVisitorController->Groups[group].Statistics.lastThreeRides[2] &&
+			r.ClosestCache[i] != GVisitorController->Groups[group].Statistics.lastThreeRides[1])
 		{
 			return r.ClosestCache[i];
 		}
 	}
 
-	return kNoSelectedRide;
-}
-
-
-QWaitTypes::FastPass Engine::IsFastPassTicketSoon(int visitor, int possible_destination)
-{
-	if (FastPassMode != Constants::FastPassModeNone)
-	{
-		if (GVisitorController->Visitors[visitor].FastPassTickets.size() != 0)
-		{
-			int TimeRequired = static_cast<int>(GRideController->Rides[possible_destination].WaitTime(kNoSelectedFastPassTicket)) +
-		                                 		GRideController->GetDistanceBetweenInMinutes(GVisitorController->Visitors[visitor].Rides.current, possible_destination) +
-		                                   		GRideController->GetDistanceBetweenInMinutes(possible_destination, GVisitorController->Visitors[visitor].FastPassTickets[0].ride);
-
-			int TimeToFPT = Utility::Duration(CurrentTime, GVisitorController->Visitors[visitor].FastPassTickets[0].ticket);
-
-			// fastpass slot is 1 hour
-			if (TimeRequired < TimeToFPT + 59)
-			{
-				// plenty of time to get to this ride
-			}
-			else
-			{
-				return GVisitorController->Visitors[visitor].FastPassTickets[0];
-			}
-		}
-	}
-
-	return { kNoSelectedType, kNoSelectedRide, { 0, 0 } };
+	return Constants::kNoSelectedRide;
 }
 
 
@@ -307,23 +283,51 @@ QWaitTypes::FastPass Engine::IsFastPassTicketSoon(int visitor, int possible_dest
 // =================================================================================================================
 
 
+QWaitTypes::FastPass Engine::IsFastPassTicketSoon(int group, int possible_destination)
+{
+	if (FastPassMode != FastPassType::None)
+	{
+		if (GVisitorController->Groups[group].FastPassTickets.size() != 0)
+		{
+			int TimeRequired = static_cast<int>(GParkController->Rides[possible_destination].WaitTime(kNoSelectedFastPassTicket)) +
+												GParkController->GetDistanceBetweenInMinutes(GVisitorController->Groups[group].Behaviour.currentRide, possible_destination) +
+												GParkController->GetDistanceBetweenInMinutes(possible_destination, GVisitorController->Groups[group].FastPassTickets[0].ride);
+
+			int TimeToFPT = Utility::Duration(CurrentTime, GVisitorController->Groups[group].FastPassTickets[0].ticket);
+
+			// fastpass slot is 1 hour
+			if (TimeRequired < TimeToFPT + 59)
+			{
+				// plenty of time to get to this ride
+			}
+			else
+			{
+				return GVisitorController->Groups[group].FastPassTickets[0];
+			}
+		}
+	}
+
+	return { Constants::kNoSelectedType, Constants::kNoSelectedRide, { 0, 0 } };
+}
+
+
 void Engine::PreArrivalFastPass()
 {
 	size_t count = 0;
 
-	if (FastPassMode != Constants::FastPassModePlusNoStayBenefit)
+	if (FastPassMode != FastPassType::PlusNoStayBenefit)
 	{
 		// Pass 1, visitors who are "staying at the park"
 
 		OutputStatus("Processing FastPass tickets...");
 
-		for (int v = 0; v < GVisitorController->Visitors.size(); v++)
+		for (int g = 0; g < GVisitorController->Groups.size(); g++)
 		{
-			if (GVisitorController->Visitors[v].StayingOnSite)
+			if (GVisitorController->Groups[g].Configuration.stayingOnSite)
 			{
-				ProcessFastPassesForVisitor(v);
+				ProcessFastPassesForGroup(g);
 
-				count += GVisitorController->Visitors[v].FastPassTickets.size();
+				count += GVisitorController->Groups[g].FastPassTickets.size();
 			}
 		}
 	}
@@ -332,60 +336,60 @@ void Engine::PreArrivalFastPass()
 
 	// Pass 2, everyone else! =========================================================
 
-	for (int v = 0; v < GVisitorController->Visitors.size(); v++)
+	for (int g = 0; g < GVisitorController->Groups.size(); g++)
 	{
-		if (!GVisitorController->Visitors[v].StayingOnSite || FastPassMode == Constants::FastPassModePlusNoStayBenefit)
+		if (!GVisitorController->Groups[g].Configuration.stayingOnSite || FastPassMode == FastPassType::PlusNoStayBenefit)
 		{
-			ProcessFastPassesForVisitor(v);
+			ProcessFastPassesForGroup(g);
 
-			count += GVisitorController->Visitors[v].FastPassTickets.size();
+			count += GVisitorController->Groups[g].FastPassTickets.size();
 		}
 
-		GVisitorController->Visitors[v].SortFastPassTickets();
+		GVisitorController->Groups[g].SortFastPassTickets();
 	}
 
 	GVisitorController->FastPassStats.ticketsEarlyAll = count;
 }
 
 
-void Engine::ProcessFastPassesForVisitor(int visitor)
+void Engine::ProcessFastPassesForGroup(int group)
 {
-	QWaitTypes::FastPass FP1 = GetFastPassRide(1, GVisitorController->Visitors[visitor].ArrivalTime, GVisitorController->Visitors[visitor].DepartureTime);
+	QWaitTypes::FastPass FP1 = GetFastPassRide(1, GVisitorController->Groups[group].Configuration.arrivalTime, GVisitorController->Groups[group].Configuration.departureTime);
 
-	if (FP1.ride != kNoSelectedRide)
+	if (FP1.ride != Constants::kNoSelectedRide)
 	{
-		GVisitorController->Visitors[visitor].AddFastPassTicket(FP1.type, FP1.ride, FP1.ticket);
+		GVisitorController->Groups[group].AddFastPassTicket(FP1.type, FP1.ride, FP1.ticket);
 	}
 	else
 	{
-		GVisitorController->Visitors[visitor].Rides.noFastPassRideForMe++;
+		GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::NoFastPassRideForMe);
 	}
 
 	for (int x = 0; x < 2; x++)
 	{
-		QWaitTypes::FastPass FP2 = GetFastPassRide(2, GVisitorController->Visitors[visitor].ArrivalTime, GVisitorController->Visitors[visitor].DepartureTime);
+		QWaitTypes::FastPass FP2 = GetFastPassRide(2, GVisitorController->Groups[group].Configuration.arrivalTime, GVisitorController->Groups[group].Configuration.departureTime);
 
-		if (FP2.ride != kNoSelectedRide)
+		if (FP2.ride != Constants::kNoSelectedRide)
 		{
-			GVisitorController->Visitors[visitor].AddFastPassTicket(FP2.type, FP2.ride, FP2.ticket);
+			GVisitorController->Groups[group].AddFastPassTicket(FP2.type, FP2.ride, FP2.ticket);
 		}
 		else
 		{
-			GVisitorController->Visitors[visitor].Rides.noFastPassRideForMe++;
+			GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::NoFastPassRideForMe);
 		}
 	}
 
 	for (int x = 0; x < 3; x++)
 	{
-		QWaitTypes::FastPass FP3 = GetFastPassRide(3, GVisitorController->Visitors[visitor].ArrivalTime, GVisitorController->Visitors[visitor].DepartureTime);
+		QWaitTypes::FastPass FP3 = GetFastPassRide(3, GVisitorController->Groups[group].Configuration.arrivalTime, GVisitorController->Groups[group].Configuration.departureTime);
 
-		if (FP3.ride != kNoSelectedRide)
+		if (FP3.ride != Constants::kNoSelectedRide)
 		{
-			GVisitorController->Visitors[visitor].AddFastPassTicket(FP3.type, FP3.ride, FP3.ticket);
+			GVisitorController->Groups[group].AddFastPassTicket(FP3.type, FP3.ride, FP3.ticket);
 		}
 		else
 		{
-			GVisitorController->Visitors[visitor].Rides.noFastPassRideForMe++;
+			GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::NoFastPassRideForMe);
 		}
 	}
 }
@@ -394,22 +398,22 @@ void Engine::ProcessFastPassesForVisitor(int visitor)
 // guests allowed 1 type 1, 2 from type 2, 3 from type 3 (if available)
 QWaitTypes::FastPass Engine::GetFastPassRide(int type, QWaitTypes::Time arrive, QWaitTypes::Time leave)
 {
-	if (GRideController->FastPassType[type - 1].size() != 0)
+	if (GParkController->FastPassTypes[type - 1].size() != 0)
 	{
 		int fpt = 0;
 		int ticket = kNoSelectedFastPassTicket;
 
 		do
 		{
-			int ride = GRideController->FastPassType[type - 1][fpt];
+			int ride = GParkController->FastPassTypes[type - 1][fpt];
 			
-			ticket = GRideController->Rides[ride].ViewFastPassTicket(arrive, leave);
+			ticket = GParkController->Rides[ride].ViewFastPassTicket(arrive, leave);
 
 			if (ticket != kNoSelectedFastPassTicket)
 			{
 				if (Utility::IsTicketValidForTime(arrive, leave, { ticket, 0 }))
 				{
-					return { type, ride, { GRideController->Rides[ride].GetFastPassTicket(arrive, leave), 0 } };
+					return { type, ride, { GParkController->Rides[ride].GetFastPassTicket(arrive, leave), 0 } };
 				}
 
 				ticket = kNoSelectedFastPassTicket;
@@ -417,50 +421,50 @@ QWaitTypes::FastPass Engine::GetFastPassRide(int type, QWaitTypes::Time arrive, 
 
 			fpt++;
 
-		} while (fpt < GRideController->FastPassType[type - 1].size() && ticket == kNoSelectedFastPassTicket);
+		} while (fpt < GParkController->FastPassTypes[type - 1].size() && ticket == kNoSelectedFastPassTicket);
 	}
 
-	return { kNoSelectedType, kNoSelectedRide, { 0, 0 } };
+	return { Constants::kNoSelectedType, Constants::kNoSelectedRide, { 0, 0 } };
 }
 
 
-void Engine::GetReplacementFastPassRide(int visitor)
+void Engine::GetReplacementFastPassRide(int group)
 {
-	if (GVisitorController->Visitors[visitor].FastPassTickets.size() == 0)
+	if (GVisitorController->Groups[group].FastPassTickets.size() == 0)
 	{
-		if (GRideController->entrance.fastPassType == 1)
+		if (GParkController->entrance.fastPassType == 1)
 		{
-			QWaitTypes::FastPass FP1 = GetFastPassRide(1, CurrentTime, GVisitorController->Visitors[visitor].DepartureTime);
+			QWaitTypes::FastPass FP1 = GetFastPassRide(1, CurrentTime, GVisitorController->Groups[group].Configuration.departureTime);
 
-			if (FP1.ride != kNoSelectedRide)
+			if (FP1.ride != Constants::kNoSelectedRide)
 			{
-				GVisitorController->Visitors[visitor].AddFastPassTicket(FP1.type, FP1.ride, FP1.ticket);
+				GVisitorController->Groups[group].AddFastPassTicket(FP1.type, FP1.ride, FP1.ticket);
 
 				return;
 			}
 
-			QWaitTypes::FastPass FP2 = GetFastPassRide(2, CurrentTime, GVisitorController->Visitors[visitor].DepartureTime);
+			QWaitTypes::FastPass FP2 = GetFastPassRide(2, CurrentTime, GVisitorController->Groups[group].Configuration.departureTime);
 
-			if (FP2.ride != kNoSelectedRide)
+			if (FP2.ride != Constants::kNoSelectedRide)
 			{
-				GVisitorController->Visitors[visitor].AddFastPassTicket(FP2.type, FP2.ride, FP2.ticket);
+				GVisitorController->Groups[group].AddFastPassTicket(FP2.type, FP2.ride, FP2.ticket);
 
 				return;
 			}
 		}
-		else if (GRideController->entrance.fastPassType == 3)
+		else if (GParkController->entrance.fastPassType == 3)
 		{
-			QWaitTypes::FastPass FP3 = GetFastPassRide(3, CurrentTime, GVisitorController->Visitors[visitor].DepartureTime);
+			QWaitTypes::FastPass FP3 = GetFastPassRide(3, CurrentTime, GVisitorController->Groups[group].Configuration.departureTime);
 
-			if (FP3.ride != kNoSelectedRide)
+			if (FP3.ride != Constants::kNoSelectedRide)
 			{
-				GVisitorController->Visitors[visitor].AddFastPassTicket(FP3.type, FP3.ride, FP3.ticket);
+				GVisitorController->Groups[group].AddFastPassTicket(FP3.type, FP3.ride, FP3.ticket);
 
 				return;
 			}
 		}
 
-		GVisitorController->Visitors[visitor].Rides.noFastPassRideForMe++;
+		GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::NoFastPassRideForMe);
 	}
 }
 
@@ -473,58 +477,63 @@ void Engine::GetReplacementFastPassRide(int visitor)
 void Engine::EntranceProcessQueue()
 {
 	int count = 0;
-	int VisitorID = kNotValidVisitor;
+	int GroupID = Constants::kNotValidGroup;
 
 	do
 	{
-		VisitorID = GRideController->RemoveFromEntranceQueue();
+		GroupID = GParkController->RemoveFromEntranceQueue();
 
-		if (VisitorID != kNotValidVisitor)
+		if (GroupID != Constants::kNotValidGroup)
 		{
-			GVisitorController->Visitors[VisitorID].ParkStatus = Constants::ParkStatusIdle;
+			GVisitorController->Groups[GroupID].SetStatusForAllVisitors(GroupParkStatus::Idle, VisitorParkStatus::Idle);
+
+			for (int v = 0; v < GVisitorController->Groups[GroupID].Visitors.size(); v++)
+			{
+				GVisitorController->Groups[GroupID].Visitors[v].BuyItem(GParkController->BuyTicket(GVisitorController->Groups[GroupID].Visitors[v].Configuration.Age, false));
+			}
 		}
 
 		count++;
 
-	} while (count < GRideController->entrance.throughPutMinute && VisitorID != kNotValidVisitor);
+	} while (count < GParkController->entrance.throughPutMinute && GroupID != Constants::kNotValidGroup);
 }
 
 
 void Engine::ProcessRide(int ride)
 {
-	if (GRideController->Rides[ride].RideOperation.isOpen)
+	if (GParkController->Rides[ride].RideOperation.isOpen)
 	{
-		if (Utility::IsTimeEqual(CurrentTime, GRideController->Rides[ride].RideOperation.close))
+		if (Utility::IsTimeEqual(CurrentTime, GParkController->Rides[ride].RideOperation.close))
 		{
 			RideEmptyQueue(ride);
 
-			GRideController->Rides[ride].Close();
+			GParkController->Rides[ride].Close();
 
 			return;
 		}
 	}
 	else
 	{
-		if (Utility::IsTimeEqual(CurrentTime, GRideController->Rides[ride].RideOperation.open))
+		if (Utility::IsTimeEqual(CurrentTime, GParkController->Rides[ride].RideOperation.open))
 		{
-			GRideController->Rides[ride].RideOperation.isOpen = true;
+			GParkController->Rides[ride].RideOperation.isOpen = true;
 		}
 	}
 
-	switch (GRideController->Rides[ride].RideOperation.rideType)
+	switch (GParkController->Rides[ride].RideOperation.rideType)
 	{
-	case kRideTypeContinuous:
+	case RideType::Continuous:
 	{
-		if (GRideController->Rides[ride].QueueSize() != 0 || GRideController->Rides[ride].QueueSizeFastPass() != 0)
+		if (GParkController->Rides[ride].QueueSize() != 0 || GParkController->Rides[ride].QueueSizeFastPass() != 0)
 		{
 			RideContinuousProcessQueue(ride);
 		}
 
 		break;
 	}
-	case kRideTypeShow:
+	case RideType::Show:
 	{
-		if ((GRideController->Rides[ride].QueueSize() != 0 || GRideController->Rides[ride].QueueSizeFastPass() != 0) && CurrentTime.minutes % GRideController->Rides[ride].RideOperation.ShowStartTime == 0)
+		if ((GParkController->Rides[ride].QueueSize() != 0 || GParkController->Rides[ride].QueueSizeFastPass() != 0) && CurrentTime.minutes % GParkController->Rides[ride].RideOperation.ShowStartTime == 0)
 		{
 			RideShowProcessQueue(ride);
 		}
@@ -533,130 +542,141 @@ void Engine::ProcessRide(int ride)
 	}
 	}
 
-	GRideController->Rides[ride].UpdateDailyStatistics();
+	GParkController->Rides[ride].UpdateDailyStatistics();
 }
 
 
 void Engine::RideContinuousProcessQueue(int ride)
 {
 	int count = 0;
-	int VisitorID = kNotValidVisitor;
+	QWaitTypes::Riders Visitor;
 
-	if (GRideController->Rides[ride].FastPass.mode != 0)
+	if (GParkController->Rides[ride].FastPass.mode != 0)
 	{
 		do
 		{
-			VisitorID = GRideController->Rides[ride].RemoveFromQueueFastPass();
+			Visitor = GParkController->Rides[ride].NextItemInQueueFastPass();
 			   
-			if (VisitorID != kNotValidVisitor)
-			{
-				GVisitorController->Visitors[VisitorID].SetRiding(ride, GRideController->Rides[ride].RideOperation.rideLength, true);
+			// if this group is larger than the maximum throughput per minute then we have to let them all through
+			if (Visitor.group != Constants::kNotValidGroup && (Visitor.memberID.size() <= (GParkController->Rides[ride].RideThroughput.perMinuteIFastPass - count) || Visitor.memberID.size() > GParkController->Rides[ride].RideThroughput.perMinuteIFastPass))
+			{			
+				GParkController->Rides[ride].RemoveFromQueueFastPass();
 
-				GRideController->Rides[ride].DailyStatistics.totalRiders++;
-				GRideController->Rides[ride].CurrentRiders++;
+				GVisitorController->Groups[Visitor.group].SetRiding(Visitor, ride, GParkController->Rides[ride].RideOperation.rideLength, true);
+
+				GParkController->Rides[ride].DailyStatistics.totalRiders += Visitor.memberID.size();
+				GParkController->Rides[ride].CurrentRiders += Visitor.memberID.size();
+
+				count += Visitor.memberID.size();
+			}
+			else
+			{
+				Visitor.group = Constants::kNotValidGroup;
 			}
 
-			count++;
-
-		} while (count < GRideController->Rides[ride].RideThroughput.perMinuteIFastPass && VisitorID != kNotValidVisitor);
+		} while (count < GParkController->Rides[ride].RideThroughput.perMinuteIFastPass && Visitor.group != Constants::kNotValidGroup);
 	}
 
 	do
 	{
-		VisitorID = GRideController->Rides[ride].RemoveFromQueue();
+		Visitor = GParkController->Rides[ride].NextItemInQueue();
 
-		if (VisitorID != kNotValidVisitor)
+		// if this group is larger than the maximum throughput per minute then we have to let them all through
+		if (Visitor.group != Constants::kNotValidGroup && (static_cast<int>(Visitor.memberID.size()) <= (GParkController->Rides[ride].RideThroughput.perMinuteI + GParkController->Rides[ride].RideThroughput.perMinuteIFastPass - count) || static_cast<int>(Visitor.memberID.size()) > GParkController->Rides[ride].RideThroughput.perMinuteI))
 		{
-			GVisitorController->Visitors[VisitorID].SetRiding(ride, GRideController->Rides[ride].RideOperation.rideLength, false);
+			GParkController->Rides[ride].RemoveFromQueue();
 
-			GRideController->Rides[ride].DailyStatistics.totalRiders++;
-			GRideController->Rides[ride].CurrentRiders++;
+			GVisitorController->Groups[Visitor.group].SetRiding(Visitor, ride, GParkController->Rides[ride].RideOperation.rideLength, false);
+
+			GParkController->Rides[ride].DailyStatistics.totalRiders += Visitor.memberID.size();
+			GParkController->Rides[ride].CurrentRiders += Visitor.memberID.size();
+
+			count += Visitor.memberID.size();
+		}
+		else
+		{
+			Visitor.group = Constants::kNotValidGroup;
 		}
 
-		count++;
-
-	} while (count < GRideController->Rides[ride].RideThroughput.perMinuteI + GRideController->Rides[ride].RideThroughput.perMinuteIFastPass && VisitorID != kNotValidVisitor);
+	} while (count < GParkController->Rides[ride].RideThroughput.perMinuteI + GParkController->Rides[ride].RideThroughput.perMinuteIFastPass && Visitor.group != Constants::kNotValidGroup);
 }
 
 
 void Engine::RideShowProcessQueue(int ride)
 {
 	int count = 0;
-	int VisitorID = kNotValidVisitor;
+	QWaitTypes::Riders Visitor;
 
-	if (GRideController->Rides[ride].FastPass.mode != 0)
+	if (GParkController->Rides[ride].FastPass.mode != 0)
 	{
 		do
 		{
-			VisitorID = GRideController->Rides[ride].RemoveFromQueueFastPass();
+			Visitor = GParkController->Rides[ride].RemoveFromQueueFastPass();
 
-			if (VisitorID != kNotValidVisitor)
+			if (Visitor.group != Constants::kNotValidGroup)
 			{
-				GVisitorController->Visitors[VisitorID].SetRiding(ride, GRideController->Rides[ride].RideOperation.rideLength, true);
+				
+				GVisitorController->Groups[Visitor.group].SetRiding(Visitor, ride, GParkController->Rides[ride].RideOperation.rideLength, true);
 
-				GRideController->Rides[ride].DailyStatistics.totalRiders++;
-				GRideController->Rides[ride].CurrentRiders++;
+				GParkController->Rides[ride].DailyStatistics.totalRiders += Visitor.memberID.size();
+				GParkController->Rides[ride].CurrentRiders += Visitor.memberID.size();
+
+				count += Visitor.memberID.size();
 			}
 
-			count++;
-
-		} while (count < GRideController->Rides[ride].RideThroughput.showCapacityFastPass && VisitorID != kNotValidVisitor);
+		} while (count < GParkController->Rides[ride].RideThroughput.showCapacityFastPass && Visitor.group != Constants::kNotValidGroup);
 	}
 
 	do
 	{
-		VisitorID = GRideController->Rides[ride].RemoveFromQueue();
+		Visitor = GParkController->Rides[ride].RemoveFromQueue();
 
-		if (VisitorID != kNotValidVisitor)
+		if (Visitor.group != Constants::kNotValidGroup)
 		{
-			GVisitorController->Visitors[VisitorID].SetRiding(ride, GRideController->Rides[ride].RideOperation.rideLength, false);
+			GVisitorController->Groups[Visitor.group].SetRiding(Visitor, ride, GParkController->Rides[ride].RideOperation.rideLength, false);
 
-			GRideController->Rides[ride].DailyStatistics.totalRiders++;
-			GRideController->Rides[ride].CurrentRiders++;
+			GParkController->Rides[ride].DailyStatistics.totalRiders += Visitor.memberID.size();
+			GParkController->Rides[ride].CurrentRiders += Visitor.memberID.size();
+
+			count += Visitor.memberID.size();
 		}
 
-		count++;
-
-	} while (count < GRideController->Rides[ride].RideThroughput.showCapacity && VisitorID != kNotValidVisitor);
+	} while (count < GParkController->Rides[ride].RideThroughput.showCapacity && Visitor.group != Constants::kNotValidGroup);
 }
 
 
 void Engine::RideEmptyQueue(int ride)
 {
-	if (GRideController->Rides[ride].QueueSize() != 0)
+	if (GParkController->Rides[ride].QueueSize() != 0)
 	{
-		int VisitorID = kNotValidVisitor;
+		QWaitTypes::Riders Visitor;
 
 		do
 		{
-			VisitorID = GRideController->Rides[ride].RemoveFromQueue();
+			Visitor = GParkController->Rides[ride].RemoveFromQueue();
 
-			if (VisitorID != kNotValidVisitor)
+			if (Visitor.group != Constants::kNotValidGroup)
 			{
-				GVisitorController->Visitors[VisitorID].ParkStatus = Constants::ParkStatusIdle;
-				
-				GVisitorController->Visitors[VisitorID].Rides.rideShutdown++;
+				GVisitorController->Groups[Visitor.group].GroupRemovedFromRideShutdown(GParkController->Rides[ride].RideOperation.rideExitType);
 			}
 
-		} while (VisitorID != kNotValidVisitor);
+		} while (Visitor.group != Constants::kNotValidGroup);
 	}
 
-	if (GRideController->Rides[ride].QueueSizeFastPass() != 0)
+	if (GParkController->Rides[ride].QueueSizeFastPass() != 0)
 	{
-		int VisitorID = kNotValidVisitor;
+		QWaitTypes::Riders Visitor;
 
 		do
 		{
-			VisitorID = GRideController->Rides[ride].RemoveFromQueueFastPass();
+			Visitor = GParkController->Rides[ride].RemoveFromQueueFastPass();
 
-			if (VisitorID != kNotValidVisitor)
+			if (Visitor.group != Constants::kNotValidGroup)
 			{
-				GVisitorController->Visitors[VisitorID].ParkStatus = Constants::ParkStatusIdle;
-
-				GVisitorController->Visitors[VisitorID].Rides.rideShutdown++;
+				GVisitorController->Groups[Visitor.group].GroupRemovedFromRideShutdown(GParkController->Rides[ride].RideOperation.rideExitType);
 			}
 
-		} while (VisitorID != kNotValidVisitor);
+		} while (Visitor.group != Constants::kNotValidGroup);
 	}
 }
 
@@ -666,131 +686,178 @@ void Engine::RideEmptyQueue(int ride)
 // =================================================================================================================
 
 
-void Engine::ParkStatusEntrance(int visitor)
+void Engine::ParkStatusEntrance(int group)
 {
-	GRideController->AddToEntranceQueue(visitor);
+	GParkController->AddToEntranceQueue(group);
 
-	GVisitorController->Visitors[visitor].ParkStatus = Constants::ParkStatusQueuing;
+	GVisitorController->Groups[group].SetStatusForAllVisitors(GroupParkStatus::Queuing, VisitorParkStatus::Queuing);
 
-	VisitorsInPark++;
+	VisitorsInPark += GVisitorController->Groups[group].Visitors.size();
 }
 
 
-void Engine::ParkStatusIdle(int visitor)
+void Engine::ParkStatusIdle(int group)
 {
-	if ((CurrentTime.minutes >= GVisitorController->Visitors[visitor].DepartureTime.minutes && CurrentTime.hours == GVisitorController->Visitors[visitor].DepartureTime.hours)
+	if ((CurrentTime.minutes >= GVisitorController->Groups[group].Configuration.departureTime.minutes && CurrentTime.hours == GVisitorController->Groups[group].Configuration.departureTime.hours)
 		|| !ParkOpen)
 	{
-		GVisitorController->Visitors[visitor].UpdateLocation(kLocationExitedPark, kLocationExitedPark);
+		GVisitorController->Groups[group].UpdateLocation(Constants::kLocationExitedPark, Constants::kLocationExitedPark);
 
-		VisitorsInPark--;
+		VisitorsInPark -= GVisitorController->Groups[group].Visitors.size();
 	}
 	else
 	{
 		// lets find something to ride
-		QWaitTypes::GetRide NewRide = GetRide(visitor);
+		QWaitTypes::GetRide NewRide = GetRide(group);
 
-		if (NewRide.ride != kNoSelectedRide)
+		if (NewRide.ride != Constants::kNoSelectedRide)
 		{
-			GVisitorController->Visitors[visitor].SetNewRide(NewRide.ride, NewRide.fastPassTicket, 
-				                                             GRideController->GetDistanceBetweenInMinutes(GVisitorController->Visitors[visitor].Rides.current, NewRide.ride),
-				                                             GRideController->GetDistanceBetweenInMetres(GVisitorController->Visitors[visitor].Rides.current, NewRide.ride),
-				                                             GRideController->Rides[NewRide.ride].RideOperation.position);
+			GVisitorController->Groups[group].SetNewRide(NewRide.ride, NewRide.fastPassTicket,
+														 GParkController->GetDistanceBetweenInMinutes(GVisitorController->Groups[group].Behaviour.currentRide, NewRide.ride),
+														 GParkController->GetDistanceBetweenInMetres(GVisitorController->Groups[group].Behaviour.currentRide, NewRide.ride),
+														 GParkController->Rides[NewRide.ride].RideOperation.position);
 		}
 		else
 		{
-			GVisitorController->Visitors[visitor].Rides.noRideAvailable++;
-			GVisitorController->Visitors[visitor].TimeSpent.idle++;
+			GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::NoRideAvailable);
+
+			GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::TimeSpentIdle);
 		}
 	}
 }
 
 
-void Engine::ParkStatusRiding(int visitor)
+void Engine::ParkStatusRiding(int group)
 {
-	if (GVisitorController->Visitors[visitor].Rides.timeLeft == 0)
+	if (GVisitorController->Groups[group].Riding.timeLeft == 0)
 	{
-		GVisitorController->Visitors[visitor].ParkStatus = Constants::ParkStatusIdle;
+		int ridercount = GVisitorController->Groups[group].GroupRemovedFromRide(GVisitorController->Groups[group].Behaviour.currentRide, GParkController->Rides[GVisitorController->Groups[group].Behaviour.currentRide].RideOperation.rideExitType);
 
-		GRideController->Rides[GVisitorController->Visitors[visitor].Rides.current].CurrentRiders--;
+		GParkController->Rides[GVisitorController->Groups[group].Behaviour.currentRide].CurrentRiders -= ridercount;
 
-		if (FastPassMode != Constants::FastPassModeNone && GVisitorController->Visitors[visitor].FastPassTickets.size() == 0)
+		// fastpass stuff
+		if (FastPassMode != FastPassType::None && GVisitorController-> Groups[group].FastPassTickets.size() == 0)
 		{
-			GetReplacementFastPassRide(visitor);
+			GetReplacementFastPassRide(group);
 
-			GVisitorController->Visitors[visitor].SetWaiting(5); // indicates time taken to get/check fastpass tickets
+			GVisitorController->Groups[group].SetWaiting(5); // indicates time taken to get/check fastpass tickets
 		}
 	}
 	else
 	{
-		GVisitorController->Visitors[visitor].Rides.timeLeft--;
+		GVisitorController->Groups[group].Riding.timeLeft--;
 
-		GVisitorController->Visitors[visitor].TimeSpent.riding++;
+		GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::TimeSpentRiding);
 	}
 }
 
 
-void Engine::ParkStatusTravelling(int visitor)
+void Engine::ParkStatusTravelling(int group)
 {
-	if (GVisitorController->Visitors[visitor].Travelling.minutesLeft == 0)
+	if (GVisitorController->Groups[group].Behaviour.travelling.minutesLeft == 0)
 	{
-		GVisitorController->Visitors[visitor].UpdateLocation(GRideController->Rides[GVisitorController->Visitors[visitor].Travelling.toRide].RideOperation.position.x,
-			                                                 GRideController->Rides[GVisitorController->Visitors[visitor].Travelling.toRide].RideOperation.position.y);
+		GVisitorController->Groups[group].UpdateLocation(GParkController->Rides[GVisitorController->Groups[group].Behaviour.travelling.toRide].RideOperation.position.x,
+			                                             GParkController->Rides[GVisitorController->Groups[group].Behaviour.travelling.toRide].RideOperation.position.y);
 
 		if (ParkOpen)
 		{
+			int Ride = GVisitorController->Groups[group].Behaviour.travelling.toRide;
+
 			// if they travel there and find the queue has changed then they are willing to wait a bit longer
-			if (GRideController->Rides[GVisitorController->Visitors[visitor].Travelling.toRide].WaitTime(GVisitorController->Visitors[visitor].Travelling.fastPass) < (float)GVisitorController->Visitors[visitor].Rides.maxWaitTime * 1.10f)
+			if (GParkController->Rides[Ride].WaitTime(GVisitorController->Groups[group].Behaviour.travelling.fastPass) < (float)GVisitorController->Groups[group].Behaviour.maximumRideWaitingTime * 1.10f)
 			{
-				GVisitorController->Visitors[visitor].Rides.current = GVisitorController->Visitors[visitor].Travelling.toRide;
-				GVisitorController->Visitors[visitor].Travelling.toRide = kNoDestinationRide;
+				QWaitTypes::Riders riders;
 
-				if (GVisitorController->Visitors[visitor].Travelling.fastPass != kNoFastPass)
+				riders.group = group;
+
+				for (int v = 0; v < GVisitorController->Groups[group].Visitors.size(); v++)
 				{
-					GRideController->Rides[GVisitorController->Visitors[visitor].Rides.current].AddToQueueFastPass(visitor);
+					if (GVisitorController->Groups[group].IsRideSuitable(v, GParkController->Rides[Ride].RideOperation.ChildValid, GParkController->Rides[Ride].RideOperation.AdultValid)) // to do fail here?!
+					{
+						riders.memberID.push_back(v);
 
-					GVisitorController->Visitors[visitor].SetQueuingFastPass(GRideController->Rides[GVisitorController->Visitors[visitor].Rides.current].WaitTime(GVisitorController->Visitors[visitor].Travelling.fastPass));
+						if (GVisitorController->Groups[group].Behaviour.travelling.fastPass != Constants::kNoFastPass)
+						{
+							GVisitorController->Groups[group].Visitors[v].SetQueuingFastPassLengthStat(GParkController->Rides[Ride].WaitTime(GVisitorController->Groups[group].Behaviour.travelling.fastPass));
+						}
+						else
+						{
+							GVisitorController->Groups[group].Visitors[v].SetQueuingLengthStat(GParkController->Rides[Ride].WaitTime(GVisitorController->Groups[group].Behaviour.travelling.fastPass));
+						}
+					}
+					else
+					{
+						GVisitorController->Groups[group].Visitors[v].Rides.rideNotSuitableForMe++;
+					}
+				}
+
+				if (riders.memberID.size() != 0)
+				{
+					if (GVisitorController->Groups[group].Behaviour.travelling.fastPass != Constants::kNoFastPass)
+					{
+						GParkController->Rides[Ride].AddToQueueFastPass(riders);
+
+						GVisitorController->Groups[group].SetAtRideQueuingFastPass(Ride);
+					}
+					else
+					{
+						GParkController->Rides[Ride].AddToQueue(riders);
+
+						GVisitorController->Groups[group].SetAtRideQueuing(Ride);
+					}
 				}
 				else
 				{
-					GRideController->Rides[GVisitorController->Visitors[visitor].Rides.current].AddToQueue(visitor);
+					GVisitorController->Groups[group].SetStatusForAllVisitors(GroupParkStatus::Idle, VisitorParkStatus::Idle);
 
-					GVisitorController->Visitors[visitor].SetQueuing(GRideController->Rides[GVisitorController->Visitors[visitor].Rides.current].WaitTime(GVisitorController->Visitors[visitor].Travelling.fastPass));
+					GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::NooneCanRideInGroup);
 				}
-
-				GVisitorController->Visitors[visitor].UpdateLastRidesList();
 			}
 			else
-			{
+			{			
 				// queue is much bigger than expected or tolerated, so let's go looking for something else
-				GVisitorController->Visitors[visitor].ParkStatus = Constants::ParkStatusIdle; // disappointed too
+				GVisitorController->Groups[group].SetStatusForAllVisitors(GroupParkStatus::Idle, VisitorParkStatus::Idle);
 
-				GVisitorController->Visitors[visitor].Rides.waitTimeTooLong++;
+				GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::WaitTimeTooLong);
 			}
 		}
 		else
 		{
-			GVisitorController->Visitors[visitor].UpdateLocation(kLocationExitedPark, kLocationExitedPark);
+			GVisitorController->Groups[group].UpdateLocation(Constants::kLocationExitedPark, Constants::kLocationExitedPark);
 		}
 	}
 	else
-	{
-		GVisitorController->Visitors[visitor].Travelling.minutesLeft--;
+	{	
+		GVisitorController->Groups[group].Behaviour.travelling.minutesLeft--;
 
-		GVisitorController->Visitors[visitor].UpdateTravellingLocation();
+		GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::TimeSpentTravelling);		
+
+		GVisitorController->Groups[group].UpdateTravellingLocation();
 	}
 }
 
 
-void Engine::ParkStatusWaiting(int visitor)
+void Engine::ParkStatusWaiting(int group)
 {
-	if (GVisitorController->Visitors[visitor].WaitingTime == 0)
+	if ((CurrentTime.minutes >= GVisitorController->Groups[group].Configuration.departureTime.minutes && CurrentTime.hours == GVisitorController->Groups[group].Configuration.departureTime.hours)
+		|| !ParkOpen)
 	{
-		GVisitorController->Visitors[visitor].ParkStatus = Constants::ParkStatusIdle;
+		GVisitorController->Groups[group].UpdateLocation(Constants::kLocationExitedPark, Constants::kLocationExitedPark);
+
+		VisitorsInPark -= GVisitorController->Groups[group].Visitors.size();
 	}
 	else
 	{
-		GVisitorController->Visitors[visitor].WaitingTime--;
+		if (GVisitorController->Groups[group].Behaviour.waitingTime == 0)
+		{
+			GVisitorController->Groups[group].SetStatusForAllVisitors(GroupParkStatus::Idle, VisitorParkStatus::Idle);
+		}
+		else
+		{
+			GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::TimeSpentWaiting);
+
+			GVisitorController->Groups[group].Behaviour.waitingTime--;
+		}
 	}
 }
 
@@ -808,16 +875,16 @@ void Engine::ShowLiveStats()
 	size_t AtRide = 0;
 	std::string log = "";
 
-	for (int t = 0; t < GRideController->Rides.size(); t++)
+	for (int t = 0; t < GParkController->Rides.size(); t++)
 	{
-		Queue += GRideController->Rides[t].QueueSize();
-		QueueFP += GRideController->Rides[t].QueueSizeFastPass();
-		Riding += GRideController->Rides[t].CurrentRiders;   
+		Queue += GParkController->Rides[t].QueueSize();
+		QueueFP += GParkController->Rides[t].QueueSizeFastPass();
+		Riding += GParkController->Rides[t].CurrentRiders;
 	}
 
 	AtRide = Queue + QueueFP + Riding;
 
-	if (FastPassMode == Constants::FastPassModeNone)
+	if (FastPassMode == FastPassType::None)
 	{ 
 		log = Utility::FormatTime(CurrentTime.hours, CurrentTime.minutes) + "  " + Utility::PadRight(VisitorsInPark, 6) + " q: " + Utility::PadRight(Queue, 6) + " r: " + Utility::PadRight(Riding, 6) + "   (" + Utility::PadRight(AtRide, 6) + " / " + Utility::PadRight(VisitorsInPark, 6) + ")";
 	}
@@ -828,5 +895,5 @@ void Engine::ShowLiveStats()
 
 	OutputStatus("    " + log);
 
-	GRideController->Log.push_back(log);
+	GParkController->Log.push_back(log);
 }

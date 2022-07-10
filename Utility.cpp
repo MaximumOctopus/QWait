@@ -5,13 +5,14 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
 
 #include <algorithm>
 #include <string>
+
 #include "Constants.h"
 #include "MD5.h"
 #include "QWaitTypes.h"
@@ -58,13 +59,13 @@ namespace Utility
 			sec = "0" + sec;
 		}
 
-		if (mode == 0)
+		if (mode == kDisplayModeConsole)
 		{
 			return year + "/" + month + "/" + day + " " + hour + ":" + min + ":" + sec;
 		}
 		else
 		{
-			return year + month + day + hour + min + sec;
+			return year + month + day + "_" + hour + min + sec;
 		}
 	}
 
@@ -107,7 +108,7 @@ namespace Utility
 	}
 
 
-	std::string PadRight(std::string input, int pad)
+	std::string PadRight(const std::string input, int pad)
 	{
 		if (input.length() < pad)
 		{
@@ -178,7 +179,7 @@ namespace Utility
 	}
 
 
-	std::string Utility::GetMD5(std::string input)
+	std::string Utility::GetMD5(const std::string input)
 	{
 		std::string str(input.begin(), input.end());
 

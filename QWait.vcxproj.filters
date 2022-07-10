@@ -13,33 +13,42 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Reports">
+      <UniqueIdentifier>{37fc6255-2fca-4e05-9c9d-60834b460ac7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Visitors">
+      <UniqueIdentifier>{efd74bf9-c695-4454-9a7b-c5f918d35b8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rides">
+      <UniqueIdentifier>{6e2153eb-2417-4cdb-aaef-e7b191147a34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Visitors">
+      <UniqueIdentifier>{b86c2c33-3ac6-490d-b5f1-ee66285b4895}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Reports">
+      <UniqueIdentifier>{0611a500-5f24-4a45-9736-32b583bf478d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rides">
+      <UniqueIdentifier>{794556ff-3310-4f8b-9915-daa2b474b6d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Groups">
+      <UniqueIdentifier>{f72f53fa-11d0-4523-ae47-9017e672dd2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Groups">
+      <UniqueIdentifier>{b03c2a90-be8c-42ba-9b07-451d81bef887}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="QWait.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Visitor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ride.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Engine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VisitorController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RideController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GlobalController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Configuration.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ReportController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Utility.cpp">
@@ -57,36 +66,48 @@
     <ClCompile Include="MD5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ReportController.cpp">
+      <Filter>Source Files\Reports</Filter>
+    </ClCompile>
     <ClCompile Include="ReportHTML.cpp">
+      <Filter>Source Files\Reports</Filter>
+    </ClCompile>
+    <ClCompile Include="Ride.cpp">
+      <Filter>Source Files\Rides</Filter>
+    </ClCompile>
+    <ClCompile Include="ParkController.cpp">
+      <Filter>Source Files\Rides</Filter>
+    </ClCompile>
+    <ClCompile Include="Visitor.cpp">
+      <Filter>Source Files\Visitors</Filter>
+    </ClCompile>
+    <ClCompile Include="VisitorController.cpp">
+      <Filter>Source Files\Visitors</Filter>
+    </ClCompile>
+    <ClCompile Include="Group.cpp">
+      <Filter>Source Files\Groups</Filter>
+    </ClCompile>
+    <ClCompile Include="QWaitTypes.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ReportCSV.cpp">
+      <Filter>Source Files\Reports</Filter>
+    </ClCompile>
+    <ClCompile Include="ReportText.cpp">
+      <Filter>Source Files\Reports</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Visitor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ride.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Engine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VisitorController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RideController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GlobalController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Configuration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ReportController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
@@ -107,13 +128,53 @@
     <ClInclude Include="MD5.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ReportController.h">
+      <Filter>Header Files\Reports</Filter>
+    </ClInclude>
     <ClInclude Include="ReportHTML.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Reports</Filter>
+    </ClInclude>
+    <ClInclude Include="Ride.h">
+      <Filter>Header Files\Rides</Filter>
+    </ClInclude>
+    <ClInclude Include="ParkController.h">
+      <Filter>Header Files\Rides</Filter>
+    </ClInclude>
+    <ClInclude Include="Visitor.h">
+      <Filter>Header Files\Visitors</Filter>
+    </ClInclude>
+    <ClInclude Include="VisitorController.h">
+      <Filter>Header Files\Visitors</Filter>
+    </ClInclude>
+    <ClInclude Include="RidePricing.h">
+      <Filter>Header Files\Rides</Filter>
+    </ClInclude>
+    <ClInclude Include="Group.h">
+      <Filter>Header Files\Groups</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ReportCSV.h">
+      <Filter>Header Files\Reports</Filter>
+    </ClInclude>
+    <ClInclude Include="ReportText.h">
+      <Filter>Header Files\Reports</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt">
       <Filter>Resource Files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\cat_ghost_halloween_22016.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

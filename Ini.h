@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -20,7 +20,7 @@
 class Ini
 {
 private:
-	bool LoadFile(std::string);
+	bool LoadFile(const std::string);
 
 public:
 
@@ -28,9 +28,9 @@ public:
 
 	std::vector<std::string> Lines;
 
-	Ini(std::string);
+	Ini(const std::string);
 
-	bool ReadBoolean(std::string, std::string, bool);
-	int ReadInteger(std::string, std::string key, int);
-	std::string ReadString(std::string, std::string, std::string);	
+	bool ReadBoolean(const std::string, const std::string, bool);
+	int ReadInteger(const std::string, const std::string key, int);
+	std::string ReadString(std::string, std::string, const std::string);
 };

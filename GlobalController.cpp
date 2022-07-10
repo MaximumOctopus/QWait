@@ -5,21 +5,21 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
 
 #include "Configuration.h"
 #include "GlobalController.h"
+#include "ParkController.h"
 #include "ReportController.h"
-#include "RideController.h"
 #include "VisitorController.h"
 
 
 extern Configuration* GConfiguration;
 extern ReportController* GReportController;
-extern RideController* GRideController;
+extern ParkController* GParkController;
 extern VisitorController* GVisitorController;
 
 
@@ -29,23 +29,23 @@ namespace GlobalControllers
 	{
 		GConfiguration     = new Configuration(argc, argv);
 
-		GRideController    = new RideController(!GConfiguration->DebugConfig.DisableConsoleOutput, GConfiguration->RideTemplateFile);
+		GParkController = new ParkController(!GConfiguration->DebugConfig.DisableConsoleOutput, GConfiguration->RideTemplateFile);
 
 		if (GConfiguration->VisitorCount == VisitorCountUseParkAverage)
 		{
-			GConfiguration->VisitorCount = GRideController->entrance.averageVisitors;
+			GConfiguration->VisitorCount = GParkController->entrance.averageVisitors;
 		}
 
-		GVisitorController = new VisitorController(GConfiguration->VisitorCount, !GConfiguration->DebugConfig.DisableConsoleOutput);
+		GVisitorController = new VisitorController(GConfiguration->VisitorCount, !GConfiguration->DebugConfig.DisableConsoleOutput, GConfiguration->RideTemplate, GConfiguration->GetVisitorNames);
 		
 		return 0;
 	}
 
 	void FreeGlobalControllers()
 	{
-		if (GRideController != nullptr)
+		if (GParkController != nullptr)
 		{
-			delete GRideController;
+			delete GParkController;
 		}
 
 		if (GVisitorController != nullptr)

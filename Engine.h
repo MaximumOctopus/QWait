@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -15,6 +15,7 @@
 
 #include <string>
 #include <vector>
+
 #include "Constants.h"
 #include "QWaitTypes.h"
 
@@ -24,22 +25,24 @@ class Engine
 	bool ShowOutput;
 
 	bool ParkOpen;
-	int FastPassMode;
+	FastPassType FastPassMode;
 
 	QWaitTypes::Time CurrentTime;
 	int TimeParkCloses;
 	int TimeRidesClose;
 
+	int UpdateRate = 15;
+
 	void UpdateClock();
 
-	void OutputStatus(std::string);
+	void OutputStatus(const std::string);
 
 	QWaitTypes::GetRide GetRide(int);
 	int IsRideAvailableCloser(int, int);
 	QWaitTypes::FastPass IsFastPassTicketSoon(int, int);
 
 	void PreArrivalFastPass();
-	void ProcessFastPassesForVisitor(int);
+	void ProcessFastPassesForGroup(int);
 	QWaitTypes::FastPass GetFastPassRide(int, QWaitTypes::Time, QWaitTypes::Time);
 	void GetReplacementFastPassRide(int);
 
@@ -61,9 +64,9 @@ class Engine
 
 public:
 
-	int VisitorsInPark;
+	int VisitorsInPark = 0;
 
-	Engine(int, int, int, bool);
+	Engine(FastPassType, int, int, bool, int);
 
 	void Run(bool, bool);	
 };

@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -14,39 +14,28 @@
 
 
 #include <vector>
+
 #include "Constants.h"
 #include "QWaitTypes.h"
 
 
-const static int kNoCurrentRide = -1;
-const static int kNoDestinationRide = -1;
-const static int kNoFastPass = -1;
-const static int kNoSelectedRide = -1;
-const static int kNoSelectedType = -1;
-const static int kNotValidVisitor = -1;
-const static int kLocationExitedPark = -1;
+enum class AgeGroup { Baby = 0, Child = 1, Adult = 2 };
 
-
-struct TypeConfiguration {
-	std::string name = "";
-
-	int Type = 0;
-
-	float maxWaitTime = 0.0f;
-	float preference = 0.0f;
-
-	int stayDuration = 0; // hours
-
-	bool stayingOnSite = false;
-
-	QWaitTypes::Time arrivalTime = { 0, 0 };
-	QWaitTypes::Time departureTime = { 0, 0 };
+enum class VisitorParkStatus {
+	OnWay = 0, AtEntrance = 1, Idle = 2, Riding = 3, Queuing = 4, QueuingFastPass = 5,
+	Travelling = 6, Waiting = 7, WaitingForOthersInParty = 8, Exited = 9
 };
 
 
-struct MinuteDataVI {
-	QWaitTypes::Coords position = { 0, 0 };
-	int parkStatus = 0;
+struct NewVisitorConfiguration {
+	std::string name = "";
+
+	AgeGroup age = AgeGroup::Adult;
+
+	VisitorType type = VisitorType::Enthusiast;
+
+	float maxWaitTime = 0.0f;
+	float preference = 0.0f;
 };
 
 
@@ -55,13 +44,13 @@ struct TimeStats {
 	int riding = 0;
 	int travelling = 0;
 	int queuing = 0;
+	int waiting = 0;
 };
 
 
 struct RideStats {
 	float maxWaitTime = 0.0f;    // max wait time for a ride (minutes)
 	float preference = 0.0f;     // scale from 0 = rides only, 1 = attractions only (actually high priority to low)
-	int current = 0;
 
 	int count = 0;
 
@@ -70,6 +59,8 @@ struct RideStats {
 	int rideShutdown = 0;
 	int distanceTravelled = 0; // metres
 	int noFastPassRideForMe = 0;
+	int nooneCanRideInGroup = 0;
+	int rideNotSuitableForMe = 0;
 
 	float shortestQueue = 0.0f;
 	float longestQueue = 0.0f;
@@ -79,82 +70,79 @@ struct RideStats {
 
 	int fastPassRides = 0;
 
-	int timeLeft = 0;     // minutes left on the current ride
+	int currentRide = Constants::kNoSelectedRide;
 };
 
 
-struct Travel {
-	QWaitTypes::Coords from = { 0, 0 };
-	QWaitTypes::Coords to = { 0, 0 };
+struct VisitorConfiguration {
 
-	int toRide = 0;
-	int minutesLeft = 0;
-	int minutesStart = 0;
-	int fastPass = 0;
-};
+	AgeGroup Age = AgeGroup::Baby;
 
+	VisitorType Type = VisitorType::Enthusiast;
+	int TypeInt = 0;
 
-class Visitor
-{
-	//int Id;
-
-	void SetDefaults();
-	
-public:
-
-	std::vector<MinuteDataVI> Statistics;
-
-	std::vector<QWaitTypes::FastPass> FastPassTickets;
-
-	bool StayingOnSite; // only used for fastpass+ mode
-
-	std::vector<int> RideList; // list of every ride this visitor has ridden today
-
-	int Type;
+	int MoneySpent = 0;	
 
 	std::string Name;
-
-	QWaitTypes::Time ArrivalTime;
-	QWaitTypes::Time DepartureTime;
 
 	QWaitTypes::Coords Location;
 
 	int StayDuration;
 
-	int ParkStatus;		  //
+	int GetAgeAsInt()
+	{
+		switch (Age)
+		{
+		case AgeGroup::Baby:
+			return 0;
+		case AgeGroup::Child:
+			return 1;
+		case AgeGroup::Adult:
+			return 2;
+		}
+
+		return 2;
+	}
+
+	std::string GetAgeAsString()
+	{
+		switch (Age)
+		{
+		case AgeGroup::Baby:
+			return "Baby";
+		case AgeGroup::Child:
+			return "Child";
+		case AgeGroup::Adult:
+			return "Adult";
+		}
+
+		return "Unknown";
+	}
+};
+
+
+class Visitor
+{
+	void SetDefaults();
+	
+public:
+
+	VisitorConfiguration Configuration;
+
+	std::vector<int> RideList;		// list of every ride this visitor has ridden today
+
+	VisitorParkStatus ParkStatus;	//
 
 	TimeStats TimeSpent;
 
 	RideStats Rides;
 
-	int WaitingTime;      // minutes to wait
+	int WaitingTime;				// minutes to wait
 		
-	Travel Travelling;
+	Visitor(NewVisitorConfiguration);
+
+	void SetQueuingLengthStat(float);
+	void SetQueuingFastPassLengthStat(float);
 	
-	int LastThreeRides[3];
-
-	Visitor(TypeConfiguration);
-
-	void AddFastPassTicket(int, int, QWaitTypes::Time);
-	void SortFastPassTickets();
-
-	void SetNewRide(int ride, int fastpass_ticket, int minutes_left, int distance, QWaitTypes::Coords location);
-
-	void SetRiding(int, int, bool);
-
-	void SetQueuing(float);
-	void SetQueuingFastPass(float);
-
-	void SetTravellingMinutesLeft(int);
-
-	void SetWaiting(int);
-
-	std::string GetLocationByMinute(int);
-	void SaveMinuteStats();
-
-	void UpdateTravellingLocation(void);
-
-	void UpdateLocation(int, int);
-
-	void UpdateLastRidesList();
+	void BuyItem(int cost);
 };

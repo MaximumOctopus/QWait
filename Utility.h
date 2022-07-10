@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -18,6 +18,10 @@
 #include "QWaitTypes.h"
 
 
+static const int kDisplayModeConsole = 0;
+static const int kDisplayModeFile = 1;
+
+
 namespace Utility
 {
 	std::string DateTime(int aMode);
@@ -25,7 +29,7 @@ namespace Utility
 	std::string FormatTime(int, int);
 	std::string FormatTime(QWaitTypes::Time);
 
-	std::string PadRight(std::string, int);
+	std::string PadRight(const std::string, int);
 	std::string PadRight(int, int);
 
 	int Duration(QWaitTypes::Time, QWaitTypes::Time);
@@ -34,5 +38,5 @@ namespace Utility
 
 	bool IsTicketValidForTime(QWaitTypes::Time, QWaitTypes::Time, QWaitTypes::Time);
 
-	std::string GetMD5(std::string);
+	std::string GetMD5(const std::string);
 };

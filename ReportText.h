@@ -14,22 +14,19 @@
 
 
 #include <string>
-#include <vector>
+
+#include "QWaitTypes.h"
+#include "VisitorController.h"
 
 
-class Names
+namespace ReportText
 {
-	std::vector<std::string> FirstName;
-	std::vector<std::string> LastName;
+	void SaveSimulationReport(const std::string, FastPassType);
 
-	void LoadNames();
+	void SaveMxMReport(const std::string, FastPassType);
 
-public:
+	void MxMRow(std::ofstream& file, MinuteDataV mdv);
+	void MxMRowFP(std::ofstream& file, MinuteDataV mdv);
 
-	bool LoadFirstNames = false;
-	bool LoadLastNames = false;
-
-	Names();
-
-	std::string GetRandomName();
-};
+	void OutputStatus(const std::string);
+}

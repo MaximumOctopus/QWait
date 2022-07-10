@@ -5,21 +5,25 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
 
 #include <iostream>
+
 #include "Ride.h"
 #include "Utility.h"
 
 
-Ride::Ride(int Type, std::string name, int ride_length, int hourly_throughput, int popularity, int x, int y, int is_fast_pass, int fp_reserve_percent, QWaitTypes::Time open, QWaitTypes::Time close, int open_hours)
+Ride::Ride(RideType ride_type, std::string name, int ride_length, RideExitType ride_exit_type, int hourly_throughput, int popularity, int x, int y, int is_fast_pass, int fp_reserve_percent,
+	QWaitTypes::Time open, QWaitTypes::Time close, int open_hours,
+	bool AdultValid, bool ChildValid)
 {
 	RideOperation.isShutdown = false;
 
-	RideOperation.rideType   = Type;
+	RideOperation.rideType   = ride_type;
+	RideOperation.rideExitType = ride_exit_type;
 
 	RideOperation.name       = name;
 
@@ -41,6 +45,9 @@ Ride::Ride(int Type, std::string name, int ride_length, int hourly_throughput, i
 
 	RideOperation.ShowStartTime = 0;
 
+	RideOperation.AdultValid = AdultValid;
+	RideOperation.ChildValid = ChildValid;
+
 	CurrentRiders = 0;
 
 	DailyStatistics.maxQueueLength = 0;
@@ -54,7 +61,7 @@ Ride::Ride(int Type, std::string name, int ride_length, int hourly_throughput, i
 
 	for (int t = 0; t < kClosestCacheSize; t++)
 	{
-		ClosestCache[t] = kNoSelectedRide;
+		ClosestCache[t] = Constants::kNoSelectedRide;
 	}
 }
 
@@ -75,14 +82,14 @@ std::string Ride::GetUniqueReference()
 	
 	switch (RideOperation.rideType)
 	{
-		case kRideTypeContinuous:
+		case RideType::Continuous:
 			data = RideOperation.name + std::to_string(RideOperation.rideLength) + std::to_string(RideOperation.position.x) + std::to_string(RideOperation.position.y) + std::to_string(RideOperation.Popularity) +
 				Utility::FormatTime(RideOperation.open) + Utility::FormatTime(RideOperation.close) + 
 				std::to_string(FastPass.mode) + std::to_string(FastPass.percentage) +
 				std::to_string(RideThroughput.totalPerHour);
 			break;
 		
-		case kRideTypeShow:
+		case RideType::Show:
 			data = RideOperation.name + std::to_string(RideOperation.rideLength) + std::to_string(RideOperation.position.x) + std::to_string(RideOperation.position.y) + std::to_string(RideOperation.Popularity) +
 				Utility::FormatTime(RideOperation.open) + Utility::FormatTime(RideOperation.close) + std::to_string(RideOperation.ShowStartTime) +
 				std::to_string(FastPass.mode) + std::to_string(FastPass.percentage) +
@@ -164,57 +171,97 @@ void Ride::ConfigureShowThroughput(int show_capacity, int fastpass_percent)
 }
 
 
-void Ride::AddToQueue(int visitor)
+void Ride::AddToQueue(QWaitTypes::Riders riders)
 {
-	Queue.push_back(visitor);
+	Queue.push_back(riders);
 }
 
 
-int Ride::RemoveFromQueue()
+QWaitTypes::Riders Ride::RemoveFromQueue()
 {
 	if (Queue.size() != 0)
 	{
-		int VisitorID = Queue[0];
+		QWaitTypes::Riders Visitor = Queue[0];
 
 		Queue.erase(Queue.begin());
 
-		return VisitorID;
+		return Visitor;
 	}
 
-	return kNotValidVisitor;
+	return { Constants::kNotValidGroup, {} };
 }
 
 
-size_t Ride::QueueSize()
+QWaitTypes::Riders Ride::NextItemInQueue()
 {
-	return Queue.size();
+	if (Queue.size() != 0)
+	{
+		QWaitTypes::Riders Visitor = Queue[0];
+
+		return Visitor;
+	}
+
+	return { Constants::kNotValidGroup, {} };
 }
 
 
-void Ride::AddToQueueFastPass(int visitor)
+int Ride::QueueSize()
 {
-	QueueFastPass.push_back(visitor);
+	int count = 0;
+
+	for (int q = 0; q < Queue.size(); q++)
+	{
+		count += Queue[q].memberID.size();
+	}
+
+	return count;
 }
 
 
-int Ride::RemoveFromQueueFastPass()
+void Ride::AddToQueueFastPass(QWaitTypes::Riders riders)
+{
+	QueueFastPass.push_back(riders);
+}
+
+
+QWaitTypes::Riders Ride::RemoveFromQueueFastPass()
 {
 	if (QueueFastPass.size() != 0)
 	{
-		int Visitor = QueueFastPass[0];
+		QWaitTypes::Riders Visitor = QueueFastPass[0];
 
 		QueueFastPass.erase(QueueFastPass.begin());
 
 		return Visitor;
 	}
 
-	return kNotValidVisitor;
+	return { Constants::kNotValidGroup, {} };
 }
 
 
-size_t Ride::QueueSizeFastPass()
+QWaitTypes::Riders Ride::NextItemInQueueFastPass()
 {
-	return QueueFastPass.size();
+	if (QueueFastPass.size() != 0)
+	{
+		QWaitTypes::Riders Visitor = QueueFastPass[0];
+
+		return Visitor;
+	}
+
+	return { Constants::kNotValidGroup, {} };
+}
+
+
+int Ride::QueueSizeFastPass()
+{
+	int count = 0;
+
+	for (int q = 0; q < QueueFastPass.size(); q++)
+	{
+		count += QueueFastPass[q].memberID.size();
+	}
+
+	return count;
 }
 
 
@@ -256,11 +303,11 @@ float Ride::WaitTime(int is_fast_pass)
 {
 	if (is_fast_pass != kNoSelectedFastPassTicket)
 	{
-		return (float)(QueueFastPass.size() / RideThroughput.perMinuteFastPass);
+		return (float)(QueueSizeFastPass() / RideThroughput.perMinuteFastPass);
 	}
 	else
 	{
-		return ((float)Queue.size() + (float)QueueFastPass.size()) / RideThroughput.perMinuteTotal;
+		return ((float)QueueSize() + (float)QueueSizeFastPass()) / RideThroughput.perMinuteTotal;
 	}
 }
 
@@ -280,8 +327,8 @@ void Ride::UpdateMinuteStats()
 {
 	MinuteData m;
 
-	m.queueSize = Queue.size();
-	m.queueSizeFastPass = QueueFastPass.size();
+	m.queueSize = QueueSize();
+	m.queueSizeFastPass = QueueSizeFastPass();
 	m.riders = CurrentRiders;
 	m.waitTimeMinutes = static_cast<int>(WaitTime(kNoSelectedFastPassTicket));
 	m.waitTimeMinutesFastPass = static_cast<int>(WaitTime(0));
@@ -294,9 +341,11 @@ void Ride::UpdateMinuteStats()
 
 void Ride::UpdateDailyStatistics()
 {
-	if (Queue.size() > DailyStatistics.maxQueueLength)
+	int queue = QueueSize();
+
+	if (queue > DailyStatistics.maxQueueLength)
 	{
-		DailyStatistics.maxQueueLength = Queue.size();
+		DailyStatistics.maxQueueLength = queue;
 	}
 }
 

@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -14,9 +14,13 @@
 
 
 #include <string>
+#include <time.h>
 #include <vector>
+
 #include "Constants.h"
+#include "Group.h"
 #include "Visitor.h"
+#include "VisitorController.h"
 
 
 static const int kDailyStatsByTypeNoRideAvailable = 0;
@@ -36,13 +40,15 @@ static const int kDailyRideCount = 51;
 
 struct MinuteDataV {
 	std::string time = "";
+
 	int visitorsInPark = 0;
+
 	int onWay = 0;			// number of visitors with this ParkStatus
 	int atEntrance = 0;		//
 	int idle = 0;			//
 	int riding = 0;			//
-	int queing = 0;			//
-	int queingFastPass = 0; //
+	int queuing = 0;		//
+	int queuingFastPass = 0;//
 	int travelling = 0;		//	
 	int waiting = 0;		//
 	int exited = 0;			//
@@ -53,13 +59,15 @@ struct MinuteDataV {
 };
 
 
-struct Daily {
+struct DailyStatistics {
 	int minRides = 999;
 	int maxRides = 0;
 	int zeroRides = 0;
 	int averageRides = 0;
 	int totalRides = 0;
 	int totalFastPastRides = 0;
+
+	int queueTimePerRideTime = 0;
 
 	int totalQueueTime = 0;
 	int averageQueueTime = 0;
@@ -73,38 +81,8 @@ struct Daily {
 	int totalTravellingTime = 0;
 	float averageTravellingTime = 0.0f;
 
-	int noRideAvailable = 0;
-	int waitTimeTooLong = 0;
-	int rideShutdown = 0;
-	int distanceTravelled = 0; // metres
-
-	int averageDistanceTravelled = 0; // metres;
-
-	int rideCount[kDailyRideCount] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // each slot represents the number of visitors to ride that many times
-};
-
-
-struct DailyByType {
-	int minRides = 999;
-	int maxRides = 0;
-	int zeroRides = 0;
-	int averageRides = 0;
-	int totalRides = 0;
-	int totalFastPastRides = 0;
-
-	int totalQueueTime = 0;
-	int averageQueueTime = 0;
-
-	int totalIdleTime = 0;
-	float averageIdleTime = 0.0f;
-
-	int totalRidingTime = 0;
-	float averageRidingTime = 0.0f;
-
-	int totalTravellingTime = 0;
-	float averageTravellingTime = 0.0f;
+	int totalWaitingTime = 0;
+	float averageWaitingTime = 0.0f;
 
 	int noRideAvailable = 0;
 	int waitTimeTooLong = 0;
@@ -116,6 +94,9 @@ struct DailyByType {
 									   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 									   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // each slot represents the number of visitors to ride that many times
 	int typeCount = 0;
+
+	int totalSpend = 0;
+	float totalSpendPerRide = 0.0f;
 };
 
 
@@ -129,42 +110,61 @@ class VisitorController
 {
 	std::vector<MinuteDataV> Statistics;
 
-	int VisitorCount;
+	int ExpectedVisitorCount = 0;
 
-	bool ShowOutput;
+	ParkTemplate TemplateID = ParkTemplate::WDWAnimalKingdom;
+	int TemplateIDint = 1;
+
+	bool ShowOutput = true;
+
+	bool GetVisitorName = false;
 
 	void SetDefaults();
 
-	int GetType(float);
-	TypeConfiguration GetTypeConfiguration(int);
+	GroupType GetGroupType(float);
 
-	bool CreateVisitorsFromFileData(std::string);
+	bool CreateGroupFromFileData(const std::string);
 
-	void OutputStatus(std::string status);
+	void OutputStatus(const std::string);
 
 public:
+
+	// the number of visitors and groups created, maximum values.
+	// not be altered once set. doesn't represent current number of 
+	// groups or visitors in park
+	int VisitorCountCreated = 0;
+	int GroupCountCreated = 0;
 	 
+	int GroupTypeCount[Constants::AvailableGroupTypes];
 	int TypeCount[Constants::AvailableVisitorTypes];
 	
-	Daily DailyStats;
-	DailyByType DailyStatsByType[Constants::AvailableVisitorTypes];
+	DailyStatistics DailyStats;
+	DailyStatistics DailyStatsByType[Constants::AvailableVisitorTypes];
 	StatsFastPass FastPassStats;
 
-	std::vector<Visitor> Visitors;
+	DailyStatistics DailyStatsByGroup[Constants::AvailableGroupTypes];
 
-	VisitorController(int, bool);
+	std::vector<Group> Groups;
 
-	int LoadVisitorList(std::string);
-	void SaveVisitorList(std::string);
+	VisitorController(int, bool, ParkTemplate, bool);
+
+	int LoadVisitorList(const std::string);
+	void SaveVisitorList(const std::string);
 
 	void ShowConfig();
-	void Run(bool, std::string, bool, std::string);
+	void Run(bool, const std::string, bool, const std::string);
+
+	int GetCurrentVisitorCount();
 
 	int GetLargestValueByType(int);
 
-	void UpdateMinuteStats(std::string);
+	int TotalSpending();
+
+	void UpdateMinuteStats(const std::string);
 	std::string GetMinuteDataFor(int);
 	MinuteDataV GetMinuteDataStructFor(int);
+
+	void CalculateDemographics();
 
 	void CalculateStatistics();
 

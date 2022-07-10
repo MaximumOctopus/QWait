@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -21,15 +21,15 @@
 #include <vector>
 
 
-Ini::Ini(std::string fileName)
+Ini::Ini(const std::string file_name)
 {
-	Loaded = LoadFile(fileName);
+	Loaded = LoadFile(file_name);
 }
 
 
-bool Ini::LoadFile(std::string fileName)
+bool Ini::LoadFile(const std::string file_name)
 {
-	std::ifstream file(fileName);
+	std::ifstream file(file_name);
 
 	if (file)
 	{
@@ -54,7 +54,7 @@ bool Ini::LoadFile(std::string fileName)
 }
 
 
-int Ini::ReadInteger(std::string section, std::string key, int default_value)
+int Ini::ReadInteger(const std::string section, const std::string key, int default_value)
 {
 	try
 	{
@@ -76,7 +76,7 @@ int Ini::ReadInteger(std::string section, std::string key, int default_value)
 }
 
 
-bool Ini::ReadBoolean(std::string section, std::string key, bool default_value)
+bool Ini::ReadBoolean(const std::string section, const std::string key, bool default_value)
 {
 	try
 	{
@@ -102,7 +102,7 @@ bool Ini::ReadBoolean(std::string section, std::string key, bool default_value)
 }
 
 
-std::string Ini::ReadString(std::string section, std::string key, std::string default_value)
+std::string Ini::ReadString(std::string section, std::string key, const std::string default_value)
 {
 	bool inSection = false;
 	std::string sectionName = "";

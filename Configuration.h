@@ -5,12 +5,12 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
 // source
-// https://www.ocregister.com/2020/05/22/what-an-attendance-cap-could-mean-for-crowded-disney-parks-in-the-covid-19-era/
+// https://www.ocregister.com/2020/05/22/what-an-attendance-cap-could-mean-for-crowm
 
 
 #pragma once
@@ -19,14 +19,22 @@
 #include <string>
 #include <vector>
 
+#include "Constants.h"
+#include "QWaitTypes.h"
 
+
+static const std::string kCats = "/cat";
 static const std::string kDebugSCC = "/debugscc";
+static const std::string kDebugDistanceCache = "/debugdistancecache";
 static const std::string kDegbugNoExecute = "/debugnoexecute";
+static const std::string kDebugUpdateRate = "/debugupdaterate";
 static const std::string kReportCVD = "/reportcvd";
-static const std::string kReportMxM = "/reportmxm";
+static const std::string kReportMxMCSV = "/reportcsvmxm";
+static const std::string kReportMxMText = "/reporttextmxm";
 static const std::string kReportSimulation = "/reportsimulation";
 static const std::string kReportSimulationHTML = "/reporthtml";
 static const std::string kReportVisitorLocation = "/reportvisitorlocation";
+static const std::string kReportVisitorRideList = "/reportvisitorridelist";
 static const std::string kImportVisitorDemo = "/importvisitordemo";
 static const std::string kReportVisitorDemo = "/reportvisitordemo";
 static const std::string kTemplateFile = "/templatefile";
@@ -34,6 +42,7 @@ static const std::string kTemplate = "/template";
 static const std::string kVisitors = "/visitors";
 static const std::string kFastPassMode = "/fastpassmode";
 static const std::string kUserConfigFile = "/useconfigfile";
+static const std::string kGetVisitorNames = "/getvisitornames";
 
 
 const static int VisitorCountUseParkAverage = -1;
@@ -46,6 +55,7 @@ struct ParameterData {
 
 
 struct DebugOutput {
+	bool DistanceCache = false;
 	bool SelectionChoiceCache = false;
 };
 
@@ -53,6 +63,8 @@ struct DebugOutput {
 struct DebugOptions {
 	bool NoExecution = false;
 	bool DisableConsoleOutput = false;
+
+	int UpdateRate = 15;
 };
 
 
@@ -61,6 +73,7 @@ struct CSVOutput {
 	bool CompleteVisitorData = false;
 	bool VisitorLocation = false;
 	bool VisitorDemographics = false;
+	bool VisitorRideList = false;
 
 	std::string VisitorDemographicsFile = "";
 };
@@ -68,6 +81,7 @@ struct CSVOutput {
 
 struct TextOutput {
 	bool SimulationReport = false;
+	bool MinuteByMinute = false;
 };
 
 
@@ -91,22 +105,23 @@ class Configuration
 	void SetDefaults();
 	void SetFromCommandLine();
 
-	std::string GetCommandValue(std::string);
-	std::string GetPropertyValue(std::string);
+	std::string GetCommandValue(const std::string);
+	std::string GetPropertyValue(const std::string);
 
-	bool IsValidParameter(std::string input);
+	bool IsValidParameter(const std::string input);
 
-	bool LoadConfigurationFromIni(std::string);
+	bool LoadConfigurationFromIni(const std::string);
 
-	std::string SetExtension(std::string, std::string);
+	std::string SetExtension(const std::string, const std::string);
 
-	void HandleImportVisitorDemo(std::string);
-	void HandleReportVisitorDemo(std::string);
-	void HandleSimulationReportHTML(std::string);
-	void HandleTemplateFile(std::string);
-	void HandleTemplate(std::string);
-	void HandleVisitors(std::string);
-	void HandleFastPassMode(std::string);
+	void HandleDebugUpdateRate(int);
+	void HandleImportVisitorDemo(const std::string);
+	void HandleReportVisitorDemo(const std::string);
+	void HandleSimulationReportHTML(const std::string);
+	void HandleTemplateFile(const std::string);
+	void HandleTemplate(const std::string);
+	void HandleVisitors(const std::string);
+	void HandleFastPassMode(const std::string);
 	void HandleUseConfigFile(std::string);
 
 public:
@@ -120,16 +135,18 @@ public:
 
 	SimulationInput Input;
 
-	int VisitorCount;  // average daily visitors to WDW Florida: Magic Kingdom: 57000; Animal Kingdom: 38000; Epcot: 34000; Hollywood Studios: 31000
+	int VisitorCount = 0;  // average daily visitors to WDW Florida: Magic Kingdom: 57000; Animal Kingdom: 38000; Epcot: 34000; Hollywood Studios: 31000
 
-	int RideTemplate;
-	std::string RideTemplateFile;
+	ParkTemplate RideTemplate = ParkTemplate::WDWAnimalKingdom;
+	std::string RideTemplateFile = "";
 
-	int FastPassMode;
+	bool GetVisitorNames = false;
 
-	int ParkOpenTime;	// 24-hour clock
-	int ParkCloseTime;  // 24-hour clock
-	int ParkOpenHours;
+	FastPassType FastPassMode = FastPassType::None;
+
+	int ParkOpenTime = 0;	// 24-hour clock
+	int ParkCloseTime = 0;  // 24-hour clock
+	int ParkOpenHours = 0;
 
 	Configuration(int argc, char* argv[]);
 };

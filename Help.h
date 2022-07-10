@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -16,4 +16,6 @@
 namespace Help
 {
 	void ShowHelp();
+
+	void ShowCat();
 }

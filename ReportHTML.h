@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -34,13 +34,15 @@ static const std::string kGraphAverage = "FF0000";
 
 namespace ReportHTML
 {
-	bool SaveSimulationReport(std::string, int);
+	bool SaveSimulationReport(const std::string, FastPassType);
 
 	namespace
 	{
 		void Summary(std::ofstream&);
 
+		void TicketList(std::ofstream&);
 		void RideList(std::ofstream&);
+		void GroupTypeList(std::ofstream&);
 		void VisitorTypeList(std::ofstream&);
 		void VisitorRideList(std::ofstream&);
 		void MinuteByMinute(std::ofstream&);
@@ -53,10 +55,13 @@ namespace ReportHTML
 		void FourColumnTableRow(std::ofstream&, int, std::string, int, float, int);
 		void FourColumnTableEnd(std::ofstream&, bool, int, float);
 
+		void FiveColumnHeader(std::ofstream&, std::string, std::string, std::string, std::string);
+		void FiveColumnTableRow(std::ofstream&, int, std::string, int, int, float, int);
+
 		void MxMTableHeader(std::ofstream&);
 		void MxMTableHeaderFP(std::ofstream&);
-		void MxMTableRow(std::ofstream&, int, std::string, int, int, int, int, int);
 		void MxMTableRow(std::ofstream&, int, std::string, int, int, int, int, int, int);
+		void MxMTableRow(std::ofstream&, int, std::string, int, int, int, int, int, int, int);
 
 		std::string GraphTable(float, float, int);
 

@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -30,7 +30,7 @@ void Names::LoadNames()
 	{
 		std::string s;
 
-		std::cout << "Loading firstnames.txt..." << std::endl;
+		std::cout << "Loading \"firstnames.txt\"..." << std::endl;
 
 		while (std::getline(file, s))
 		{
@@ -41,6 +41,12 @@ void Names::LoadNames()
 		}
 
 		file.close();
+
+		LoadFirstNames = true;
+	}
+	else
+	{
+		std::cout << "Error loading \"firstnames.txt\"." << std::endl;
 	}
 
 	std::ifstream file2("surnames.txt");
@@ -49,7 +55,7 @@ void Names::LoadNames()
 	{
 		std::string s;
 
-		std::cout << "Loading surnames.txt..." << std::endl;
+		std::cout << "Loading \"surnames.txt\"..." << std::endl;
 
 		while (std::getline(file2, s))
 		{
@@ -60,6 +66,12 @@ void Names::LoadNames()
 		}
 
 		file2.close();
+
+		LoadLastNames = true;
+	}
+	else
+	{
+		std::cout << "Error loading \"surnames.txt\"." << std::endl;
 	}
 }
 
@@ -67,7 +79,7 @@ void Names::LoadNames()
 std::string Names::GetRandomName()
 {
 	int first = rand() % FirstName.size();
-	int last  = rand() % LastName.size();
+	int last = rand() % LastName.size();
 
 	return FirstName[first] + " " + LastName[last];
 }

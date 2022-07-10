@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -18,37 +18,40 @@
 
 class ReportController
 {
-	bool ShowOutput;
+	bool ShowOutput = true;
 
-	void OutputStatus(std::string);
+	void OutputStatus(const std::string);
 
 public:
 
 	ReportController(bool);
 
 	// =======================================================================
-	// == CSV Reports ========================================================
+    // == CSV Reports =======================================================
     // =======================================================================
 
-	void SaveRideDataCSV(std::string);
-	void SaveVisitorDataCSV(std::string);
-	void SaveMinuteByMinuteLogCSV(std::string);
+	void SaveRideDataCSV(const std::string);
+	void SaveVisitorDataCSV(const std::string);
+	void SaveMinuteByMinuteLogCSV(const std::string);
 
-	void SaveRideCountCSV(std::string);
+	void SaveRideCountCSV(const std::string);
 
-	void SaveSelectionChoiceCacheCSV(std::string);
+	void SaveSelectionChoiceCacheCSV(const std::string);
 
-	void SaveVisitorLocationCSV(std::string);
+	void SaveVisitorLocationCSV(const std::string);
+
+	void SaveVisitorRideListCSV(const std::string);
+
+	// =======================================================================
+	// == HTML Reports =======================================================
+	// =======================================================================
+
+	void SaveSimulationReportHTML(const std::string, FastPassType);
 
 	// =======================================================================
 	// == Text Reports =======================================================
 	// =======================================================================
 
-	void SaveSimulationReport(std::string, int);
-
-	// =======================================================================
-	// == HTML Reports =======================================================
-	// =======================================================================
-	
-	void SaveSimulationReportHTML(std::string, int);
+	void SaveMXMReportText(const std::string, FastPassType);
+	void SaveSimulationReportText(const std::string, FastPassType);	
 };

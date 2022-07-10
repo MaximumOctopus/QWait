@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -15,6 +15,7 @@
 
 #include <string>
 #include <vector>
+
 #include "Constants.h"
 #include "QWaitTypes.h"
 #include "Visitor.h"
@@ -22,17 +23,17 @@
 
 static const int kNoSelectedFastPassTicket = -1;
 
-static const int kRideTypeContinuous = 0;
-static const int kRideTypeShow = 1;
-
 static const int kClosestCacheSize = 5;
 
 
 struct Operation {
-	int rideType = 0;
+	RideType rideType = RideType::Continuous;
+
+	RideExitType rideExitType = RideExitType::None;
+
 	std::string name = "";
 
-	QWaitTypes::Coords position; // x position in 2d map
+	QWaitTypes::Coords position;	 // x position in 2d map
 
 	int rideLength = 0;				 // minutes
 
@@ -48,8 +49,20 @@ struct Operation {
 	int operationHours = 0;
 
 	int Popularity = 0;            //
-	//bool ChildValid;           // unused for now
-	//bool AdultValid;           // unused for now
+
+	bool BabyValid = false;
+	bool ChildValid = false;
+	bool AdultValid = false;	
+
+	int rideTypeAsInt()
+	{
+		if (rideType == RideType::Continuous)
+		{
+			return 0;
+		}
+
+		return 1;
+	}
 };
 
 
@@ -93,8 +106,8 @@ struct Capacity {
 
 class Ride
 {
-	std::vector<int> Queue;
-	std::vector<int> QueueFastPass;
+	std::vector<QWaitTypes::Riders> Queue;
+	std::vector<QWaitTypes::Riders> QueueFastPass;
 
 	std::vector<MinuteData> Statistics;
 
@@ -117,7 +130,7 @@ public:
 
 	Capacity RideThroughput;
 
-	Ride(int, std::string, int, int, int, int, int, int, int, QWaitTypes::Time, QWaitTypes::Time, int);
+	Ride(RideType, std::string, int, RideExitType, int, int, int, int, int, int, QWaitTypes::Time, QWaitTypes::Time, int, bool, bool);
 
 	void Close();
 
@@ -125,14 +138,17 @@ public:
 
 	void ConfigureShowThroughput(int, int);
 
-	void AddToQueue(int);
-	int RemoveFromQueue();
+	void AddToQueue(QWaitTypes::Riders);
+	QWaitTypes::Riders RemoveFromQueue();
+	QWaitTypes::Riders NextItemInQueue(); // doesn't remove, gives information on next item
 
-	void AddToQueueFastPass(int);
-	int RemoveFromQueueFastPass();
 
-	size_t QueueSize();
-	size_t QueueSizeFastPass();
+	void AddToQueueFastPass(QWaitTypes::Riders);
+	QWaitTypes::Riders RemoveFromQueueFastPass();
+	QWaitTypes::Riders NextItemInQueueFastPass(); // doesn't remove, gives information on next item
+
+	int QueueSize();
+	int QueueSizeFastPass();
 
 	float WaitTime(int);
 

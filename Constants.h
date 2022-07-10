@@ -5,7 +5,7 @@
 // (c) Paul Alan Freshney 2022
 // paul@freshney.org
 //
-// https://qwait.sourceforge.io
+// https://github.com/MaximumOctopus/QWait
 // 
 // =======================================================================
 
@@ -18,20 +18,16 @@
 
 namespace Constants
 {
-	static const std::string QWVersion = "0.4";
-	static const std::string QWDate = "April 14th 2022";
+	static const std::string QWVersion = "0.6";
+	static const std::string QWDate = "June 19th 2022";
+
+	// ===========================================================================================================================
+
+	static const int TemplateMaximum = 6;
 
 	// ===========================================================================================================================
 
 	const static int MaxRideCount = 30;
-
-	const static int TemplateGenericTest = 0;
-	const static int TemplateWDWAnimalKingdom = 1;
-	const static int TemplateWDWEpcot = 2;
-	const static int TemplateWDWHollywoodStudios = 3;
-	const static int TemplateWDWMagicKingdom = 4;
-	const static int TemplateArcade = 5;
-	const static int TemplateMaximum = TemplateArcade;
 
 	// ===========================================================================================================================
 
@@ -49,6 +45,7 @@ namespace Constants
 	const static float ArriveAt21 = 0.0f;
 
 	const static int AvailableVisitorTypes = 7;
+	const static int AvailableGroupTypes = 4;
 
 	const static int VisitorTypeEnthusiast = 0;
 	const static int VisitorTypeFan = 1;
@@ -59,7 +56,7 @@ namespace Constants
 	const static int VisitorTypeTikToker = 6;
 	const static int VisitorTypeVIP = 7;
 
-	const static std::string TypeNames[AvailableVisitorTypes] = { "Enthusiast", "Fan", "Tourist", "Activity", "Passholder", "Passholder (E)", "Tiktoker", "VIP" };
+	const static std::string GroupNames[AvailableGroupTypes]  = { "Family", "Adult Couple", "Adult Group", "Single" };
 
 	const static int PercentageStayingOnSiteStartingEarly = 10; 
 
@@ -68,11 +65,6 @@ namespace Constants
 
 	// ===========================================================================================================================
 
-	const static int FastPassModeNone = 0;
-	const static int FastPassModePlus = 1;
-	const static int FastPassModePlusNoStayBenefit = 2; // visitors staying onsite do not get first pick on fastpass tickets
-
-	const static std::string FastPassModeNames[3] = { "None.", "FastPass+", "FastPass+ (no stay benefits) "};
 	const static int FastPassTicketsAllowes[3] = { 0, 3, 3 }; // tickets allowed per visitor per different fastpass modes
 
 	const static float FastPassHourlyPercent = 75.0f; // these two must add to 100 :)
@@ -88,7 +80,17 @@ namespace Constants
 	const static int ParkStatusQueuingFastPass = 5; // queuing for a ride with FastPass
 	const static int ParkStatusTravelling = 6; // travelling to a ride
 	const static int ParkStatusWaiting = 7; // visitor is doing something which causes to be busy doing something
-	const static int ParkStatusExited = 8; // left the park
+	const static int ParkStatusWaitingForOthersInParty = 8;
+	const static int ParkStatusExited = 9; // left the park
 
-	const static int VisitorsInPark = 9;
+	const static int kNoCurrentRide = -1;
+	const static int kNoDestinationRide = -1;
+	const static int kNoFastPass = -1;
+	const static int kNoSelectedRide = -1;
+	const static int kNoSelectedType = -1;
+	const static int kNotValidVisitor = -1;
+	const static int kNotValidGroup = -1;
+	const static int kLocationExitedPark = -1;
+
+	const static int VisitorsInPark = 10;
 }
