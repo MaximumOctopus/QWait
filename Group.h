@@ -21,27 +21,27 @@
 
 enum class GroupType { Family = 0, AdultCouple = 1, AdultGroup = 2, Single = 3 };
 
-static const float kFamilyChildrenCount[4] = { 20.0f, 70.0f, 95.0f, 99.0f };
-static const float kAdultGroupCount[4]     = { 10.0f, 25.0f, 40.0f, 75.0f };
+static const double kFamilyChildrenCount[4] = { 20.0f, 70.0f, 95.0f, 99.0f };
+static const double kAdultGroupCount[4]     = { 10.0f, 25.0f, 40.0f, 75.0f };
 
 static const int kBasePostRideWaitTime = 1;
 
-static const float kVisitorTypeCoeff[7][6] = { { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// generic test
-											   { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Animal Kingdom
-											   { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Epcot
-											   { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Hollywood Studios
-											   { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Magic Kingdom
-											   { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Arcade
-											   { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f } };	// Alton Towers
+static const double kVisitorTypeCoeff[7][6] = { { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// generic test
+											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Animal Kingdom
+											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Epcot
+											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Hollywood Studios
+											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Magic Kingdom
+											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Arcade
+											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f } };	// Alton Towers
 
 											  // Family AdultCouple AdultGroup Single 
-static const float kGroupTypeCoeff[7][3] =   { { 0.50f, 0.75f, 0.990f },	// generic test
-											   { 0.50f, 0.75f, 0.990f },	// Animal Kingdom
-											   { 0.50f, 0.75f, 0.990f },	// Epcot
-											   { 0.50f, 0.75f, 0.990f },	// Hollywood Studios
-											   { 0.50f, 0.75f, 0.990f },	// Magic Kingdom
-											   { 0.50f, 0.75f, 0.990f },	// Arcade
-											   { 0.40f, 0.75f, 0.990f } };	// Alton Towers
+static const double kGroupTypeCoeff[7][3] =   { { 0.50f, 0.75f, 0.990f },	// generic test
+										  	    { 0.50f, 0.75f, 0.990f },	// Animal Kingdom
+											    { 0.50f, 0.75f, 0.990f },	// Epcot
+											    { 0.50f, 0.75f, 0.990f },	// Hollywood Studios
+											    { 0.50f, 0.75f, 0.990f },	// Magic Kingdom
+											    { 0.50f, 0.75f, 0.990f },	// Arcade
+											    { 0.40f, 0.75f, 0.990f } };	// Alton Towers
 
 enum class GroupParkStatus { OnWay = 0, AtEntrance = 1, Idle = 2, Riding = 3, Queuing = 4, 
 	                         QueuingFastPass = 5, Travelling = 6, Waiting = 7, Exited = 8};
@@ -83,28 +83,28 @@ struct GroupConfiguration {
 	QWaitTypes::Time arrivalTime = { 0, 0 };
 	QWaitTypes::Time departureTime = { 0, 0 };
 
-	std::string GetTypeToString()
+	std::wstring GetTypeToString()
 	{
 		switch (type)
 		{
 		case GroupType::Family:
-			return "Family";
+			return L"Family";
 			break;
 
 		case GroupType::AdultCouple:
-			return "Adult Couple";
+			return L"Adult Couple";
 			break;
 
 		case GroupType::AdultGroup:
-			return "Adult Group";
+			return L"Adult Group";
 			break;
 
 		case GroupType::Single:
-			return "Single";
+			return L"Single";
 			break;
 		}
 
-		return "Unknown!";
+		return L"Unknown!";
 	}
 
 
@@ -169,12 +169,12 @@ class Group
 {
 	void SetGroupSettings();
 
-	void BuildFamily(float);
-	void BuildAdultCouple(float);
-	void BuildAdultGroup(float);
-	void BuildSingle(float);
+	void BuildFamily(double);
+	void BuildAdultCouple(double);
+	void BuildAdultGroup(double);
+	void BuildSingle(double);
 
-	VisitorType GetType(float);
+	VisitorType GetType(double);
 
 	NewVisitorConfiguration GetVisitorGenericAdult();
 	NewVisitorConfiguration GetVisitorGenericChild();
@@ -202,15 +202,15 @@ public:
 	Group(GroupType, int);
 	Group(int, int, int, bool, int, int, int, int);
 
-	bool CreateVisitorFromFileData(const std::string);
+	bool CreateVisitorFromFileData(const std::wstring);
 
 	int GroupRemovedFromRide(int, RideExitType);
 	int GroupRemovedFromRideShutdown(RideExitType);
 
 	int GetGroupLeaderType();
 
-	void SetQueuing(int, float);
-	void SetQueuingFastPass(int, float);
+	void SetQueuing(int, double);
+	void SetQueuingFastPass(int, double);
 
 	void SetRiding(QWaitTypes::Riders, int, int, bool);
 	void SetNewRide(int, int, int, int, QWaitTypes::Coords);
@@ -234,12 +234,12 @@ public:
 
 	void SaveMinuteStats();
 
-	std::string GetLocationByMinute(int);
+	std::wstring GetLocationByMinute(int);
 
 	void SetWaiting(int);
 
 	void AddFastPassTicket(int, int, QWaitTypes::Time);
 	void SortFastPassTickets();
 
-	std::string GetVisitorAgesString();
+	std::wstring GetVisitorAgesString();
 };

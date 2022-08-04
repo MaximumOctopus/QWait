@@ -23,7 +23,7 @@
 
 namespace MD5
 {
-	std::string GetMD5HashString(char* pcValue)
+	std::wstring GetMD5HashString(char* pcValue)
 	{
 		BYTE *bytes = reinterpret_cast<BYTE *>(&pcValue[0]);
 		DWORD byteLength = strlen(pcValue) * sizeof(pcValue[0]);
@@ -59,10 +59,10 @@ namespace MD5
 
 		std::string output(pcMD5HashString);
 
-		//int size_needed = MultiByteToWideChar(CP_UTF8, 0, &output[0], (int)output.size(), NULL, 0);
-		//std::string outputHashed(size_needed, 0);
-		//MultiByteToWideChar(CP_UTF8, 0, &output[0], (int)output.size(), &outputHashed[0], size_needed);
+		int size_needed = MultiByteToWideChar(CP_UTF8, 0, &output[0], (int)output.size(), NULL, 0);
+		std::wstring outputHashed(size_needed, 0);
+		MultiByteToWideChar(CP_UTF8, 0, &output[0], (int)output.size(), &outputHashed[0], size_needed);
 
-		return output;
+		return outputHashed;
 	}
 }

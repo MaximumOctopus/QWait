@@ -25,7 +25,7 @@ extern VisitorController* GVisitorController;
 
 namespace GlobalControllers
 {
-	int CreateGlobalControllers(int argc, char* argv[])
+	int CreateGlobalControllers(int argc, wchar_t* argv[])
 	{
 		GConfiguration     = new Configuration(argc, argv);
 

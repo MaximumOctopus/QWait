@@ -35,7 +35,7 @@ class Engine
 
 	void UpdateClock();
 
-	void OutputStatus(const std::string);
+	void OutputStatus(const std::wstring);
 
 	QWaitTypes::GetRide GetRide(int);
 	int IsRideAvailableCloser(int, int);

@@ -148,6 +148,7 @@
     <ClCompile Include="Group.cpp" />
     <ClCompile Include="QWaitTypes.cpp" />
     <ClCompile Include="ReportText.cpp" />
+    <ClCompile Include="ReportUtility.cpp" />
     <ClCompile Include="Utility.cpp" />
     <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="Group.h" />
     <ClInclude Include="ReportCSV.h" />
     <ClInclude Include="ReportText.h" />
+    <ClInclude Include="ReportUtility.h" />
     <ClInclude Include="RidePricing.h" />
     <ClInclude Include="Ini.h" />
     <ClInclude Include="MD5.h" />

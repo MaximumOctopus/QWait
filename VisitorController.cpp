@@ -20,6 +20,7 @@
 #include "Group.h"
 #include "Names.h"
 #include "QWaitTypes.h"
+#include "ReportUtility.h"
 #include "Utility.h"
 #include "Visitor.h"
 #include "VisitorController.h"
@@ -52,7 +53,7 @@ void VisitorController::SetDefaults()
 }
 
 
-GroupType VisitorController::GetGroupType(float random)
+GroupType VisitorController::GetGroupType(double random)
 {
 	if (random < kGroupTypeCoeff[TemplateIDint][0])
 	{
@@ -71,22 +72,22 @@ GroupType VisitorController::GetGroupType(float random)
 }
 
 
-void VisitorController::Run(bool save_visitor_list, const std::string save_file_name, bool load_visitor_list, const std::string load_file_name)
+void VisitorController::Run(bool save_visitor_list, const std::wstring save_file_name, bool load_visitor_list, const std::wstring load_file_name)
 {
 	if (load_visitor_list)
 	{
-		OutputStatus("Loading Visitor data from \"" + load_file_name + "\"...");
+		OutputStatus(L"Loading Visitor data from \"" + load_file_name + L"\"...");
 	}
 	else
 	{
-		OutputStatus("Generating ~" + std::to_string(ExpectedVisitorCount) + " visitors...");
+		OutputStatus(L"Generating ~" + std::to_wstring(ExpectedVisitorCount) + L" visitors...");
 	}
 
 	if (load_visitor_list)
 	{
 		int count = LoadVisitorList(load_file_name);
 
-		OutputStatus("Loaded " + std::to_string(count) + " visitors.");
+		OutputStatus(L"Loaded " + std::to_wstring(count) + L" visitors.");
 	}
 	else
 	{
@@ -98,7 +99,7 @@ void VisitorController::Run(bool save_visitor_list, const std::string save_file_
 		{
 			std::random_device rd;
 			std::default_random_engine eng(rd());
-			std::uniform_real_distribution<float> distr(0.0f, 1.0f);
+			std::uniform_real_distribution<double> distr(0.0f, 1.0f);
 
 			GroupType group_type = GetGroupType(distr(eng));
 
@@ -171,31 +172,33 @@ void VisitorController::ShowConfig()
 {
 	if (ShowOutput)
 	{
-		std::cout << "Family       : " << Utility::PadRight(GroupTypeCount[0], 6) << "\n";
-		std::cout << "Adult Couple : " << Utility::PadRight(GroupTypeCount[1], 6) << "\n";
-		std::cout << "Adult Group  : " << Utility::PadRight(GroupTypeCount[2], 6) << "\n";
-		std::cout << "Single       : " << Utility::PadRight(GroupTypeCount[3], 6) << "\n";
-		std::cout << "=====================\n";
-		std::cout << "      Total  : " << Utility::PadRight(GroupCountCreated, 6) << "\n\n";
+		std::wcout << L"Family       :    " << Utility::PadRight(GroupTypeCount[0], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[0] / (double)GroupCountCreated) * 100.0f)) << "\n";
+		std::wcout << L"Adult Couple :    " << Utility::PadRight(GroupTypeCount[1], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[1] / (double)GroupCountCreated) * 100.0f)) << "\n";
+		std::wcout << L"Adult Group  :    " << Utility::PadRight(GroupTypeCount[2], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[2] / (double)GroupCountCreated) * 100.0f)) << "\n";
+		std::wcout << L"Single       :    " << Utility::PadRight(GroupTypeCount[3], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[3] / (double)GroupCountCreated) * 100.0f)) << "\n";
+		std::wcout << L"=========================\n";
+		std::wcout << L"      Total  :    " << Utility::PadRight(GroupCountCreated, 6) << "\n\n";
 
 		for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 		{
-			std::cout << "Type   : " << t << "  " << Utility::PadRight(TypeCount[t], 6) << "\n";
-		}
-		
-		std::cout << "==================\n";
-		std::cout << "Total    " << Utility::PadRight(VisitorCountCreated, 9) << "\n\n";
+			int pc = static_cast<int>(((double)TypeCount[t] / (double)VisitorCountCreated) * 100.0f);
 
-		std::cout << std::endl;
+			std::wcout << L"Type         : " << t << "  " << Utility::PadRight(TypeCount[t], 6) << L" " << ReportUtility::BarGraph(pc) << "\n";
+		}                            
+		
+		std::wcout << L"=========================\n";
+		std::wcout << L"      Total  : " << Utility::PadRight(VisitorCountCreated, 9) << "\n\n";
+
+		std::wcout << std::endl;
 	}
 }
 
 
-void VisitorController::OutputStatus(const std::string status)
+void VisitorController::OutputStatus(const std::wstring status)
 {
 	if (ShowOutput)
 	{
-		std::cout << status << std::endl;
+		std::wcout << status << std::endl;
 	}
 }
 
@@ -323,7 +326,7 @@ int VisitorController::GetLargestValueByType(int parameter)
 }
 
 
-void VisitorController::UpdateMinuteStats(const std::string current_time)
+void VisitorController::UpdateMinuteStats(const std::wstring current_time)
 {
  	MinuteDataV m;
 
@@ -404,7 +407,7 @@ void VisitorController::UpdateMinuteStats(const std::string current_time)
 
 	if (RideCount != 0 && VisitorCountCreated != 0)
 	{
-		m.averageRides = static_cast<int>((float)RideCount / (float)VisitorCountCreated); // average number of rides per visitor
+		m.averageRides = static_cast<int>((double)RideCount / (double)VisitorCountCreated); // average number of rides per visitor
 	}
 	else
 	{
@@ -415,21 +418,21 @@ void VisitorController::UpdateMinuteStats(const std::string current_time)
 }
 
 
-std::string VisitorController::GetMinuteDataFor(int minute)
+std::wstring VisitorController::GetMinuteDataFor(int minute)
 {
-	return std::to_string(Statistics[minute].visitorsInPark) + "," +
-	       std::to_string(Statistics[minute].onWay) + "," +
-		   std::to_string(Statistics[minute].atEntrance) + "," +
-		   std::to_string(Statistics[minute].idle) + "," +
-		   std::to_string(Statistics[minute].riding) + "," +
-		   std::to_string(Statistics[minute].queuing) + "," +
-		   std::to_string(Statistics[minute].queuingFastPass) + "," +
-		   std::to_string(Statistics[minute].travelling) + "," +
-		   std::to_string(Statistics[minute].waiting) + "," +
-		   std::to_string(Statistics[minute].exited) + "," +
-		   std::to_string(Statistics[minute].averageRides) + "," +
-		   std::to_string(Statistics[minute].minRides) + "," + 
-		   std::to_string(Statistics[minute].maxRides);
+	return std::to_wstring(Statistics[minute].visitorsInPark) + L"," +
+	       std::to_wstring(Statistics[minute].onWay) + L"," +
+		   std::to_wstring(Statistics[minute].atEntrance) + L"," +
+		   std::to_wstring(Statistics[minute].idle) + L"," +
+		   std::to_wstring(Statistics[minute].riding) + L"," +
+		   std::to_wstring(Statistics[minute].queuing) + L"," +
+		   std::to_wstring(Statistics[minute].queuingFastPass) + L"," +
+		   std::to_wstring(Statistics[minute].travelling) + L"," +
+		   std::to_wstring(Statistics[minute].waiting) + L"," +
+		   std::to_wstring(Statistics[minute].exited) + L"," +
+		   std::to_wstring(Statistics[minute].averageRides) + L"," +
+		   std::to_wstring(Statistics[minute].minRides) + L"," +
+		   std::to_wstring(Statistics[minute].maxRides);
 } 
 
 
@@ -579,18 +582,18 @@ void VisitorController::CalculateStatistics()
 
 	// =====================================================================================================
 
-	DailyStats.averageRides = static_cast<int>((float)DailyStats.totalRides / (float)VisitorCountCreated);
-	DailyStats.averageQueueTime = static_cast<int>((float)DailyStats.totalQueueTime / (float)VisitorCountCreated);
+	DailyStats.averageRides = static_cast<int>((double)DailyStats.totalRides / (double)VisitorCountCreated);
+	DailyStats.averageQueueTime = static_cast<int>((double)DailyStats.totalQueueTime / (double)VisitorCountCreated);
 
-	DailyStats.averageDistanceTravelled = static_cast<int>((float)DailyStats.distanceTravelled / (float)VisitorCountCreated);
-	DailyStats.averageIdleTime = (float)DailyStats.totalIdleTime / (float)VisitorCountCreated;
-	DailyStats.averageRidingTime = (float)DailyStats.totalRidingTime / (float)VisitorCountCreated;
-	DailyStats.averageTravellingTime = (float)DailyStats.totalTravellingTime / (float)VisitorCountCreated;
-	DailyStats.averageWaitingTime = (float)DailyStats.totalWaitingTime / (float)VisitorCountCreated;
+	DailyStats.averageDistanceTravelled = static_cast<int>((double)DailyStats.distanceTravelled / (double)VisitorCountCreated);
+	DailyStats.averageIdleTime = (double)DailyStats.totalIdleTime / (double)VisitorCountCreated;
+	DailyStats.averageRidingTime = (double)DailyStats.totalRidingTime / (double)VisitorCountCreated;
+	DailyStats.averageTravellingTime = (double)DailyStats.totalTravellingTime / (double)VisitorCountCreated;
+	DailyStats.averageWaitingTime = (double)DailyStats.totalWaitingTime / (double)VisitorCountCreated;
 
 	if (DailyStats.totalRidingTime != 0)
 	{
-		DailyStats.queueTimePerRideTime = static_cast<int>((float)DailyStats.totalQueueTime / (float)DailyStats.totalRidingTime);
+		DailyStats.queueTimePerRideTime = static_cast<int>((double)DailyStats.totalQueueTime / (double)DailyStats.totalRidingTime);
 	}
 
 	// =====================================================================================================
@@ -599,22 +602,22 @@ void VisitorController::CalculateStatistics()
 	{
 		if (DailyStatsByType[t].typeCount != 0)
 		{
-			DailyStatsByType[t].averageRides = static_cast<int>((float)DailyStatsByType[t].totalRides / (float)DailyStatsByType[t].typeCount);
-			DailyStatsByType[t].averageIdleTime = (float)DailyStatsByType[t].totalIdleTime / (float)DailyStatsByType[t].typeCount;
-			DailyStatsByType[t].averageRidingTime = (float)DailyStatsByType[t].totalRidingTime / (float)DailyStatsByType[t].typeCount;
-			DailyStatsByType[t].averageTravellingTime = (float)DailyStatsByType[t].totalTravellingTime / (float)DailyStatsByType[t].typeCount;
-			DailyStatsByType[t].averageWaitingTime = (float)DailyStatsByType[t].totalWaitingTime / (float)DailyStatsByType[t].typeCount;
-			DailyStatsByType[t].averageDistanceTravelled = static_cast<int>((float)DailyStatsByType[t].distanceTravelled / (float)DailyStatsByType[t].typeCount);
+			DailyStatsByType[t].averageRides = static_cast<int>((double)DailyStatsByType[t].totalRides / (double)DailyStatsByType[t].typeCount);
+			DailyStatsByType[t].averageIdleTime = (double)DailyStatsByType[t].totalIdleTime / (double)DailyStatsByType[t].typeCount;
+			DailyStatsByType[t].averageRidingTime = (double)DailyStatsByType[t].totalRidingTime / (double)DailyStatsByType[t].typeCount;
+			DailyStatsByType[t].averageTravellingTime = (double)DailyStatsByType[t].totalTravellingTime / (double)DailyStatsByType[t].typeCount;
+			DailyStatsByType[t].averageWaitingTime = (double)DailyStatsByType[t].totalWaitingTime / (double)DailyStatsByType[t].typeCount;
+			DailyStatsByType[t].averageDistanceTravelled = static_cast<int>((double)DailyStatsByType[t].distanceTravelled / (double)DailyStatsByType[t].typeCount);
 		}
 
 		if (DailyStatsByType[t].totalRides != 0)
 		{
-			DailyStatsByType[t].averageQueueTime = static_cast<int>((float)DailyStatsByType[t].totalQueueTime / (float)DailyStatsByType[t].totalRides);
+			DailyStatsByType[t].averageQueueTime = static_cast<int>((double)DailyStatsByType[t].totalQueueTime / (double)DailyStatsByType[t].totalRides);
 		}
 
 		if (DailyStatsByType[t].totalRidingTime != 0)
 		{
-			DailyStatsByType[t].queueTimePerRideTime = static_cast<int>((float)DailyStatsByType[t].totalQueueTime / (float)DailyStatsByType[t].totalRidingTime);
+			DailyStatsByType[t].queueTimePerRideTime = static_cast<int>((double)DailyStatsByType[t].totalQueueTime / (double)DailyStatsByType[t].totalRidingTime);
 		}
 	}
 
@@ -624,22 +627,22 @@ void VisitorController::CalculateStatistics()
 	{
 		if (DailyStatsByGroup[g].typeCount != 0)
 		{
-			DailyStatsByGroup[g].averageRides = static_cast<int>((float)DailyStatsByGroup[g].totalRides / (float)DailyStatsByGroup[g].typeCount);
-			DailyStatsByGroup[g].averageIdleTime = (float)DailyStatsByGroup[g].totalIdleTime / (float)DailyStatsByGroup[g].typeCount;
-			DailyStatsByGroup[g].averageRidingTime = (float)DailyStatsByGroup[g].totalRidingTime / (float)DailyStatsByGroup[g].typeCount;
-			DailyStatsByGroup[g].averageTravellingTime = (float)DailyStatsByGroup[g].totalTravellingTime / (float)DailyStatsByGroup[g].typeCount;
-			DailyStatsByGroup[g].averageWaitingTime = (float)DailyStatsByGroup[g].totalWaitingTime / (float)DailyStatsByGroup[g].typeCount;
-			DailyStatsByGroup[g].averageDistanceTravelled = static_cast<int>((float)DailyStatsByGroup[g].distanceTravelled / (float)DailyStatsByGroup[g].typeCount);
+			DailyStatsByGroup[g].averageRides = static_cast<int>((double)DailyStatsByGroup[g].totalRides / (double)DailyStatsByGroup[g].typeCount);
+			DailyStatsByGroup[g].averageIdleTime = (double)DailyStatsByGroup[g].totalIdleTime / (double)DailyStatsByGroup[g].typeCount;
+			DailyStatsByGroup[g].averageRidingTime = (double)DailyStatsByGroup[g].totalRidingTime / (double)DailyStatsByGroup[g].typeCount;
+			DailyStatsByGroup[g].averageTravellingTime = (double)DailyStatsByGroup[g].totalTravellingTime / (double)DailyStatsByGroup[g].typeCount;
+			DailyStatsByGroup[g].averageWaitingTime = (double)DailyStatsByGroup[g].totalWaitingTime / (double)DailyStatsByGroup[g].typeCount;
+			DailyStatsByGroup[g].averageDistanceTravelled = static_cast<int>((double)DailyStatsByGroup[g].distanceTravelled / (double)DailyStatsByGroup[g].typeCount);
 		}
 
 		if (DailyStatsByGroup[g].totalRides != 0)
 		{
-			DailyStatsByGroup[g].averageQueueTime = static_cast<int>((float)DailyStatsByGroup[g].totalQueueTime / (float)DailyStatsByGroup[g].totalRides);
+			DailyStatsByGroup[g].averageQueueTime = static_cast<int>((double)DailyStatsByGroup[g].totalQueueTime / (double)DailyStatsByGroup[g].totalRides);
 		}
 
 		if (DailyStatsByGroup[g].totalRidingTime != 0)
 		{
-			DailyStatsByGroup[g].queueTimePerRideTime = static_cast<int>((float)DailyStatsByGroup[g].totalQueueTime / (float)DailyStatsByGroup[g].totalRidingTime);
+			DailyStatsByGroup[g].queueTimePerRideTime = static_cast<int>((double)DailyStatsByGroup[g].totalQueueTime / (double)DailyStatsByGroup[g].totalRidingTime);
 		}
 	}
 
@@ -647,33 +650,33 @@ void VisitorController::CalculateStatistics()
 
 	DailyStats.totalSpend = TotalSpending();
 
-	DailyStats.totalSpendPerRide = (float)DailyStats.totalSpend / (float)DailyStats.totalRides;
+	DailyStats.totalSpendPerRide = (double)DailyStats.totalSpend / (double)DailyStats.totalRides;
 }
 
 
 void VisitorController::ShowStatistics()
 {
-	std::cout << "\n";
+	std::wcout << "\n";
 
 	if (DailyStats.totalRides != 0)
 	{
 		if (DailyStats.totalFastPastRides != 0)
 		{
-			std::cout << "Total rides: " << DailyStats.totalRides << " (fp: " << DailyStats.totalFastPastRides << "); " << "Max rides " << DailyStats.maxRides << ", min rides " << DailyStats.minRides << ", average " << DailyStats.averageRides << "\n";
+			std::wcout << "Total rides: " << DailyStats.totalRides << " (fp: " << DailyStats.totalFastPastRides << "); " << "Max rides " << DailyStats.maxRides << ", min rides " << DailyStats.minRides << ", average " << DailyStats.averageRides << "\n";
 		}
 		else
 		{
-			std::cout << "Total rides: " << DailyStats.totalRides << "; " << "Max rides " << DailyStats.maxRides << ", min rides " << DailyStats.minRides << ", average " << DailyStats.averageRides << "\n";
+			std::wcout << "Total rides: " << DailyStats.totalRides << "; " << "Max rides " << DailyStats.maxRides << ", min rides " << DailyStats.minRides << ", average " << DailyStats.averageRides << "\n";
 		}
 
-		std::cout << "Avg.queue time: " << DailyStats.averageQueueTime << " mins; Avg.idle time: " << DailyStats.averageIdleTime << " mins; Avg.travel time : " << DailyStats.averageTravellingTime << " mins; Avg. wait time: " << DailyStats.averageWaitingTime << " mins\n";
-		std::cout << "\n";
-		std::cout << "Total queue time: " << DailyStats.totalQueueTime << " mins; total ride time: " << DailyStats.totalRidingTime << " mins; total travel time: " << DailyStats.totalTravellingTime << " mins\n";
-		std::cout << "Total idle time : " << DailyStats.totalIdleTime << " mins; total waiting time: " << DailyStats.totalWaitingTime << " mins.\n";
-		std::cout << "\n";
-		std::cout << "Queue minutes per ride minute: " << DailyStats.queueTimePerRideTime << "\n";
-		std::cout << "\n";
-		std::cout << "Spending $" << DailyStats.totalSpend << "\n\n"; // it's only $ cos I couldn't get £ to work in cout ;)
+		std::wcout << "Avg.queue time: " << DailyStats.averageQueueTime << " mins; Avg.idle time: " << DailyStats.averageIdleTime << " mins; Avg.travel time : " << DailyStats.averageTravellingTime << " mins; Avg. wait time: " << DailyStats.averageWaitingTime << " mins\n";
+		std::wcout << "\n";
+		std::wcout << "Total queue time: " << DailyStats.totalQueueTime << " mins; total ride time: " << DailyStats.totalRidingTime << " mins; total travel time: " << DailyStats.totalTravellingTime << " mins\n";
+		std::wcout << "Total idle time : " << DailyStats.totalIdleTime << " mins; total waiting time: " << DailyStats.totalWaitingTime << " mins.\n";
+		std::wcout << "\n";
+		std::wcout << "Queue minutes per ride minute: " << DailyStats.queueTimePerRideTime << "\n";
+		std::wcout << "\n";
+		std::wcout << "Spending $" << DailyStats.totalSpend << "\n\n"; // it's only $ cos I couldn't get £ to work in cout ;)
 	}
 }
 
@@ -683,23 +686,23 @@ void VisitorController::ShowStatistics()
 // =================================================================================================================
 
 
-int VisitorController::LoadVisitorList(const std::string file_name)
+int VisitorController::LoadVisitorList(const std::wstring file_name)
 {
 	int count = 0; 
 
-	std::ifstream file(file_name);
+	std::wifstream file(file_name);
 
 	if (file)
 	{
-		OutputStatus("Loading Visitors from file...");
+		OutputStatus(L"Loading Visitors from file...");
 
-		std::string s;
+		std::wstring s;
 
 		while (std::getline(file, s))
 		{
-			if (s != "")
+			if (s != L"")
 			{
-				if (s.rfind("{group}", 0) == 0)
+				if (s.find(L"{group}", 0) == 0)
 				{
 					CreateGroupFromFileData(s);
 				}
@@ -717,20 +720,20 @@ int VisitorController::LoadVisitorList(const std::string file_name)
 	}
 	else
 	{
-		std::cerr << "Unable to load visitors from file." << std::endl;
+		std::wcerr << L"Unable to load visitors from file." << std::endl;
 	}
 
 	return count;
 }
 
 
-bool VisitorController::CreateGroupFromFileData(const std::string input)
+bool VisitorController::CreateGroupFromFileData(const std::wstring input)
 {
-	std::stringstream visitorinput(input);
-	std::vector<std::string> parameters;
-	std::string parameter;
+	std::wifstream visitorinput(input);
+	std::vector<std::wstring> parameters;
+	std::wstring parameter;
 
-	while (std::getline(visitorinput, parameter, ','))
+	while (std::getline(visitorinput, parameter, L','))
 	{
 		parameters.push_back(parameter);
 	}
@@ -767,14 +770,14 @@ bool VisitorController::CreateGroupFromFileData(const std::string input)
 		}
 		catch (...)
 		{
-			std::cerr << "There appears to be some dodgy data in this input row:" << "\n";
-			std::cerr << "    \"" << input << "\"" << std::endl;
+			std::wcerr << L"There appears to be some dodgy data in this input row:" << "\n";
+			std::wcerr << L"    \"" << input << L"\"" << std::endl;
 		}
 	}
 	else
 	{
-		std::cerr << "Invalid number of parameters in this visitor data (should be 9): " << parameters.size() << "\n";
-		std::cerr << "    \"" << input << "\"" << std::endl;
+		std::wcerr << L"Invalid number of parameters in this visitor data (should be 9): " << parameters.size() << "\n";
+		std::wcerr << L"    \"" << input << L"\"" << std::endl;
 	}
 
 	return false;
@@ -783,19 +786,19 @@ bool VisitorController::CreateGroupFromFileData(const std::string input)
 
 // saves the randomly generated visitors (without any stats or sim information)
 // this is useful if you want to rerun a sim using a specific visitor configuration
-void VisitorController::SaveVisitorList(const std::string file_name)
+void VisitorController::SaveVisitorList(const std::wstring file_name)
 {
-	std::ofstream file(file_name);
+	std::wofstream file(file_name);
 
 	if (file)
 	{
-		OutputStatus("Saving as Visitor file...");
+		OutputStatus(L"Saving as Visitor file...");
 
 		for (int g = 0; g < Groups.size(); g++)
 		{
 			Group gx = Groups[g];
 
-			file << "{group}," << gx.Configuration.GetTypeToInt() << "," << gx.Configuration.templateID << "," << gx.Configuration.stayDuration << "," << gx.Configuration.stayingOnSite << "," << gx.Configuration.arrivalTime.hours << "," << gx.Configuration.arrivalTime.minutes << "," << gx.Configuration.departureTime.hours << "," << gx.Configuration.departureTime.minutes << "\n";
+			file << L"{group}," << gx.Configuration.GetTypeToInt() << L"," << gx.Configuration.templateID << L"," << gx.Configuration.stayDuration << L"," << gx.Configuration.stayingOnSite << L"," << gx.Configuration.arrivalTime.hours << L"," << gx.Configuration.arrivalTime.minutes << L"," << gx.Configuration.departureTime.hours << L"," << gx.Configuration.departureTime.minutes << "\n";
 
 			for (int v = 0; v < Groups[g].Visitors.size(); v++)
 			{
@@ -809,6 +812,6 @@ void VisitorController::SaveVisitorList(const std::string file_name)
 	}
 	else
 	{
-		std::cerr << "Unable to save Visitor list file." << std::endl;
+		std::cerr << L"Unable to save Visitor list file." << std::endl;
 	}
 }

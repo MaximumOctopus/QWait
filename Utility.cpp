@@ -11,6 +11,8 @@
 
 
 #include <algorithm>
+#include <codecvt>
+#include <locale>
 #include <string>
 
 #include "Constants.h"
@@ -21,102 +23,102 @@
 
 namespace Utility
 {
-	std::string DateTime(int mode)
+	std::wstring DateTime(int mode)
 	{
 		struct tm newtime;
 		time_t now = time(0);
 		localtime_s(&newtime, &now);
 
-		std::string year  = std::to_string(newtime.tm_year + 1900);
-		std::string month = std::to_string(newtime.tm_mon + 1);
-		std::string day   = std::to_string(newtime.tm_mday);
-		std::string hour  = std::to_string(newtime.tm_hour);
-		std::string min   = std::to_string(newtime.tm_min);
-		std::string sec   = std::to_string(newtime.tm_sec);
+		std::wstring year  = std::to_wstring(newtime.tm_year + 1900);
+		std::wstring month = std::to_wstring(newtime.tm_mon + 1);
+		std::wstring day   = std::to_wstring(newtime.tm_mday);
+		std::wstring hour  = std::to_wstring(newtime.tm_hour);
+		std::wstring min   = std::to_wstring(newtime.tm_min);
+		std::wstring sec   = std::to_wstring(newtime.tm_sec);
 
 		if (newtime.tm_mon < 10)
 		{
-			month = "0" + month;
+			month = L"0" + month;
 		}
 
 		if (newtime.tm_mday < 10)
 		{
-			month = "0" + month;
+			month = L"0" + month;
 		}
 
 		if (newtime.tm_hour < 10)
 		{
-			hour = "0" + hour;
+			hour = L"0" + hour;
 		}
 
 		if (newtime.tm_min < 10)
 		{
-			min = "0" + min;
+			min = L"0" + min;
 		}
 
 		if (newtime.tm_sec < 10)
 		{
-			sec = "0" + sec;
+			sec = L"0" + sec;
 		}
 
 		if (mode == kDisplayModeConsole)
 		{
-			return year + "/" + month + "/" + day + " " + hour + ":" + min + ":" + sec;
+			return year + L"/" + month + L"/" + day + L" " + hour + L":" + min + L":" + sec;
 		}
 		else
 		{
-			return year + month + day + "_" + hour + min + sec;
+			return year + month + day + L"_" + hour + min + sec;
 		}
 	}
 
 
-	std::string FormatTime(int hours, int minutes)
+	std::wstring FormatTime(int hours, int minutes)
 	{
-		std::string h = std::to_string(hours);
-		std::string m = std::to_string(minutes);
+		std::wstring h = std::to_wstring(hours);
+		std::wstring m = std::to_wstring(minutes);
 
 		if (hours < 10)
 		{
-			h = "0" + h;
+			h = L"0" + h;
 		}
 
 		if (minutes < 10)
 		{
-			m = "0" + m;
+			m = L"0" + m;
 		}
 
-		return h + ":" + m;
+		return h + L":" + m;
 	}
 
 
-	std::string FormatTime(QWaitTypes::Time time)
+	std::wstring FormatTime(QWaitTypes::Time time)
 	{
-		std::string h = std::to_string(time.hours);
-		std::string m = std::to_string(time.minutes);
+		std::wstring h = std::to_wstring(time.hours);
+		std::wstring m = std::to_wstring(time.minutes);
 
 		if (time.hours < 10)
 		{
-			h = "0" + h;
+			h = L"0" + h;
 		}
 
 		if (time.minutes < 10)
 		{
-			m = "0" + m;
+			m = L"0" + m;
 		}
 
-		return h + ":" + m;
+		return h + L":" + m;
 	}
 
 
-	std::string PadRight(const std::string input, int pad)
+	std::wstring PadRight(const std::wstring input, int pad)
 	{
 		if (input.length() < pad)
 		{
-			std::string output = input;
+			std::wstring output = input;
 			
 			for (int i = input.length(); i < pad; i++)
 			{
-				output = " " + output;
+				output = L" " + output;
 			}
 
 			return input;
@@ -126,15 +128,15 @@ namespace Utility
 	}
 
 
-	std::string PadRight(int input, int pad)
+	std::wstring PadRight(int input, int pad)
 	{
-		std::string output = std::to_string(input);
+		std::wstring output = std::to_wstring(input);
 
 		if (output.length() < pad)
 		{
 			for (int i = output.length(); i < pad; i++)
 			{
-				output = " " + output;
+				output = L" " + output;
 			}
 
 			return output;
@@ -147,7 +149,7 @@ namespace Utility
 	// duration in minutes between From and To
 	int Duration(QWaitTypes::Time from, QWaitTypes::Time to)
 	{
-		return static_cast<int>(((float)to.hours - (float)from.hours) * 60.0f + (to.minutes - from.minutes));
+		return static_cast<int>(((double)to.hours - (double)from.hours) * 60.0f + (to.minutes - from.minutes));
 	}
 
 
@@ -179,17 +181,20 @@ namespace Utility
 	}
 
 
-	std::string Utility::GetMD5(const std::string input)
+	std::wstring Utility::GetMD5(const std::wstring input)
 	{
-		std::string str(input.begin(), input.end());
+		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+
+		//use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
+		std::string str = converter.to_bytes(input);
 
 		std::transform(str.begin(), str.end(), str.begin(), ::toupper);
 
 		char* y = new char[str.length() + 1];
 
-		strcpy_s(y, str.length() + 1, str.c_str());
+		strcpy_s(y, str.length(), str.c_str());
 
-		std::string MD5 = MD5::GetMD5HashString(y);
+		std::wstring MD5 = MD5::GetMD5HashString(y);
 
 		delete[] y;
 

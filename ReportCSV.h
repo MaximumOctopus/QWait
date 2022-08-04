@@ -18,18 +18,18 @@
 
 namespace ReportCSV
 {
-	void SaveRideData(const std::string);
-	void SaveVisitorData(const std::string);
+	void SaveRideData(const std::wstring);
+	void SaveVisitorData(const std::wstring);
 
-	void SaveMinuteByMinuteLog(const std::string);
+	void SaveMinuteByMinuteLog(const std::wstring);
 
-	void SaveRideCount(const std::string);
+	void SaveRideCount(const std::wstring);
 
-	void SaveSelectionChoiceCache(const std::string);
+	void SaveSelectionChoiceCache(const std::wstring);
 
-	void SaveVisitorLocation(const std::string);
+	void SaveVisitorLocation(const std::wstring);
 
-	void SaveVisitorRideList(const std::string);
+	void SaveVisitorRideList(const std::wstring);
 
-	void OutputStatus(const std::string);
+	void OutputStatus(const std::wstring);
 }

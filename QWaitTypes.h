@@ -73,14 +73,14 @@ namespace QWaitTypes
 
 	int RideExitTypeToInt(RideExitType);
 	RideExitType IntToRideExitType(int);
-	std::string RideExitTypeToString(RideExitType);
+	std::wstring RideExitTypeToString(RideExitType);
 
 	FastPassType IntToFastPassMode(int);
-	std::string FastPassModeToString(FastPassType);
+	std::wstring FastPassModeToString(FastPassType);
 
 	VisitorType IntToVisitorType(int);
-	std::string VisitorTypeToString(VisitorType);
-	std::string VisitorTypeToString(int);
+	std::wstring VisitorTypeToString(VisitorType);
+	std::wstring VisitorTypeToString(int);
 	int VisitorTypeToInt(VisitorType);
 
 	int ParkTemplateToInt(ParkTemplate);

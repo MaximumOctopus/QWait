@@ -31,7 +31,7 @@ struct Operation {
 
 	RideExitType rideExitType = RideExitType::None;
 
-	std::string name = "";
+	std::wstring name = L"";
 
 	QWaitTypes::Coords position;	 // x position in 2d map
 
@@ -92,11 +92,11 @@ struct FastPassSystem {
 struct Capacity {
 	int totalPerHour = 0;			// visitors per hour	
 
-	float perMinuteTotal = 0;		// HourlyThroughput / 60
-	float perMinute = 0;			// HourlyThroughput / 60
+	double perMinuteTotal = 0;		// HourlyThroughput / 60
+	double perMinute = 0;			// HourlyThroughput / 60
 	int perMinuteI = 0;				// integer version of above
 
-	float perMinuteFastPass = 0;	// HourlyThroughput / 60
+	double perMinuteFastPass = 0;	// HourlyThroughput / 60
 	int perMinuteIFastPass = 0;		// integer version of above
 
 	int showCapacity = 0;
@@ -130,11 +130,11 @@ public:
 
 	Capacity RideThroughput;
 
-	Ride(RideType, std::string, int, RideExitType, int, int, int, int, int, int, QWaitTypes::Time, QWaitTypes::Time, int, bool, bool);
+	Ride(RideType, std::wstring, int, RideExitType, int, int, int, int, int, int, QWaitTypes::Time, QWaitTypes::Time, int, bool, bool);
 
 	void Close();
 
-	std::string GetUniqueReference();
+	std::wstring GetUniqueReference();
 
 	void ConfigureShowThroughput(int, int);
 
@@ -150,14 +150,14 @@ public:
 	int QueueSize();
 	int QueueSizeFastPass();
 
-	float WaitTime(int);
+	double WaitTime(int);
 
 	int GetFastPassTicket(QWaitTypes::Time, QWaitTypes::Time);
 	int ViewFastPassTicket(QWaitTypes::Time, QWaitTypes::Time);
 
 	size_t GetMinuteStatsCount();
 
-	std::string GetMinuteStatFor(int);
+	std::wstring GetMinuteStatFor(int);
 	void UpdateMinuteStats();
 
 	void UpdateDailyStatistics();

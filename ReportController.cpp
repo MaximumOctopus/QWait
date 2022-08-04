@@ -35,11 +35,11 @@ ReportController::ReportController(bool show_output)
 }
 
 
-void ReportController::OutputStatus(const std::string status)
+void ReportController::OutputStatus(const std::wstring status)
 {
 	if (ShowOutput)
 	{
-		std::cout << status << std::endl;
+		std::wcout << status << std::endl;
 	}
 }
 
@@ -48,43 +48,43 @@ void ReportController::OutputStatus(const std::string status)
 // =======================================================================================================================
 
 
-void ReportController::SaveRideDataCSV(const std::string file_name)
+void ReportController::SaveRideDataCSV(const std::wstring file_name)
 {
 	ReportCSV::SaveRideData(file_name);
 }
 
 
-void ReportController::SaveVisitorDataCSV(const std::string file_name)
+void ReportController::SaveVisitorDataCSV(const std::wstring file_name)
 {
 	ReportCSV::SaveVisitorData(file_name);
 }
 
 
-void ReportController::SaveMinuteByMinuteLogCSV(const std::string file_name)
+void ReportController::SaveMinuteByMinuteLogCSV(const std::wstring file_name)
 {
 	ReportCSV::SaveMinuteByMinuteLog(file_name);
 }
 
 
-void ReportController::SaveRideCountCSV(const std::string file_name)
+void ReportController::SaveRideCountCSV(const std::wstring file_name)
 {
 	ReportCSV::SaveRideCount(file_name);
 }
 
 
-void ReportController::SaveSelectionChoiceCacheCSV(const std::string file_name)
+void ReportController::SaveSelectionChoiceCacheCSV(const std::wstring file_name)
 {
 	ReportCSV::SaveSelectionChoiceCache(file_name);
 }
 
 
-void ReportController::SaveVisitorLocationCSV(const std::string file_name)
+void ReportController::SaveVisitorLocationCSV(const std::wstring file_name)
 {
 	ReportCSV::SaveVisitorLocation(file_name);
 }
 
 
-void ReportController::SaveVisitorRideListCSV(const std::string file_name)
+void ReportController::SaveVisitorRideListCSV(const std::wstring file_name)
 {
 	ReportCSV::SaveVisitorRideList(file_name);
 }
@@ -94,7 +94,7 @@ void ReportController::SaveVisitorRideListCSV(const std::string file_name)
 // =======================================================================================================================
 
 
-void ReportController::SaveSimulationReportHTML(const std::string file_name, FastPassType fastpass_mode)
+void ReportController::SaveSimulationReportHTML(const std::wstring file_name, FastPassType fastpass_mode)
 {
 	if (!ReportHTML::SaveSimulationReport(file_name, fastpass_mode))
 	{
@@ -107,13 +107,13 @@ void ReportController::SaveSimulationReportHTML(const std::string file_name, Fas
 // =======================================================================================================================
 
 
-void ReportController::SaveMXMReportText(const std::string file_name, FastPassType fastpass_mode)
+void ReportController::SaveMXMReportText(const std::wstring file_name, FastPassType fastpass_mode)
 {
 	ReportText::SaveMxMReport(file_name, fastpass_mode);
 }
 
 
-void ReportController::SaveSimulationReportText(const std::string file_name, FastPassType fastpass_mode)
+void ReportController::SaveSimulationReportText(const std::wstring file_name, FastPassType fastpass_mode)
 {
 	ReportText::SaveSimulationReport(file_name, fastpass_mode);
 }

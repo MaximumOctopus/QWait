@@ -21,25 +21,25 @@
 #include <vector>
 
 
-Ini::Ini(const std::string file_name)
+Ini::Ini(const std::wstring file_name)
 {
 	Loaded = LoadFile(file_name);
 }
 
 
-bool Ini::LoadFile(const std::string file_name)
+bool Ini::LoadFile(const std::wstring file_name)
 {
-	std::ifstream file(file_name);
+	std::wifstream file(file_name);
 
 	if (file)
 	{
 		Lines.clear();
 
-		std::string s;
+		std::wstring s;
 
 		while (std::getline(file, s))
 		{
-			if (s != "")
+			if (s != L"")
 			{
 				Lines.push_back(s);
 			}
@@ -54,11 +54,11 @@ bool Ini::LoadFile(const std::string file_name)
 }
 
 
-int Ini::ReadInteger(const std::string section, const std::string key, int default_value)
+int Ini::ReadInteger(const std::wstring section, const std::wstring key, int default_value)
 {
 	try
 	{
-		int i = std::stoi(ReadString(section, key, "-1"));
+		int i = std::stoi(ReadString(section, key, L"-1"));
 
 		if (i == -1)
 		{
@@ -69,18 +69,18 @@ int Ini::ReadInteger(const std::string section, const std::string key, int defau
 	}
 	catch(...)
 	{
-		std::cerr << "Invalid integer parameter \"" << key << "\" in [" << section << "]." << section << std::endl;
+		std::wcerr << L"Invalid integer parameter \"" << key << L"\" in [" << section << L"]." << section << std::endl;
 
 		return default_value;
 	}
 }
 
 
-bool Ini::ReadBoolean(const std::string section, const std::string key, bool default_value)
+bool Ini::ReadBoolean(const std::wstring section, const std::wstring key, bool default_value)
 {
 	try
 	{
-		int i = std::stoi(ReadString(section, key, "-1"));
+		int i = std::stoi(ReadString(section, key, L"-1"));
 
 		if (i == -1)
 		{
@@ -95,19 +95,19 @@ bool Ini::ReadBoolean(const std::string section, const std::string key, bool def
 	}
 	catch (...)
 	{
-		std::cerr << "Invalid boolean parameter \"" << key << "\" in [" << section << "]." << section << std::endl;
+		std::wcerr << L"Invalid boolean parameter \"" << key << L"\" in [" << section << L"]." << section << std::endl;
 
 		return default_value;
 	}
 }
 
 
-std::string Ini::ReadString(std::string section, std::string key, const std::string default_value)
+std::wstring Ini::ReadString(std::wstring section, std::wstring key, const std::wstring default_value)
 {
 	bool inSection = false;
-	std::string sectionName = "";
+	std::wstring sectionName = L"";
 
-	key = key + '=';
+	key = key + L'=';
 
 	std::transform(section.begin(), section.end(), section.begin(), ::tolower);
 
@@ -124,8 +124,8 @@ std::string Ini::ReadString(std::string section, std::string key, const std::str
 			}
 			else
 			{
-				std::size_t bo = Lines[i].find("[");
-				std::size_t bc = Lines[i].find("]");
+				std::size_t bo = Lines[i].find(L"[");
+				std::size_t bc = Lines[i].find(L"]");
 
 				sectionName = Lines[i].substr(bo + 1, bc - 1);
 
@@ -141,9 +141,9 @@ std::string Ini::ReadString(std::string section, std::string key, const std::str
 		{
 			if (inSection)
 			{
-				if (Lines[i] != "")
+				if (Lines[i] != L"")
 				{
-					if ((Lines[i][0] != ';') && (Lines[i][0] != '/'))
+					if ((Lines[i][0] != L';') && (Lines[i][0] != L'/'))
 					{
 						if (Lines[i].find(key) == 0)
 						{

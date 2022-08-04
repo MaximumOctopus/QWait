@@ -20,7 +20,7 @@ class ReportController
 {
 	bool ShowOutput = true;
 
-	void OutputStatus(const std::string);
+	void OutputStatus(const std::wstring);
 
 public:
 
@@ -30,28 +30,28 @@ public:
     // == CSV Reports =======================================================
     // =======================================================================
 
-	void SaveRideDataCSV(const std::string);
-	void SaveVisitorDataCSV(const std::string);
-	void SaveMinuteByMinuteLogCSV(const std::string);
+	void SaveRideDataCSV(const std::wstring);
+	void SaveVisitorDataCSV(const std::wstring);
+	void SaveMinuteByMinuteLogCSV(const std::wstring);
 
-	void SaveRideCountCSV(const std::string);
+	void SaveRideCountCSV(const std::wstring);
 
-	void SaveSelectionChoiceCacheCSV(const std::string);
+	void SaveSelectionChoiceCacheCSV(const std::wstring);
 
-	void SaveVisitorLocationCSV(const std::string);
+	void SaveVisitorLocationCSV(const std::wstring);
 
-	void SaveVisitorRideListCSV(const std::string);
+	void SaveVisitorRideListCSV(const std::wstring);
 
 	// =======================================================================
 	// == HTML Reports =======================================================
 	// =======================================================================
 
-	void SaveSimulationReportHTML(const std::string, FastPassType);
+	void SaveSimulationReportHTML(const std::wstring, FastPassType);
 
 	// =======================================================================
 	// == Text Reports =======================================================
 	// =======================================================================
 
-	void SaveMXMReportText(const std::string, FastPassType);
-	void SaveSimulationReportText(const std::string, FastPassType);	
+	void SaveMXMReportText(const std::wstring, FastPassType);
+	void SaveSimulationReportText(const std::wstring, FastPassType);	
 };

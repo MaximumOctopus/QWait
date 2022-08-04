@@ -13,9 +13,12 @@
 #pragma once
 
 
-namespace GlobalControllers
-{
-	int CreateGlobalControllers(int argc, wchar_t* argv[]);
+#include <string>
 
-	void FreeGlobalControllers();
-};
+
+namespace ReportUtility
+{
+	std::wstring BarGraphScale();
+
+	std::wstring BarGraph(int);
+}

@@ -21,12 +21,12 @@
 
 namespace ReportText
 {
-	void SaveSimulationReport(const std::string, FastPassType);
+	void SaveSimulationReport(const std::wstring, FastPassType);
 
-	void SaveMxMReport(const std::string, FastPassType);
+	void SaveMxMReport(const std::wstring, FastPassType);
 
-	void MxMRow(std::ofstream& file, MinuteDataV mdv);
-	void MxMRowFP(std::ofstream& file, MinuteDataV mdv);
+	void MxMRow(std::wofstream& file, MinuteDataV mdv);
+	void MxMRowFP(std::wofstream& file, MinuteDataV mdv);
 
-	void OutputStatus(const std::string);
+	void OutputStatus(const std::wstring);
 }

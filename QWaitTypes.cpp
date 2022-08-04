@@ -68,28 +68,28 @@ namespace QWaitTypes
 	}
 
 
-	std::string QWaitTypes::RideExitTypeToString(RideExitType ride_exit_type)
+	std::wstring QWaitTypes::RideExitTypeToString(RideExitType ride_exit_type)
 	{
 		switch (ride_exit_type)
 		{
 		case RideExitType::None:
-			return "None";
+			return L"None";
 			break;
 		case RideExitType::Short:
-			return "Short";
+			return L"Short";
 			break;
 		case RideExitType::Long:
-			return "Long";
+			return L"Long";
 			break;
 		case RideExitType::Shop:
-			return "Shop";
+			return L"Shop";
 			break;
 		case RideExitType::LargeShop:
-			return "Large shop";
+			return L"Large shop";
 			break;
 		}
 
-		return "Unknown";
+		return L"Unknown";
 	}
 
 
@@ -112,22 +112,22 @@ namespace QWaitTypes
 	}
 
 
-	std::string QWaitTypes::FastPassModeToString(FastPassType fast_pass_mode)
+	std::wstring QWaitTypes::FastPassModeToString(FastPassType fast_pass_mode)
 	{
 		switch (fast_pass_mode)
 		{
 		case FastPassType::None:
-			return "None";
+			return L"None";
 			break;
 		case FastPassType::Plus:
-			return "FastPass+";
+			return L"FastPass+";
 			break;
 		case FastPassType::PlusNoStayBenefit:
-			return "FastPass+ (no stay benefits)";
+			return L"FastPass+ (no stay benefits)";
 			break;
 		}
 
-		return "Unknown";
+		return L"Unknown";
 	}
 
 
@@ -157,71 +157,71 @@ namespace QWaitTypes
 	}
 
 
-	std::string QWaitTypes::VisitorTypeToString(VisitorType visitor_type)
+	std::wstring QWaitTypes::VisitorTypeToString(VisitorType visitor_type)
 	{
 		switch (visitor_type)
 		{
 		case VisitorType::Enthusiast:
-			return "Enthusiast";
+			return L"Enthusiast";
 			break;
 		case VisitorType::Fan:
-			return "Fan";
+			return L"Fan";
 			break;
 		case VisitorType::Tourist:
-			return "Tourist";
+			return L"Tourist";
 			break;
 		case VisitorType::Activity:
-			return "Activity";
+			return L"Activity";
 			break;
 		case VisitorType::Passholder:
-			return "Passholder";
+			return L"Passholder";
 			break;
 		case VisitorType::EPassHolder:
-			return "Passholder (E)";
+			return L"Passholder (E)";
 			break;
 		case VisitorType::TikToker:
-			return "Tiktoker";
+			return L"Tiktoker";
 			break;
 		case VisitorType::VIP:
-			return "VIP";
+			return L"VIP";
 			break;
 		}
 		
-		return "Unknown";
+		return L"Unknown";
 	}
 
 
-	std::string QWaitTypes::VisitorTypeToString(int visitor_type)
+	std::wstring QWaitTypes::VisitorTypeToString(int visitor_type)
 	{
 		switch (visitor_type)
 		{
 		case 0:
-			return "Enthusiast";
+			return L"Enthusiast";
 			break;
 		case 1:
-			return "Fan";
+			return L"Fan";
 			break;
 		case 2:
-			return "Tourist";
+			return L"Tourist";
 			break;
 		case 3:
-			return "Activity";
+			return L"Activity";
 			break;
 		case 4:
-			return "Passholder";
+			return L"Passholder";
 			break;
 		case 5:
-			return "Passholder (E)";
+			return L"Passholder (E)";
 			break;
 		case 6:
-			return "Tiktoker";
+			return L"Tiktoker";
 			break;
 		case 7:
-			return "VIP";
+			return L"VIP";
 			break;
 		}
 
-		return "Unknown";
+		return L"Unknown";
 	}
 
 

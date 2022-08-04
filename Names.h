@@ -19,8 +19,8 @@
 
 class Names
 {
-	std::vector<std::string> FirstName;
-	std::vector<std::string> LastName;
+	std::vector<std::wstring> FirstName;
+	std::vector<std::wstring> LastName;
 
 	void LoadNames();
 
@@ -31,5 +31,5 @@ public:
 
 	Names();
 
-	std::string GetRandomName();
+	std::wstring GetRandomName();
 };

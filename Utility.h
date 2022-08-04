@@ -24,13 +24,13 @@ static const int kDisplayModeFile = 1;
 
 namespace Utility
 {
-	std::string DateTime(int aMode);
+	std::wstring DateTime(int aMode);
 
-	std::string FormatTime(int, int);
-	std::string FormatTime(QWaitTypes::Time);
+	std::wstring FormatTime(int, int);
+	std::wstring FormatTime(QWaitTypes::Time);
 
-	std::string PadRight(const std::string, int);
-	std::string PadRight(int, int);
+	std::wstring PadRight(const std::wstring, int);
+	std::wstring PadRight(int, int);
 
 	int Duration(QWaitTypes::Time, QWaitTypes::Time);
 
@@ -38,5 +38,5 @@ namespace Utility
 
 	bool IsTicketValidForTime(QWaitTypes::Time, QWaitTypes::Time, QWaitTypes::Time);
 
-	std::string GetMD5(const std::string);
+	std::wstring GetMD5(const std::wstring);
 };

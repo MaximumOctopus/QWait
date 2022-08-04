@@ -96,6 +96,9 @@
     <ClCompile Include="ReportText.cpp">
       <Filter>Source Files\Reports</Filter>
     </ClCompile>
+    <ClCompile Include="ReportUtility.cpp">
+      <Filter>Source Files\Reports</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants.h">
@@ -159,6 +162,9 @@
       <Filter>Header Files\Reports</Filter>
     </ClInclude>
     <ClInclude Include="ReportText.h">
+      <Filter>Header Files\Reports</Filter>
+    </ClInclude>
+    <ClInclude Include="ReportUtility.h">
       <Filter>Header Files\Reports</Filter>
     </ClInclude>
   </ItemGroup>

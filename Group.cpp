@@ -34,7 +34,7 @@ Group::Group(GroupType group_type, int template_id)
 
 	SetGroupSettings();
 
-	float random = (float)rand() / RAND_MAX;
+	double random = (double)rand() / RAND_MAX;
 
 	switch (Configuration.type)
 	{
@@ -89,7 +89,7 @@ Group::Group(int type, int template_id, int stay_duration, bool staying_on_site,
 }
 
 
-void Group::BuildFamily(float random)
+void Group::BuildFamily(double random)
 {
 	int ChildrenCount = 0;
 
@@ -124,16 +124,18 @@ void Group::BuildFamily(float random)
 }
 
 
-void Group::BuildAdultCouple(float random)
+void Group::BuildAdultCouple(double random)
 {
-	NewVisitorConfiguration vtc = GetBaseVisitorConfiguration(GetType((float)rand() / RAND_MAX));
+	double r = ((double)rand() / double(RAND_MAX)) * 0.75f;
+
+	NewVisitorConfiguration vtc = GetBaseVisitorConfiguration(GetType(r));
 
 	Visitors.push_back(Visitor(vtc));
 	Visitors.push_back(Visitor(vtc));
 }
 
 
-void Group::BuildAdultGroup(float random)
+void Group::BuildAdultGroup(double random)
 {
 	int GroupCount = 0;
 
@@ -160,14 +162,14 @@ void Group::BuildAdultGroup(float random)
 
 	for (int g = 0; g < GroupCount; g++)
 	{
-		Visitors.push_back(Visitor(GetBaseVisitorConfiguration(GetType(rand() % 6))));
+		Visitors.push_back(Visitor(GetBaseVisitorConfiguration(GetType((double)rand() / double(RAND_MAX)))));
 	}
 }
 
 
-void Group::BuildSingle(float random)
+void Group::BuildSingle(double random)
 {
-	Visitors.push_back(Visitor(GetBaseVisitorConfiguration(GetType(rand() % 7))));
+	Visitors.push_back(Visitor(GetBaseVisitorConfiguration(GetType((double)rand() / double(RAND_MAX)))));
 }
 
 
@@ -228,7 +230,7 @@ void Group::SetGroupSettings()
 }
 
 
-VisitorType Group::GetType(float random)
+VisitorType Group::GetType(double random)
 {
 	if (random < kVisitorTypeCoeff[Configuration.templateID][Constants::VisitorTypeEnthusiast])
 	{
@@ -261,7 +263,9 @@ VisitorType Group::GetType(float random)
 
 NewVisitorConfiguration Group::GetVisitorGenericAdult()
 {
-	NewVisitorConfiguration vtc = GetBaseVisitorConfiguration(GetType(rand() % 5));
+	double r = ((double)rand() / double(RAND_MAX));
+
+	NewVisitorConfiguration vtc = GetBaseVisitorConfiguration(GetType(r));
 
 	vtc.age = AgeGroup::Adult;
 
@@ -271,7 +275,9 @@ NewVisitorConfiguration Group::GetVisitorGenericAdult()
 
 NewVisitorConfiguration Group::GetVisitorGenericChild()
 {
-	NewVisitorConfiguration vtc = GetBaseVisitorConfiguration(GetType(rand() % 5));
+	double r = ((double)rand() / double(RAND_MAX));
+
+	NewVisitorConfiguration vtc = GetBaseVisitorConfiguration(GetType(r));
 
 	vtc.age = AgeGroup::Child;
 
@@ -358,14 +364,14 @@ int Group::GetGroupLeaderType()
 
 int Group::GetMaximumWaitingTime()
 {
-	float mwt = 0;
+	double mwt = 0;
 
 	for (int v = 0; v < Visitors.size(); v++)
 	{
 		mwt += Visitors[v].Rides.maxWaitTime;
 	}
 
-	return static_cast<int>((mwt / (float)Visitors.size()) * 1.05f);
+	return static_cast<int>((mwt / (double)Visitors.size()) * 1.05f);
 }
 
 
@@ -385,13 +391,13 @@ void Group::SetStatusForAllVisitors(GroupParkStatus group_park_status, VisitorPa
 // =================================================================================================================
 
 
-void Group::SetQueuing(int visitor, float queue_length)
+void Group::SetQueuing(int visitor, double queue_length)
 {
 	Visitors[visitor].SetQueuingLengthStat(queue_length);
 }
 
 
-void Group::SetQueuingFastPass(int visitor, float queue_length)
+void Group::SetQueuingFastPass(int visitor, double queue_length)
 {
 	Visitors[visitor].SetQueuingFastPassLengthStat(queue_length);
 }
@@ -723,13 +729,13 @@ void Group::SetWaiting(int time_minutes)
 // =================================================================================================================
 
 
-bool Group::CreateVisitorFromFileData(const std::string input)
+bool Group::CreateVisitorFromFileData(const std::wstring input)
 {
-	std::stringstream visitorinput(input);
-	std::vector<std::string> parameters;
-	std::string parameter;
+	std::wstringstream visitorinput(input);
+	std::vector<std::wstring> parameters;
+	std::wstring parameter;
 
-	while (std::getline(visitorinput, parameter, ','))
+	while (std::getline(visitorinput, parameter, L','))
 	{
 		parameters.push_back(parameter);
 	}
@@ -767,14 +773,14 @@ bool Group::CreateVisitorFromFileData(const std::string input)
 		}
 		catch (...)
 		{
-			std::cerr << "There appears to be some dodgy data in this input row:" << "\n";
-			std::cerr << "    \"" << input << "\"" << std::endl;
+			std::wcerr << L"There appears to be some dodgy data in this input row:" << "\n";
+			std::wcerr << L"    \"" << input << L"\"" << std::endl;
 		}
 	}
 	else
 	{
-		std::cerr << "Invalid number of parameters in this visitor data (should be 5): " << parameters.size() << "\n";
-		std::cerr << "    \"" << input << "\"" << std::endl;
+		std::wcerr << L"Invalid number of parameters in this visitor data (should be 5): " << parameters.size() << "\n";
+		std::wcerr << L"    \"" << input << L"\"" << std::endl;
 	}
 
 	return false;
@@ -800,15 +806,15 @@ void Group::UpdateLocation(int x, int y)
 
 void Group::UpdateTravellingLocation(void)
 {
-	float dx = abs((float)Behaviour.travelling.from.x - (float)Behaviour.travelling.to.x);
-	float dy = abs((float)Behaviour.travelling.from.y - (float)Behaviour.travelling.to.y);
+	double dx = abs((double)Behaviour.travelling.from.x - (double)Behaviour.travelling.to.x);
+	double dy = abs((double)Behaviour.travelling.from.y - (double)Behaviour.travelling.to.y);
 
-	float d = sqrtf(dx * dx + dy * dy);
+	double d = sqrtf(dx * dx + dy * dy);
 
-	float deltad = d * (((float)Behaviour.travelling.minutesStart - (float)Behaviour.travelling.minutesLeft) / (float)Behaviour.travelling.minutesStart);
+	double deltad = d * (((double)Behaviour.travelling.minutesStart - (double)Behaviour.travelling.minutesLeft) / (double)Behaviour.travelling.minutesStart);
 
-	int newx = static_cast<int>((deltad / d) * ((float)Behaviour.travelling.to.x - (float)Behaviour.travelling.from.x) + (float)Behaviour.travelling.from.x);
-	int newy = static_cast<int>((deltad / d) * ((float)Behaviour.travelling.to.y - (float)Behaviour.travelling.from.y) + (float)Behaviour.travelling.from.y);
+	int newx = static_cast<int>((deltad / d) * ((double)Behaviour.travelling.to.x - (double)Behaviour.travelling.from.x) + (double)Behaviour.travelling.from.x);
+	int newy = static_cast<int>((deltad / d) * ((double)Behaviour.travelling.to.y - (double)Behaviour.travelling.from.y) + (double)Behaviour.travelling.from.y);
 
 	Behaviour.location.x = newx;
 	Behaviour.location.y = newy;
@@ -820,13 +826,13 @@ void Group::UpdateTravellingLocation(void)
 // =================================================================================================================
 
 
-std::string Group::GetVisitorAgesString()
+std::wstring Group::GetVisitorAgesString()
 {
-	std::string output = "";
+	std::wstring output = L"";
 
 	for (int v = 0; v < Visitors.size(); v++)
 	{
-		output += Visitors[v].Configuration.GetAgeAsString() + " ";
+		output += Visitors[v].Configuration.GetAgeAsString() + L" ";
 	}
 
 	return output;
@@ -921,7 +927,7 @@ void Group::SaveMinuteStats()
 }
 
 
-std::string Group::GetLocationByMinute(int minute)
+std::wstring Group::GetLocationByMinute(int minute)
 {
-	return "," + std::to_string(minute) + "," + std::to_string(Statistics.minuteLog[minute].position.x) + "," + std::to_string(Statistics.minuteLog[minute].position.y) + "," + std::to_string(Statistics.minuteLog[minute].parkStatusInt);
+	return L"," + std::to_wstring(minute) + L"," + std::to_wstring(Statistics.minuteLog[minute].position.x) + L"," + std::to_wstring(Statistics.minuteLog[minute].position.y) + L"," + std::to_wstring(Statistics.minuteLog[minute].parkStatusInt);
 }

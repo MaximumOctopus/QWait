@@ -27,12 +27,12 @@ const static int kSelectionChoiceCacheCount   = 200;
 
 const static int kGetMaxQueueLength = 0;
 
-const static std::string kRideTypeNames[2] = { "Continuous", "Show" };
+const static std::wstring kRideTypeNames[2] = { L"Continuous", L"Show" };
 
 
 struct Entrance
 {
-	std::string ParkName;
+	std::wstring ParkName;
 
 	QWaitTypes::Coords position = { 0, 0 };
 	int throughPutMinute = 0; 
@@ -72,11 +72,11 @@ class ParkController
 
 	void UpdateThroughput();
 
-	void OutputStatus(std::string);
+	void OutputStatus(std::wstring);
 
 public:
 
-	std::vector<std::string> Log;
+	std::vector<std::wstring> Log;
 
 	std::vector<int> FastPassTypes[3];
 
@@ -97,23 +97,23 @@ public:
 
 	std::vector<Ride> Rides;
 
-	ParkController(bool, const std::string);
+	ParkController(bool, const std::wstring);
 
-	bool BuildFromTemplate(const std::string);
+	bool BuildFromTemplate(const std::wstring);
 
-	void SaveAsTemplate(const std::string);
+	void SaveAsTemplate(const std::wstring);
 
-	void AddNewRideContinuous(const std::string, int, RideExitType, int, int, int, int, int, int, bool, bool, bool);		// eg it's a small world
-	void AddNewRideShow(const std::string, int, RideExitType, int, int, int, int, int, int, int, int, bool, bool, bool);	// eg lion king show
+	void AddNewRideContinuous(const std::wstring, int, RideExitType, int, int, int, int, int, int, bool, bool, bool);		// eg it's a small world
+	void AddNewRideShow(const std::wstring, int, RideExitType, int, int, int, int, int, int, int, int, bool, bool, bool);	// eg lion king show
 
-	void AddNewRideContinuousWithHours(const std::string, int, RideExitType, int, int, int, int, int, int, int, int, int, int, bool, bool, bool);		// eg it's a small world
-	void AddNewRideShowWithHours(const std::string, int, RideExitType, int, int, int, int, int, int, int, int, int, int, int, int, bool, bool, bool);	// eg lion king show
+	void AddNewRideContinuousWithHours(const std::wstring, int, RideExitType, int, int, int, int, int, int, int, int, int, int, bool, bool, bool);		// eg it's a small world
+	void AddNewRideShowWithHours(const std::wstring, int, RideExitType, int, int, int, int, int, int, int, int, int, int, int, int, bool, bool, bool);	// eg lion king show
 
-	void SetEntrance(const std::string, int, int, int, int, int, int, int, int, int, int);
+	void SetEntrance(const std::wstring, int, int, int, int, int, int, int, int, int, int);
 
-	void BuildRides(ParkTemplate, const std::string);
+	void BuildRides(ParkTemplate, const std::wstring);
 
-	void AddToLog(const std::string);
+	void AddToLog(const std::wstring);
 
 	int BuyTicket(AgeGroup, bool);
 
@@ -129,5 +129,5 @@ public:
 	void ShowConfig();
 	void ShowStatistics(int);
 
-	bool SaveDistanceCache(const std::string);
+	bool SaveDistanceCache(const std::wstring);
 };

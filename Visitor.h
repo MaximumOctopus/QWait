@@ -28,14 +28,14 @@ enum class VisitorParkStatus {
 
 
 struct NewVisitorConfiguration {
-	std::string name = "";
+	std::wstring name = L"";
 
 	AgeGroup age = AgeGroup::Adult;
 
 	VisitorType type = VisitorType::Enthusiast;
 
-	float maxWaitTime = 0.0f;
-	float preference = 0.0f;
+	double maxWaitTime = 0.0f;
+	double preference = 0.0f;
 };
 
 
@@ -49,8 +49,8 @@ struct TimeStats {
 
 
 struct RideStats {
-	float maxWaitTime = 0.0f;    // max wait time for a ride (minutes)
-	float preference = 0.0f;     // scale from 0 = rides only, 1 = attractions only (actually high priority to low)
+	double maxWaitTime = 0.0f;    // max wait time for a ride (minutes)
+	double preference = 0.0f;     // scale from 0 = rides only, 1 = attractions only (actually high priority to low)
 
 	int count = 0;
 
@@ -62,11 +62,11 @@ struct RideStats {
 	int nooneCanRideInGroup = 0;
 	int rideNotSuitableForMe = 0;
 
-	float shortestQueue = 0.0f;
-	float longestQueue = 0.0f;
+	double shortestQueue = 0.0f;
+	double longestQueue = 0.0f;
 
-	float shortestQueueFastPass = 0.0f;
-	float longestQueueFastPass = 0.0f;
+	double shortestQueueFastPass = 0.0f;
+	double longestQueueFastPass = 0.0f;
 
 	int fastPassRides = 0;
 
@@ -83,7 +83,7 @@ struct VisitorConfiguration {
 
 	int MoneySpent = 0;	
 
-	std::string Name;
+	std::wstring Name;
 
 	QWaitTypes::Coords Location;
 
@@ -104,19 +104,19 @@ struct VisitorConfiguration {
 		return 2;
 	}
 
-	std::string GetAgeAsString()
+	std::wstring GetAgeAsString()
 	{
 		switch (Age)
 		{
 		case AgeGroup::Baby:
-			return "Baby";
+			return L"Baby";
 		case AgeGroup::Child:
-			return "Child";
+			return L"Child";
 		case AgeGroup::Adult:
-			return "Adult";
+			return L"Adult";
 		}
 
-		return "Unknown";
+		return L"Unknown";
 	}
 };
 
@@ -141,8 +141,8 @@ public:
 		
 	Visitor(NewVisitorConfiguration);
 
-	void SetQueuingLengthStat(float);
-	void SetQueuingFastPassLengthStat(float);
+	void SetQueuingLengthStat(double);
+	void SetQueuingFastPassLengthStat(double);
 	
 	void BuyItem(int cost);
 };

@@ -24,17 +24,17 @@ Names::Names()
 
 void Names::LoadNames()
 {
-	std::ifstream file("firstnames.txt");
+	std::wifstream file(L"firstnames.txt");
 
 	if (file)
 	{
-		std::string s;
+		std::wstring s;
 
-		std::cout << "Loading \"firstnames.txt\"..." << std::endl;
+		std::wcout << L"Loading \"firstnames.txt\"..." << std::endl;
 
 		while (std::getline(file, s))
 		{
-			if (s != "")
+			if (s != L"")
 			{
 				FirstName.push_back(s);
 			}
@@ -46,20 +46,20 @@ void Names::LoadNames()
 	}
 	else
 	{
-		std::cout << "Error loading \"firstnames.txt\"." << std::endl;
+		std::wcout << L"Error loading \"firstnames.txt\"." << std::endl;
 	}
 
-	std::ifstream file2("surnames.txt");
+	std::wifstream file2(L"surnames.txt");
 
 	if (file2)
 	{
-		std::string s;
+		std::wstring s;
 
-		std::cout << "Loading \"surnames.txt\"..." << std::endl;
+		std::wcout << L"Loading \"surnames.txt\"..." << std::endl;
 
 		while (std::getline(file2, s))
 		{
-			if (s != "")
+			if (s != L"")
 			{
 				LastName.push_back(s);
 			}
@@ -71,15 +71,15 @@ void Names::LoadNames()
 	}
 	else
 	{
-		std::cout << "Error loading \"surnames.txt\"." << std::endl;
+		std::wcout << L"Error loading \"surnames.txt\"." << std::endl;
 	}
 }
 
 
-std::string Names::GetRandomName()
+std::wstring Names::GetRandomName()
 {
 	int first = rand() % FirstName.size();
 	int last = rand() % LastName.size();
 
-	return FirstName[first] + " " + LastName[last];
+	return FirstName[first] + L" " + LastName[last];
 }

@@ -23,34 +23,34 @@
 #include "QWaitTypes.h"
 
 
-static const std::string kCats = "/cat";
-static const std::string kDebugSCC = "/debugscc";
-static const std::string kDebugDistanceCache = "/debugdistancecache";
-static const std::string kDegbugNoExecute = "/debugnoexecute";
-static const std::string kDebugUpdateRate = "/debugupdaterate";
-static const std::string kReportCVD = "/reportcvd";
-static const std::string kReportMxMCSV = "/reportcsvmxm";
-static const std::string kReportMxMText = "/reporttextmxm";
-static const std::string kReportSimulation = "/reportsimulation";
-static const std::string kReportSimulationHTML = "/reporthtml";
-static const std::string kReportVisitorLocation = "/reportvisitorlocation";
-static const std::string kReportVisitorRideList = "/reportvisitorridelist";
-static const std::string kImportVisitorDemo = "/importvisitordemo";
-static const std::string kReportVisitorDemo = "/reportvisitordemo";
-static const std::string kTemplateFile = "/templatefile";
-static const std::string kTemplate = "/template";
-static const std::string kVisitors = "/visitors";
-static const std::string kFastPassMode = "/fastpassmode";
-static const std::string kUserConfigFile = "/useconfigfile";
-static const std::string kGetVisitorNames = "/getvisitornames";
+static const std::wstring kCats = L"/cat";
+static const std::wstring kDebugSCC = L"/debugscc";
+static const std::wstring kDebugDistanceCache = L"/debugdistancecache";
+static const std::wstring kDegbugNoExecute = L"/debugnoexecute";
+static const std::wstring kDebugUpdateRate = L"/debugupdaterate";
+static const std::wstring kReportCVD = L"/reportcvd";
+static const std::wstring kReportMxMCSV = L"/reportcsvmxm";
+static const std::wstring kReportMxMText = L"/reporttextmxm";
+static const std::wstring kReportSimulation = L"/reportsimulation";
+static const std::wstring kReportSimulationHTML = L"/reporthtml";
+static const std::wstring kReportVisitorLocation = L"/reportvisitorlocation";
+static const std::wstring kReportVisitorRideList = L"/reportvisitorridelist";
+static const std::wstring kImportVisitorDemo = L"/importvisitordemo";
+static const std::wstring kReportVisitorDemo = L"/reportvisitordemo";
+static const std::wstring kTemplateFile = L"/templatefile";
+static const std::wstring kTemplate = L"/template";
+static const std::wstring kVisitors = L"/visitors";
+static const std::wstring kFastPassMode = L"/fastpassmode";
+static const std::wstring kUserConfigFile = L"/useconfigfile";
+static const std::wstring kGetVisitorNames = L"/getvisitornames";
 
 
 const static int VisitorCountUseParkAverage = -1;
 
 
 struct ParameterData {
-	std::string command = "";
-	std::string property = "";
+	std::wstring command = L"";
+	std::wstring property = L"";
 };
 
 
@@ -75,7 +75,7 @@ struct CSVOutput {
 	bool VisitorDemographics = false;
 	bool VisitorRideList = false;
 
-	std::string VisitorDemographicsFile = "";
+	std::wstring VisitorDemographicsFile = L"";
 };
 
 
@@ -87,14 +87,14 @@ struct TextOutput {
 
 struct HTMLOutput {
 	bool SimulationReport = false;
-	std::string SimulationReportFile = "";
+	std::wstring SimulationReportFile = L"";
 };
 
 
 struct SimulationInput {
 	bool VisitorDemographics = false;
 
-	std::string VisitorDemographicsFile = "";
+	std::wstring VisitorDemographicsFile = L"";
 };
 
 
@@ -105,24 +105,24 @@ class Configuration
 	void SetDefaults();
 	void SetFromCommandLine();
 
-	std::string GetCommandValue(const std::string);
-	std::string GetPropertyValue(const std::string);
+	std::wstring GetCommandValue(const std::wstring);
+	std::wstring GetPropertyValue(const std::wstring);
 
-	bool IsValidParameter(const std::string input);
+	bool IsValidParameter(const std::wstring input);
 
-	bool LoadConfigurationFromIni(const std::string);
+	bool LoadConfigurationFromIni(const std::wstring);
 
-	std::string SetExtension(const std::string, const std::string);
+	std::wstring SetExtension(const std::wstring, const std::wstring);
 
 	void HandleDebugUpdateRate(int);
-	void HandleImportVisitorDemo(const std::string);
-	void HandleReportVisitorDemo(const std::string);
-	void HandleSimulationReportHTML(const std::string);
-	void HandleTemplateFile(const std::string);
-	void HandleTemplate(const std::string);
-	void HandleVisitors(const std::string);
-	void HandleFastPassMode(const std::string);
-	void HandleUseConfigFile(std::string);
+	void HandleImportVisitorDemo(const std::wstring);
+	void HandleReportVisitorDemo(const std::wstring);
+	void HandleSimulationReportHTML(const std::wstring);
+	void HandleTemplateFile(const std::wstring);
+	void HandleTemplate(const std::wstring);
+	void HandleVisitors(const std::wstring);
+	void HandleFastPassMode(const std::wstring);
+	void HandleUseConfigFile(std::wstring);
 
 public:
 
@@ -138,7 +138,7 @@ public:
 	int VisitorCount = 0;  // average daily visitors to WDW Florida: Magic Kingdom: 57000; Animal Kingdom: 38000; Epcot: 34000; Hollywood Studios: 31000
 
 	ParkTemplate RideTemplate = ParkTemplate::WDWAnimalKingdom;
-	std::string RideTemplateFile = "";
+	std::wstring RideTemplateFile = L"";
 
 	bool GetVisitorNames = false;
 
@@ -148,5 +148,5 @@ public:
 	int ParkCloseTime = 0;  // 24-hour clock
 	int ParkOpenHours = 0;
 
-	Configuration(int argc, char* argv[]);
+	Configuration(int argc, wchar_t* argv[]);
 };

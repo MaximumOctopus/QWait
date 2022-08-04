@@ -16,6 +16,7 @@
 #include "Constants.h"
 #include "Engine.h"
 #include "ParkController.h"
+#include "ReportUtility.h"
 #include "Utility.h"
 #include "VisitorController.h"
 
@@ -46,11 +47,11 @@ Engine::Engine(FastPassType fast_pass, int park_open_time, int park_close_time, 
 }
 
 
-void Engine::OutputStatus(const std::string status)
+void Engine::OutputStatus(const std::wstring status)
 {
 	if (ShowOutput)
 	{
-		std::cout << status << std::endl;
+		std::wcout << status << std::endl;
 	}
 }
 
@@ -62,7 +63,7 @@ void Engine::Run(bool report_mxm, bool report_visitor_location)
 		PreArrivalFastPass();
 	}
 
-	OutputStatus("Park open!");
+	OutputStatus(L"Park open!                                                " + ReportUtility::BarGraphScale());
 
 	while (CurrentTime.hours != TimeParkCloses)
 	{
@@ -177,7 +178,7 @@ void Engine::Run(bool report_mxm, bool report_visitor_location)
 
 	GParkController->Minutes--;
 
-	OutputStatus("\nPark closed!");
+	OutputStatus(L"\nPark closed!");
 }
 
 
@@ -235,7 +236,7 @@ QWaitTypes::GetRide Engine::GetRide(int group)
 		}
 		else
 		{
-			//std::cout << "- " << SelectedRide << " NO \n";
+			//std::wcout << "- " << SelectedRide << " NO \n";
 		}
 
 		CheckingRides--;
@@ -319,7 +320,7 @@ void Engine::PreArrivalFastPass()
 	{
 		// Pass 1, visitors who are "staying at the park"
 
-		OutputStatus("Processing FastPass tickets...");
+		OutputStatus(L"Processing FastPass tickets...");
 
 		for (int g = 0; g < GVisitorController->Groups.size(); g++)
 		{
@@ -604,7 +605,8 @@ void Engine::RideContinuousProcessQueue(int ride)
 
 void Engine::RideShowProcessQueue(int ride)
 {
-	int count = 0;
+	auto count = 0;
+
 	QWaitTypes::Riders Visitor;
 
 	if (GParkController->Rides[ride].FastPass.mode != 0)
@@ -764,7 +766,7 @@ void Engine::ParkStatusTravelling(int group)
 			int Ride = GVisitorController->Groups[group].Behaviour.travelling.toRide;
 
 			// if they travel there and find the queue has changed then they are willing to wait a bit longer
-			if (GParkController->Rides[Ride].WaitTime(GVisitorController->Groups[group].Behaviour.travelling.fastPass) < (float)GVisitorController->Groups[group].Behaviour.maximumRideWaitingTime * 1.10f)
+			if (GParkController->Rides[Ride].WaitTime(GVisitorController->Groups[group].Behaviour.travelling.fastPass) < (double)GVisitorController->Groups[group].Behaviour.maximumRideWaitingTime * 1.10f)
 			{
 				QWaitTypes::Riders riders;
 
@@ -873,7 +875,7 @@ void Engine::ShowLiveStats()
 	size_t QueueFP = 0;
 	int Riding = 0;
 	size_t AtRide = 0;
-	std::string log = "";
+	std::wstring log = L"";
 
 	for (int t = 0; t < GParkController->Rides.size(); t++)
 	{
@@ -884,16 +886,23 @@ void Engine::ShowLiveStats()
 
 	AtRide = Queue + QueueFP + Riding;
 
+	int pcriding = 0;
+
+	if (VisitorsInPark != 0)
+	{
+		pcriding = static_cast<int>(((double)AtRide / (double)VisitorsInPark) * 100.0f);
+	}
+
 	if (FastPassMode == FastPassType::None)
 	{ 
-		log = Utility::FormatTime(CurrentTime.hours, CurrentTime.minutes) + "  " + Utility::PadRight(VisitorsInPark, 6) + " q: " + Utility::PadRight(Queue, 6) + " r: " + Utility::PadRight(Riding, 6) + "   (" + Utility::PadRight(AtRide, 6) + " / " + Utility::PadRight(VisitorsInPark, 6) + ")";
+		log = Utility::FormatTime(CurrentTime.hours, CurrentTime.minutes) + L"  " + Utility::PadRight(VisitorsInPark, 6) + L" q: " + Utility::PadRight(Queue, 6) + L" r: " + Utility::PadRight(Riding, 6) + L"   (" + Utility::PadRight(AtRide, 6) + L" / " + Utility::PadRight(VisitorsInPark, 6) + L") " + ReportUtility::BarGraph(pcriding);
 	}
 	else
 	{
-		log = Utility::FormatTime(CurrentTime.hours, CurrentTime.minutes) + "  " + Utility::PadRight(VisitorsInPark, 6) + " q: " + Utility::PadRight(Queue, 6) + " qfp: " + Utility::PadRight(QueueFP, 6) + " r: " + Utility::PadRight(Riding, 6) + "   (" + Utility::PadRight(AtRide, 6) + " / " + Utility::PadRight(VisitorsInPark, 6) + ")";
+		log = Utility::FormatTime(CurrentTime.hours, CurrentTime.minutes) + L"  " + Utility::PadRight(VisitorsInPark, 6) + L" q: " + Utility::PadRight(Queue, 6) + L" qfp: " + Utility::PadRight(QueueFP, 6) + L" r: " + Utility::PadRight(Riding, 6) + L"   (" + Utility::PadRight(AtRide, 6) + L" / " + Utility::PadRight(VisitorsInPark, 6) + L") " + ReportUtility::BarGraph(pcriding);
 	}
 
-	OutputStatus("    " + log);
+	OutputStatus(L"    " + log);
 
 	GParkController->Log.push_back(log);
 }

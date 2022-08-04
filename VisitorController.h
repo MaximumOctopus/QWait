@@ -39,7 +39,7 @@ static const int kDailyRideCount = 51;
 
 
 struct MinuteDataV {
-	std::string time = "";
+	std::wstring time = L"";
 
 	int visitorsInPark = 0;
 
@@ -73,16 +73,16 @@ struct DailyStatistics {
 	int averageQueueTime = 0;
 
 	int totalIdleTime = 0;
-	float averageIdleTime = 0.0f;
+	double averageIdleTime = 0.0f;
 
 	int totalRidingTime = 0;
-	float averageRidingTime = 0.0f;
+	double averageRidingTime = 0.0f;
 
 	int totalTravellingTime = 0;
-	float averageTravellingTime = 0.0f;
+	double averageTravellingTime = 0.0f;
 
 	int totalWaitingTime = 0;
-	float averageWaitingTime = 0.0f;
+	double averageWaitingTime = 0.0f;
 
 	int noRideAvailable = 0;
 	int waitTimeTooLong = 0;
@@ -96,7 +96,7 @@ struct DailyStatistics {
 	int typeCount = 0;
 
 	int totalSpend = 0;
-	float totalSpendPerRide = 0.0f;
+	double totalSpendPerRide = 0.0f;
 };
 
 
@@ -121,11 +121,11 @@ class VisitorController
 
 	void SetDefaults();
 
-	GroupType GetGroupType(float);
+	GroupType GetGroupType(double);
 
-	bool CreateGroupFromFileData(const std::string);
+	bool CreateGroupFromFileData(const std::wstring);
 
-	void OutputStatus(const std::string);
+	void OutputStatus(const std::wstring);
 
 public:
 
@@ -148,11 +148,11 @@ public:
 
 	VisitorController(int, bool, ParkTemplate, bool);
 
-	int LoadVisitorList(const std::string);
-	void SaveVisitorList(const std::string);
+	int LoadVisitorList(const std::wstring);
+	void SaveVisitorList(const std::wstring);
 
 	void ShowConfig();
-	void Run(bool, const std::string, bool, const std::string);
+	void Run(bool, const std::wstring, bool, const std::wstring);
 
 	int GetCurrentVisitorCount();
 
@@ -160,8 +160,8 @@ public:
 
 	int TotalSpending();
 
-	void UpdateMinuteStats(const std::string);
-	std::string GetMinuteDataFor(int);
+	void UpdateMinuteStats(const std::wstring);
+	std::wstring GetMinuteDataFor(int);
 	MinuteDataV GetMinuteDataStructFor(int);
 
 	void CalculateDemographics();

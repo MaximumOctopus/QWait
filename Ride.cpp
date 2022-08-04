@@ -16,7 +16,7 @@
 #include "Utility.h"
 
 
-Ride::Ride(RideType ride_type, std::string name, int ride_length, RideExitType ride_exit_type, int hourly_throughput, int popularity, int x, int y, int is_fast_pass, int fp_reserve_percent,
+Ride::Ride(RideType ride_type, std::wstring name, int ride_length, RideExitType ride_exit_type, int hourly_throughput, int popularity, int x, int y, int is_fast_pass, int fp_reserve_percent,
 	QWaitTypes::Time open, QWaitTypes::Time close, int open_hours,
 	bool AdultValid, bool ChildValid)
 {
@@ -76,24 +76,24 @@ void Ride::Close()
 
 
 // returns a unique reference for this ride's characteristics
-std::string Ride::GetUniqueReference()
+std::wstring Ride::GetUniqueReference()
 {
-	std::string data = "";
+	std::wstring data = L"";
 	
 	switch (RideOperation.rideType)
 	{
 		case RideType::Continuous:
-			data = RideOperation.name + std::to_string(RideOperation.rideLength) + std::to_string(RideOperation.position.x) + std::to_string(RideOperation.position.y) + std::to_string(RideOperation.Popularity) +
+			data = RideOperation.name + std::to_wstring(RideOperation.rideLength) + std::to_wstring(RideOperation.position.x) + std::to_wstring(RideOperation.position.y) + std::to_wstring(RideOperation.Popularity) +
 				Utility::FormatTime(RideOperation.open) + Utility::FormatTime(RideOperation.close) + 
-				std::to_string(FastPass.mode) + std::to_string(FastPass.percentage) +
-				std::to_string(RideThroughput.totalPerHour);
+				std::to_wstring(FastPass.mode) + std::to_wstring(FastPass.percentage) +
+				std::to_wstring(RideThroughput.totalPerHour);
 			break;
 		
 		case RideType::Show:
-			data = RideOperation.name + std::to_string(RideOperation.rideLength) + std::to_string(RideOperation.position.x) + std::to_string(RideOperation.position.y) + std::to_string(RideOperation.Popularity) +
-				Utility::FormatTime(RideOperation.open) + Utility::FormatTime(RideOperation.close) + std::to_string(RideOperation.ShowStartTime) +
-				std::to_string(FastPass.mode) + std::to_string(FastPass.percentage) +
-				std::to_string(RideThroughput.totalPerHour) + std::to_string(RideThroughput.showCapacity);
+			data = RideOperation.name + std::to_wstring(RideOperation.rideLength) + std::to_wstring(RideOperation.position.x) + std::to_wstring(RideOperation.position.y) + std::to_wstring(RideOperation.Popularity) +
+				Utility::FormatTime(RideOperation.open) + Utility::FormatTime(RideOperation.close) + std::to_wstring(RideOperation.ShowStartTime) +
+				std::to_wstring(FastPass.mode) + std::to_wstring(FastPass.percentage) +
+				std::to_wstring(RideThroughput.totalPerHour) + std::to_wstring(RideThroughput.showCapacity);
 			break;
 	}
 
@@ -123,9 +123,9 @@ void Ride::InitFastPass()
 // tickets left per hour
 int Ride::ResetFastPassTicketsLeft()
 {
-	float percentage = (float)FastPass.percentage / 100.0f;
+	double percentage = (double)FastPass.percentage / 100.0f;
 
-	return static_cast<int>((float)RideThroughput.totalPerHour * percentage);
+	return static_cast<int>((double)RideThroughput.totalPerHour * percentage);
 }
 
 
@@ -135,19 +135,19 @@ void Ride::ConfigureThroughput(int hourly_throughput)
 
 	if (FastPass.mode != 0)
 	{
-		RideThroughput.perMinuteTotal = (float)hourly_throughput / 60.0f;
+		RideThroughput.perMinuteTotal = (double)hourly_throughput / 60.0f;
 
-		RideThroughput.perMinute = ((float)hourly_throughput * (Constants::StandardHourlyPercent / 100.0f)) / 60.0f;
+		RideThroughput.perMinute = ((double)hourly_throughput * (Constants::StandardHourlyPercent / 100.0f)) / 60.0f;
 		RideThroughput.perMinuteI = static_cast<int>(std::lround(RideThroughput.perMinute));
 
-		RideThroughput.perMinuteFastPass = ((float)hourly_throughput * (Constants::FastPassHourlyPercent / 100.0f)) / 60.0f;
+		RideThroughput.perMinuteFastPass = ((double)hourly_throughput * (Constants::FastPassHourlyPercent / 100.0f)) / 60.0f;
 		RideThroughput.perMinuteIFastPass = static_cast<int>(std::lround(RideThroughput.perMinuteFastPass));
 	}
 	else
 	{
-		RideThroughput.perMinuteTotal = (float)hourly_throughput / 60.0f;
+		RideThroughput.perMinuteTotal = (double)hourly_throughput / 60.0f;
 
-		RideThroughput.perMinute = (float)hourly_throughput / 60.0f;
+		RideThroughput.perMinute = (double)hourly_throughput / 60.0f;
 		RideThroughput.perMinuteI = static_cast<int>(std::lround(RideThroughput.perMinute));
 
 		RideThroughput.perMinuteFastPass = 0.0f;
@@ -162,7 +162,7 @@ void Ride::ConfigureShowThroughput(int show_capacity, int fastpass_percent)
 
 	if (FastPass.mode != 0)
 	{
-		RideThroughput.showCapacityFastPass = static_cast<int>((float)show_capacity * ((float)fastpass_percent / 100.0f));
+		RideThroughput.showCapacityFastPass = static_cast<int>((double)show_capacity * ((double)fastpass_percent / 100.0f));
 	}
 	else
 	{
@@ -207,7 +207,7 @@ QWaitTypes::Riders Ride::NextItemInQueue()
 
 int Ride::QueueSize()
 {
-	int count = 0;
+	auto count = 0;
 
 	for (int q = 0; q < Queue.size(); q++)
 	{
@@ -254,7 +254,7 @@ QWaitTypes::Riders Ride::NextItemInQueueFastPass()
 
 int Ride::QueueSizeFastPass()
 {
-	int count = 0;
+	auto count = 0;
 
 	for (int q = 0; q < QueueFastPass.size(); q++)
 	{
@@ -299,15 +299,15 @@ int Ride::ViewFastPassTicket(QWaitTypes::Time arrive, QWaitTypes::Time leave)
 
 
 // returns the wait time in minutes
-float Ride::WaitTime(int is_fast_pass)
+double Ride::WaitTime(int is_fast_pass)
 {
 	if (is_fast_pass != kNoSelectedFastPassTicket)
 	{
-		return (float)(QueueSizeFastPass() / RideThroughput.perMinuteFastPass);
+		return (double)(QueueSizeFastPass() / RideThroughput.perMinuteFastPass);
 	}
 	else
 	{
-		return ((float)QueueSize() + (float)QueueSizeFastPass()) / RideThroughput.perMinuteTotal;
+		return ((double)QueueSize() + (double)QueueSizeFastPass()) / RideThroughput.perMinuteTotal;
 	}
 }
 
@@ -350,9 +350,9 @@ void Ride::UpdateDailyStatistics()
 }
 
 
-std::string Ride::GetMinuteStatFor(int minute)
+std::wstring Ride::GetMinuteStatFor(int minute)
 {
-	return std::to_string(Statistics[minute].queueSize) + "," +
-	       std::to_string(Statistics[minute].riders) + "," +
-		   std::to_string(Statistics[minute].waitTimeMinutes);
+	return std::to_wstring(Statistics[minute].queueSize) + L"," +
+	       std::to_wstring(Statistics[minute].riders) + L"," +
+		   std::to_wstring(Statistics[minute].waitTimeMinutes);
 }

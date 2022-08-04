@@ -21,52 +21,52 @@ static const int kGraphTypeSolidGreen = 1;
 static const int kGraphTypeAverage = 2;
 
 
-static const std::string kRowTitle = "88DDFF";
-static const std::string kRowColour1 = "EEEEEE";
-static const std::string kRowColour2 = "DDDDDD";
-static const std::string kRowAverage = "EEEEFF";
+static const std::wstring kRowTitle = L"88DDFF";
+static const std::wstring kRowColour1 = L"EEEEEE";
+static const std::wstring kRowColour2 = L"DDDDDD";
+static const std::wstring kRowAverage = L"EEEEFF";
 
-static const std::string kGraphGreen = "00BB22";
-static const std::string kGraphYellow = "BBBB22";
-static const std::string kGraphRed = "FF0000";
-static const std::string kGraphAverage = "FF0000";
+static const std::wstring kGraphGreen = L"00BB22";
+static const std::wstring kGraphYellow = L"BBBB22";
+static const std::wstring kGraphRed = L"FF0000";
+static const std::wstring kGraphAverage = L"FF0000";
 
 
 namespace ReportHTML
 {
-	bool SaveSimulationReport(const std::string, FastPassType);
+	bool SaveSimulationReport(const std::wstring, FastPassType);
 
 	namespace
 	{
-		void Summary(std::ofstream&);
+		void Summary(std::wofstream&);
 
-		void TicketList(std::ofstream&);
-		void RideList(std::ofstream&);
-		void GroupTypeList(std::ofstream&);
-		void VisitorTypeList(std::ofstream&);
-		void VisitorRideList(std::ofstream&);
-		void MinuteByMinute(std::ofstream&);
+		void TicketList(std::wofstream&);
+		void RideList(std::wofstream&);
+		void GroupTypeList(std::wofstream&);
+		void VisitorTypeList(std::wofstream&);
+		void VisitorRideList(std::wofstream&);
+		void MinuteByMinute(std::wofstream&);
 
-		void ThreeColumnTableHeader(std::ofstream&, std::string, std::string, std::string);
-		void ThreeColumnTableRow(std::ofstream&, int, std::string, int, float);
-		void ThreeColumnTableEnd(std::ofstream&, bool, int, float);
+		void ThreeColumnTableHeader(std::wofstream&, std::wstring, std::wstring, std::wstring);
+		void ThreeColumnTableRow(std::wofstream&, int, std::wstring, int, double);
+		void ThreeColumnTableEnd(std::wofstream&, bool, int, double);
 
-		void FourColumnTableHeader(std::ofstream&, std::string, std::string, std::string, std::string);
-		void FourColumnTableRow(std::ofstream&, int, std::string, int, float, int);
-		void FourColumnTableEnd(std::ofstream&, bool, int, float);
+		void FourColumnTableHeader(std::wofstream&, std::wstring, std::wstring, std::wstring, std::wstring);
+		void FourColumnTableRow(std::wofstream&, int, std::wstring, int, double, int);
+		void FourColumnTableEnd(std::wofstream&, bool, int, double);
 
-		void FiveColumnHeader(std::ofstream&, std::string, std::string, std::string, std::string);
-		void FiveColumnTableRow(std::ofstream&, int, std::string, int, int, float, int);
+		void FiveColumnHeader(std::wofstream&, std::wstring, std::wstring, std::wstring, std::wstring);
+		void FiveColumnTableRow(std::wofstream&, int, std::wstring, int, int, double, int);
 
-		void MxMTableHeader(std::ofstream&);
-		void MxMTableHeaderFP(std::ofstream&);
-		void MxMTableRow(std::ofstream&, int, std::string, int, int, int, int, int, int);
-		void MxMTableRow(std::ofstream&, int, std::string, int, int, int, int, int, int, int);
+		void MxMTableHeader(std::wofstream&);
+		void MxMTableHeaderFP(std::wofstream&);
+		void MxMTableRow(std::wofstream&, int, std::wstring, int, int, int, int, int, int);
+		void MxMTableRow(std::wofstream&, int, std::wstring, int, int, int, int, int, int, int);
 
-		std::string GraphTable(float, float, int);
+		std::wstring GraphTable(double, double, int);
 
-		void Footer(std::ofstream&);
+		void Footer(std::wofstream&);
 
-		void InsertSpacingTable(std::ofstream&);
+		void InsertSpacingTable(std::wofstream&);
 	}
 };

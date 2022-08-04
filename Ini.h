@@ -20,17 +20,17 @@
 class Ini
 {
 private:
-	bool LoadFile(const std::string);
+	bool LoadFile(const std::wstring);
 
 public:
 
 	bool Loaded;
 
-	std::vector<std::string> Lines;
+	std::vector<std::wstring> Lines;
 
-	Ini(const std::string);
+	Ini(const std::wstring);
 
-	bool ReadBoolean(const std::string, const std::string, bool);
-	int ReadInteger(const std::string, const std::string key, int);
-	std::string ReadString(std::string, std::string, const std::string);
+	bool ReadBoolean(const std::wstring, const std::wstring, bool);
+	int ReadInteger(const std::wstring, const std::wstring key, int);
+	std::wstring ReadString(std::wstring, std::wstring, const std::wstring);
 };

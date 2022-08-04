@@ -27,13 +27,13 @@ extern Configuration* GConfiguration;
 
 namespace ReportCSV
 {
-	void ReportCSV::SaveRideData(const std::string file_name)
+	void ReportCSV::SaveRideData(const std::wstring file_name)
 	{
-		std::ofstream file(file_name);
+		std::wofstream file(file_name);
 
 		if (file)
 		{
-			OutputStatus("Saving Ride data...");
+			OutputStatus(L"Saving Ride data...");
 
 			for (int r = 0; r < GParkController->Rides.size(); r++)
 			{
@@ -49,13 +49,13 @@ namespace ReportCSV
 	}
 
 
-	void ReportCSV::SaveVisitorData(const std::string file_name)
+	void ReportCSV::SaveVisitorData(const std::wstring file_name)
 	{
-		std::ofstream file(file_name);
+		std::wofstream file(file_name);
 
 		if (file)
 		{
-			OutputStatus("Saving Visitor data...");
+			OutputStatus(L"Saving Visitor data...");
 
 			// header
 			file << "Group,Group Type,Name,Spent,Type,Distance Travelled,Distance Travelled per ride,Time spent queuing,Time spent travelling,Time riding,Ride count,Queuing+Travelling/Riding Time,No ride available,Wait time too long,Shutdown,Shortest queue,longest queue,Fastpass rides" << "\n";
@@ -66,20 +66,20 @@ namespace ReportCSV
 				{
 					Visitor vx = GVisitorController->Groups[g].Visitors[v];
 
-					float dtbrc = 0;
-					float tqttbtr = 0;
+					double dtbrc = 0;
+					double tqttbtr = 0;
 
 					if (vx.Rides.count != 0)
 					{
-						dtbrc = (float)vx.Rides.distanceTravelled / (float)vx.Rides.count;
+						dtbrc = (double)vx.Rides.distanceTravelled / (double)vx.Rides.count;
 					}
 
 					if (vx.TimeSpent.riding != 0)
 					{
-						tqttbtr = (float)(vx.TimeSpent.queuing + (float)vx.TimeSpent.travelling) / (float)vx.TimeSpent.riding;
+						tqttbtr = (double)(vx.TimeSpent.queuing + (double)vx.TimeSpent.travelling) / (double)vx.TimeSpent.riding;
 					}
 
-					file << g << "," << GVisitorController->Groups[g].Configuration.GetTypeToInt() << "," << vx.Configuration.Name << "," << vx.Configuration.MoneySpent << "," << vx.Configuration.TypeInt << "," << vx.Rides.distanceTravelled << "," << dtbrc << "," << vx.TimeSpent.queuing << "," << vx.TimeSpent.travelling << "," << vx.TimeSpent.riding << "," << vx.Rides.count << "," << tqttbtr << "," << vx.Rides.noRideAvailable << "," << vx.Rides.waitTimeTooLong << "," << vx.Rides.rideShutdown << "," << vx.Rides.shortestQueue << "," << vx.Rides.longestQueue << "," << vx.Rides.fastPassRides << "\n";
+					file << g << "," << GVisitorController->Groups[g].Configuration.GetTypeToInt() << L"," << vx.Configuration.Name << L"," << vx.Configuration.MoneySpent << "," << vx.Configuration.TypeInt << "," << vx.Rides.distanceTravelled << "," << dtbrc << "," << vx.TimeSpent.queuing << "," << vx.TimeSpent.travelling << "," << vx.TimeSpent.riding << "," << vx.Rides.count << "," << tqttbtr << "," << vx.Rides.noRideAvailable << "," << vx.Rides.waitTimeTooLong << "," << vx.Rides.rideShutdown << "," << vx.Rides.shortestQueue << "," << vx.Rides.longestQueue << "," << vx.Rides.fastPassRides << "\n";
 				}
 			}
 
@@ -87,19 +87,19 @@ namespace ReportCSV
 		}
 		else
 		{
-			std::cerr << "Unable to save Visitor data." << std::endl;
+			std::wcerr << L"Unable to save Visitor data." << std::endl;
 		}
 	}
 
 
 	// number of rides completed vs number of visitors
-	void ReportCSV::SaveRideCount(const std::string file_name)
+	void ReportCSV::SaveRideCount(const std::wstring file_name)
 	{
-		std::ofstream file(file_name);
+		std::wofstream file(file_name);
 
 		if (file)
 		{
-			OutputStatus("Saving Ride count data...");
+			OutputStatus(L"Saving Ride count data...");
 
 			for (int v = 0; v < kDailyRideCount; v++)
 			{
@@ -110,68 +110,68 @@ namespace ReportCSV
 		}
 		else
 		{
-			std::cerr << "Unable to save Ride count data." << std::endl;
+			std::wcerr << L"Unable to save Ride count data." << std::endl;
 		}
 	}
 
 
-	void ReportCSV::SaveMinuteByMinuteLog(const std::string file_name)
+	void ReportCSV::SaveMinuteByMinuteLog(const std::wstring file_name)
 	{
-		std::ofstream file(file_name);
+		std::wofstream file(file_name);
 
 		if (file)
 		{
-			OutputStatus("Saving Minute-by-Minute report...");
+			OutputStatus(L"Saving Minute-by-Minute report...");
 
-			std::string output = "minute #";
+			std::wstring output = L"minute #";
 
 			// == header ==========================================================================================
 			for (int r = 0; r < GParkController->Rides.size(); r++)
 			{
-				output += "," + GParkController->Rides[r].RideOperation.name + " (Queue Size)," + GParkController->Rides[r].RideOperation.name + " (Riders)," + GParkController->Rides[r].RideOperation.name + " (Wait time)";
+				output += L"," + GParkController->Rides[r].RideOperation.name + L" (Queue Size)," + GParkController->Rides[r].RideOperation.name + L" (Riders)," + GParkController->Rides[r].RideOperation.name + L" (Wait time)";
 			}
 
-			file << output << ",In Park,On Way,At Entrance,Idle,Riding,Queing,Queing FastPass,Travelling,Waiting,Exited,Average Rides,Min Rides,Max Rides" << "\n";
+			file << output << L",In Park,On Way,At Entrance,Idle,Riding,Queing,Queing FastPass,Travelling,Waiting,Exited,Average Rides,Min Rides,Max Rides" << "\n";
 
 			// == body ============================================================================================
 			for (int m = 0; m < GParkController->Rides[0].GetMinuteStatsCount(); m++)
 			{
-				output = std::to_string(m);
+				output = std::to_wstring(m);
 
 				for (int r = 0; r < GParkController->Rides.size(); r++)
 				{
-					output += "," + GParkController->Rides[r].GetMinuteStatFor(m);
+					output += L"," + GParkController->Rides[r].GetMinuteStatFor(m);
 				}
 
-				file << output << "," << GVisitorController->GetMinuteDataFor(m) << "\n";
+				file << output << L"," << GVisitorController->GetMinuteDataFor(m) << "\n";
 			}
 
 			file.close();
 		}
 		else
 		{
-			std::cerr << "Unable to save Minute-by-Minute report." << std::endl;
+			std::wcerr << L"Unable to save Minute-by-Minute report." << std::endl;
 		}
 	}
 
 
-	void ReportCSV::SaveSelectionChoiceCache(const std::string file_name)
+	void ReportCSV::SaveSelectionChoiceCache(const std::wstring file_name)
 	{
-		std::ofstream file(file_name);
+		std::wofstream file(file_name);
 
 		if (file)
 		{
-			OutputStatus("Saving Selection Choice Cache report...");
+			OutputStatus(L"Saving Selection Choice Cache report...");
 
-			std::string output = "";
+			std::wstring output = L"";
 
 			for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 			{
-				output = std::to_string(t);
+				output = std::to_wstring(t);
 
 				for (int i = 0; i < kSelectionChoiceCacheCount; i++)
 				{
-					output += "," + std::to_string(GParkController->SelectionChoiceCache[t][i]);
+					output += L"," + std::to_wstring(GParkController->SelectionChoiceCache[t][i]);
 				}
 
 				file << output << "\n";
@@ -181,21 +181,21 @@ namespace ReportCSV
 		}
 		else
 		{
-			std::cerr << "Unable to save Selection Choice Cache report." << std::endl;
+			std::cerr << L"Unable to save Selection Choice Cache report." << std::endl;
 		}
 	}
 
 
 	// be warned! the output file will be around 280MB per 20000 visitors!
-	void ReportCSV::SaveVisitorLocation(const std::string file_name)
+	void ReportCSV::SaveVisitorLocation(const std::wstring file_name)
 	{
-		std::ofstream file(file_name);
+		std::wofstream file(file_name);
 
 		if (file)
 		{
-			OutputStatus("Saving Visitor Location report...");
+			OutputStatus(L"Saving Visitor Location report...");
 
-			std::string output = "";
+			std::wstring output = L"";
 
 			for (int m = 0; m < GParkController->GetMinuteCount(); m++)
 			{
@@ -217,33 +217,33 @@ namespace ReportCSV
 
 
 	// saves a complete list of visitors and each ride ridden
-	void ReportCSV::SaveVisitorRideList(const std::string file_name)
+	void ReportCSV::SaveVisitorRideList(const std::wstring file_name)
 	{
-		std::ofstream file(file_name);
+		std::wofstream file(file_name);
 
 		if (file)
 		{
-			OutputStatus("Saving Visitor Ride List report...");
+			OutputStatus(L"Saving Visitor Ride List report...");
 
-			std::string output = "";
+			std::wstring output = L"";
 
-			file << "Group ID,Visitor ID,Ride Count,Ride List" << "\n";
+			file << L"Group ID,Visitor ID,Ride Count,Ride List" << "\n";
 
 			for (int g = 0; g < GVisitorController->Groups.size(); g++)
 			{
 				for (int v = 0; v < GVisitorController->Groups[g].Visitors.size(); v++)
 				{
-					output = "," + std::to_string(GVisitorController->Groups[g].Visitors[v].RideList.size());
+					output = L"," + std::to_wstring(GVisitorController->Groups[g].Visitors[v].RideList.size());
 
 					if (GVisitorController->Groups[g].Visitors[v].RideList.size() != 0)
 					{
 						for (int r = 0; r < GVisitorController->Groups[g].Visitors[v].RideList.size(); r++)
 						{
-							output += "," + GParkController->Rides[GVisitorController->Groups[g].Visitors[v].RideList[r]].RideOperation.name;
+							output += L"," + GParkController->Rides[GVisitorController->Groups[g].Visitors[v].RideList[r]].RideOperation.name;
 						}
 					}
 
-					file << g << "," << v << output << "\n";
+					file << g << L"," << v << output << "\n";
 				}
 			}
 
@@ -251,16 +251,16 @@ namespace ReportCSV
 		}
 		else
 		{
-			std::cerr << "Unable to save Visitor Ride List." << std::endl;
+			std::cerr << L"Unable to save Visitor Ride List." << std::endl;
 		}
 	}
 
 
-	void ReportCSV::OutputStatus(const std::string status)
+	void ReportCSV::OutputStatus(const std::wstring status)
 	{
 		if (!GConfiguration->DebugConfig.DisableConsoleOutput)
 		{
-			std::cout << status << std::endl;
+			std::wcout << status << std::endl;
 		}
 	}
 }

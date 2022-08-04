@@ -28,22 +28,22 @@ extern VisitorController* GVisitorController;
 
 namespace ReportHTML
 {
-	bool SaveSimulationReport(const std::string file_name, FastPassType fast_pass_mode)
+	bool SaveSimulationReport(const std::wstring file_name, FastPassType fast_pass_mode)
 	{
-		std::ofstream file(file_name);
+		std::wofstream file(file_name);
 
 		if (file)
 		{
-			file << "<html><head><title>" << GParkController->entrance.ParkName << "</title>\n";
-			file << "<style type=\"text/css\">\n";
-			file << "<!--\n";
-			file << "A:link { color:#ff4400; text-decoration: none; }\n";
-			file << "A:visited { color:#ff4400; text-decoration: none; }\n";
-			file << "A:hover { color:#ff4400; text-decoration: underline; }\n";
-			file << "A:active { color:#ff4400; text-decoration: none; }\n";
-			file << ".ctable1 { font-family: Geneva, Arial, Helvetica, san-serif; font-size:10pt; color:#000000; }\n";
-			file << "-- >\n";
-			file << "</style></head><body>\n";
+			file << L"<html><head><title>" << GParkController->entrance.ParkName << L"</title>\n";
+			file << L"<style type=\"text/css\">\n";
+			file << L"<!--\n";
+			file << L"A:link { color:#ff4400; text-decoration: none; }\n";
+			file << L"A:visited { color:#ff4400; text-decoration: none; }\n";
+			file << L"A:hover { color:#ff4400; text-decoration: underline; }\n";
+			file << L"A:active { color:#ff4400; text-decoration: none; }\n";
+			file << L".ctable1 { font-family: Geneva, Arial, Helvetica, san-serif; font-size:10pt; color:#000000; }\n";
+			file << L"-- >\n";
+			file << L"</style></head><body>\n";
 
 			// ==========================================================
 
@@ -90,70 +90,70 @@ namespace ReportHTML
 
 	namespace
 	{
-		void Summary(std::ofstream& file)
+		void Summary(std::wofstream& file)
 		{
 			file << std::fixed << std::setprecision(2);
 
-			file << "<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
-			file << "<tr bgcolor=\"#" << kRowTitle << "\"><td width=\"1211\" height=\"13\" style=\"font-size:2em\"><b>\"" << GParkController->entrance.ParkName << "\" Summary</b></td></tr>\n";
+			file << L"<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
+			file << L"<tr bgcolor=\"#" << kRowTitle << "\"><td width=\"1211\" height=\"13\" style=\"font-size:2em\"><b>\"" << GParkController->entrance.ParkName << "\" Summary</b></td></tr>\n";
 			
 			if (GConfiguration->FastPassMode == FastPassType::None)
 			{
-				file << "<tr bgcolor=\"#" << kRowColour1 << "\"><td width=\"1211\" height=\"13\"><b>" << GParkController->Rides.size() << "</b> rides; theoretical throughput <b>" << GParkController->TheoreticalHourThroughputTotalDay << "</b> riders per day (actual: <b>" << GVisitorController->DailyStats.totalRides << "</b>); <b>" << GVisitorController->GroupCountCreated << "</b> groups; <b>" << GVisitorController->VisitorCountCreated << "</b> visitors; opening hours <b>" << GConfiguration->ParkOpenTime << ":00</b> to <b>" << GConfiguration->ParkCloseTime << ":00</b></td></tr>\n";
+				file << L"<tr bgcolor=\"#" << kRowColour1 << "\"><td width=\"1211\" height=\"13\"><b>" << GParkController->Rides.size() << "</b> rides; theoretical throughput <b>" << GParkController->TheoreticalHourThroughputTotalDay << "</b> riders per day (actual: <b>" << GVisitorController->DailyStats.totalRides << "</b>); <b>" << GVisitorController->GroupCountCreated << "</b> groups; <b>" << GVisitorController->VisitorCountCreated << "</b> visitors; opening hours <b>" << GConfiguration->ParkOpenTime << ":00</b> to <b>" << GConfiguration->ParkCloseTime << ":00</b></td></tr>\n";
 			}
 			else
 			{
-				file << "<tr bgcolor=\"#" << kRowColour1 << "\"><td width=\"1211\" height=\"13\"><b>" << GParkController->Rides.size() << "</b> rides; theoretical throughput <b>" << GParkController->TheoreticalHourThroughputTotalDay << "</b> riders per day (actual: <b>" << GVisitorController->DailyStats.totalRides << "</b>, fastpass rides " << GVisitorController->DailyStats.totalFastPastRides << "); <b>" << GVisitorController->GroupCountCreated << "</b> groups; <b>" << GVisitorController->VisitorCountCreated << "< / b> visitors; opening hours <b>" << GConfiguration->ParkOpenTime << ":00</b> to <b>" << GConfiguration->ParkCloseTime << ":00</b></td></tr>\n";
+				file << L"<tr bgcolor=\"#" << kRowColour1 << "\"><td width=\"1211\" height=\"13\"><b>" << GParkController->Rides.size() << "</b> rides; theoretical throughput <b>" << GParkController->TheoreticalHourThroughputTotalDay << "</b> riders per day (actual: <b>" << GVisitorController->DailyStats.totalRides << "</b>, fastpass rides " << GVisitorController->DailyStats.totalFastPastRides << "); <b>" << GVisitorController->GroupCountCreated << "</b> groups; <b>" << GVisitorController->VisitorCountCreated << "< / b> visitors; opening hours <b>" << GConfiguration->ParkOpenTime << ":00</b> to <b>" << GConfiguration->ParkCloseTime << ":00</b></td></tr>\n";
 			}
 			
-			file << "<tr bgcolor=\"#" << kRowColour2 << "\"><td width=\"1211\" height=\"13\">Max rides <b>" << GVisitorController->DailyStats.maxRides << "</b>; Minimum rides <b>" << GVisitorController->DailyStats.minRides << "</b>; Zero rides <b>" << GVisitorController->DailyStats.zeroRides << "</b>; Average rides <b>" << GVisitorController->DailyStats.averageRides << "</b></tr>\n";
-			file << "<tr bgcolor=\"#" << kRowColour1 << "\"><td width=\"1211\" height=\"13\">Distance travelled <b>" << GVisitorController->DailyStats.distanceTravelled << "</b> metres; Average distance travelled <b>" << GVisitorController->DailyStats.averageDistanceTravelled << "</b> metres</tr>\n";
-			file << "<tr bgcolor=\"#" << kRowColour2 << "\"><td width=\"1211\" height=\"13\">Total idle time <b>" << GVisitorController->DailyStats.totalIdleTime << "</b> minutes; Total travel time <b>" << GVisitorController->DailyStats.totalTravellingTime << "</b> minutes; Total queue time <b>" << GVisitorController->DailyStats.totalQueueTime << "</b> minutes; Total ride time <b>" << GVisitorController->DailyStats.totalRidingTime << "</b> minutes"<< " </tr>\n";
-			file << "<tr bgcolor=\"#" << kRowColour1 << "\"><td width=\"1211\" height=\"13\">Average idle time <b>" << GVisitorController->DailyStats.averageIdleTime << "</b> minutes; Average travel time <b>" << GVisitorController->DailyStats.averageTravellingTime << "</b> minutes; Average queue time <b>" << GVisitorController->DailyStats.averageQueueTime << "</b> minutes; Average ride time <b>" << GVisitorController->DailyStats.averageRidingTime << "</b> minutes" << " </tr>\n";
-			file << "<tr bgcolor=\"#" << kRowColour2 << "\"><td width=\"1211\" height=\"13\">Total ticket spend <b>$" << GVisitorController->DailyStats.totalSpend << "</b>; average cost per ride <b>$" << GVisitorController->DailyStats.totalSpendPerRide << "</tr>\n";
-			file << "<tr bgcolor=\"#" << kRowColour1 << "\"><td width=\"1211\" height=\"13\">&nbsp;</tr>\n";
-			file << "</table>\n";
+			file << L"<tr bgcolor=\"#" << kRowColour2 << L"\"><td width=\"1211\" height=\"13\">Max rides <b>" << GVisitorController->DailyStats.maxRides << "</b>; Minimum rides <b>" << GVisitorController->DailyStats.minRides << "</b>; Zero rides <b>" << GVisitorController->DailyStats.zeroRides << "</b>; Average rides <b>" << GVisitorController->DailyStats.averageRides << "</b></tr>\n";
+			file << L"<tr bgcolor=\"#" << kRowColour1 << L"\"><td width=\"1211\" height=\"13\">Distance travelled <b>" << GVisitorController->DailyStats.distanceTravelled << "</b> metres; Average distance travelled <b>" << GVisitorController->DailyStats.averageDistanceTravelled << "</b> metres</tr>\n";
+			file << L"<tr bgcolor=\"#" << kRowColour2 << L"\"><td width=\"1211\" height=\"13\">Total idle time <b>" << GVisitorController->DailyStats.totalIdleTime << "</b> minutes; Total travel time <b>" << GVisitorController->DailyStats.totalTravellingTime << "</b> minutes; Total queue time <b>" << GVisitorController->DailyStats.totalQueueTime << "</b> minutes; Total ride time <b>" << GVisitorController->DailyStats.totalRidingTime << "</b> minutes"<< " </tr>\n";
+			file << L"<tr bgcolor=\"#" << kRowColour1 << L"\"><td width=\"1211\" height=\"13\">Average idle time <b>" << GVisitorController->DailyStats.averageIdleTime << "</b> minutes; Average travel time <b>" << GVisitorController->DailyStats.averageTravellingTime << "</b> minutes; Average queue time <b>" << GVisitorController->DailyStats.averageQueueTime << "</b> minutes; Average ride time <b>" << GVisitorController->DailyStats.averageRidingTime << "</b> minutes" << " </tr>\n";
+			file << L"<tr bgcolor=\"#" << kRowColour2 << L"\"><td width=\"1211\" height=\"13\">Total ticket spend <b>$" << GVisitorController->DailyStats.totalSpend << "</b>; average cost per ride <b>$" << GVisitorController->DailyStats.totalSpendPerRide << "</tr>\n";
+			file << L"<tr bgcolor=\"#" << kRowColour1 << L"\"><td width=\"1211\" height=\"13\">&nbsp;</tr>\n";
+			file << L"</table>\n";
 		}
 
 
-		void TicketList(std::ofstream& file)
+		void TicketList(std::wofstream& file)
 		{
-			ThreeColumnTableHeader(file, "Ticket purchases", "Qty.", "");
+			ThreeColumnTableHeader(file, L"Ticket purchases", L"Qty.", L"");
 
 			int largest = GParkController->GetLargestTicketCategory();
 
-			ThreeColumnTableRow(file, 0, "Adult ($" + std::to_string(GParkController->entrance.Prices.Adult) + ")", GParkController->entrance.Tickets.Adult, ((float)GParkController->entrance.Tickets.Adult / (float)largest) * 100.0f);
-			ThreeColumnTableRow(file, 1, "Child ($" + std::to_string(GParkController->entrance.Prices.Children) + ")", GParkController->entrance.Tickets.Children, ((float)GParkController->entrance.Tickets.Children / (float)largest) * 100.0f);
-			ThreeColumnTableRow(file, 2, "Baby ($" + std::to_string(GParkController->entrance.Prices.Babies) + ")", GParkController->entrance.Tickets.Babies, ((float)GParkController->entrance.Tickets.Babies / (float)largest) * 100.0f);
+			ThreeColumnTableRow(file, 0, L"Adult ($" + std::to_wstring(GParkController->entrance.Prices.Adult) + L")", GParkController->entrance.Tickets.Adult, ((double)GParkController->entrance.Tickets.Adult / (double)largest) * 100.0f);
+			ThreeColumnTableRow(file, 1, L"Child ($" + std::to_wstring(GParkController->entrance.Prices.Children) + L")", GParkController->entrance.Tickets.Children, ((double)GParkController->entrance.Tickets.Children / (double)largest) * 100.0f);
+			ThreeColumnTableRow(file, 2, L"Baby ($" + std::to_wstring(GParkController->entrance.Prices.Babies) + L")", GParkController->entrance.Tickets.Babies, ((double)GParkController->entrance.Tickets.Babies / (double)largest) * 100.0f);
 
-			ThreeColumnTableRow(file, 3, "Adult advanced ($" + std::to_string(GParkController->entrance.Prices.AdultAdvance) + ")", GParkController->entrance.Tickets.AdultAdvance, ((float)GParkController->entrance.Tickets.AdultAdvance / (float)largest) * 100.0f);
-			ThreeColumnTableRow(file, 4, "Child advanced ($" + std::to_string(GParkController->entrance.Prices.ChildrenAdvance) + ")", GParkController->entrance.Tickets.ChildrenAdvance, ((float)GParkController->entrance.Tickets.ChildrenAdvance / (float)largest) * 100.0f);
-			ThreeColumnTableRow(file, 5, "Baby advanced ($" + std::to_string(GParkController->entrance.Prices.BabiesAdvance) + ")", GParkController->entrance.Tickets.BabiesAdvance, ((float)GParkController->entrance.Tickets.BabiesAdvance / (float)largest) * 100.0f);
+			ThreeColumnTableRow(file, 3, L"Adult advanced ($" + std::to_wstring(GParkController->entrance.Prices.AdultAdvance) + L")", GParkController->entrance.Tickets.AdultAdvance, ((double)GParkController->entrance.Tickets.AdultAdvance / (double)largest) * 100.0f);
+			ThreeColumnTableRow(file, 4, L"Child advanced ($" + std::to_wstring(GParkController->entrance.Prices.ChildrenAdvance) + L")", GParkController->entrance.Tickets.ChildrenAdvance, ((double)GParkController->entrance.Tickets.ChildrenAdvance / (double)largest) * 100.0f);
+			ThreeColumnTableRow(file, 5, L"Baby advanced ($" + std::to_wstring(GParkController->entrance.Prices.BabiesAdvance) + L")", GParkController->entrance.Tickets.BabiesAdvance, ((double)GParkController->entrance.Tickets.BabiesAdvance / (double)largest) * 100.0f);
 
 			file << "</table>\n";
 		}
 
 
-		void RideList(std::ofstream& file)
+		void RideList(std::wofstream& file)
 		{
 			if (GParkController->Rides.size() != 0)
 			{
 				// == ride throughput vs daily theoretical max ==============================================================================
 				
-				FiveColumnHeader(file, "Name", "Rides", "Hourly Max.", "Throughput %");
+				FiveColumnHeader(file, L"Name", L"Rides", L"Hourly Max.", L"Throughput %");
 
 				for (int r = 0; r < GParkController->Rides.size(); r++)
 				{
 					if (r % 2 == 0)
 					{
-						file << "<tr bgcolor=\"#" << kRowColour1 << "\">\n";
+						file << L"<tr bgcolor=\"#" << kRowColour1 << L"\">\n";
 					}
 					else
 					{
-						file << "<tr bgcolor=\"#" << kRowColour2 << "\">\n";
+						file << L"<tr bgcolor=\"#" << kRowColour2 << L"\">\n";
 					}
 
-					float tpc = ((float)GParkController->Rides[r].DailyStatistics.totalRiders / ((float)GParkController->Rides[r].RideThroughput.totalPerHour * (float)GParkController->Rides[r].RideOperation.operationHours)) * 100.0f;
+					double tpc = ((double)GParkController->Rides[r].DailyStatistics.totalRiders / ((double)GParkController->Rides[r].RideThroughput.totalPerHour * (double)GParkController->Rides[r].RideOperation.operationHours)) * 100.0f;
 
 					FiveColumnTableRow(file, r, GParkController->Rides[r].RideOperation.name, GParkController->Rides[r].DailyStatistics.totalRiders, GParkController->Rides[r].RideThroughput.totalPerHour, tpc, static_cast<int>(tpc));
 				}
@@ -164,13 +164,13 @@ namespace ReportHTML
 
 				// == max queue length ======================================================================================================
 
-				ThreeColumnTableHeader(file, "Name", "Max. Q", "Max. Queue (visitors)");
+				ThreeColumnTableHeader(file, L"Name", L"Max. Q", L"Max. Queue (visitors)");
 
 				int largestQueue = GParkController->GetLargestValue(kGetMaxQueueLength);
 
 				for (int r = 0; r < GParkController->Rides.size(); r++)
 				{
-					ThreeColumnTableRow(file, r, GParkController->Rides[r].RideOperation.name, GParkController->Rides[r].DailyStatistics.maxQueueLength, ((float)GParkController->Rides[r].DailyStatistics.maxQueueLength / (float)largestQueue) * 100.0f);
+					ThreeColumnTableRow(file, r, GParkController->Rides[r].RideOperation.name, GParkController->Rides[r].DailyStatistics.maxQueueLength, ((double)GParkController->Rides[r].DailyStatistics.maxQueueLength / (double)largestQueue) * 100.0f);
 				}
 
 				file << "</table>\n";
@@ -178,44 +178,44 @@ namespace ReportHTML
 		}
 
 
-		void GroupTypeList(std::ofstream& file)
+		void GroupTypeList(std::wofstream& file)
 		{
 			if (GVisitorController->GroupCountCreated != 0)
 			{
-				ThreeColumnTableHeader(file, "Group Description", "NRA", "No Ride Available");
+				ThreeColumnTableHeader(file, L"Group Description", L"NRA", L"No Ride Available");
 
 				int largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeNoRideAvailable);
 
 				for (int t = 0; t < Constants::AvailableGroupTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].noRideAvailable, ((float)GVisitorController->DailyStatsByGroup[t].noRideAvailable / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].noRideAvailable, ((double)GVisitorController->DailyStatsByGroup[t].noRideAvailable / (double)largest) * 100.0f);
 				}
 
 				file << "</table>\n";
 
-				ThreeColumnTableHeader(file, "Group Description", "WTTL", "Wait Time Too Long");
+				ThreeColumnTableHeader(file, L"Group Description", L"WTTL", L"Wait Time Too Long");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeWaitTimeTooLong);
 
 				for (int t = 0; t < Constants::AvailableGroupTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].waitTimeTooLong, ((float)GVisitorController->DailyStatsByGroup[t].waitTimeTooLong / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].waitTimeTooLong, ((double)GVisitorController->DailyStatsByGroup[t].waitTimeTooLong / (double)largest) * 100.0f);
 				}
 
 				file << "</table>\n";
 
-				ThreeColumnTableHeader(file, "Group Description", "RS", "Ride Shutdown");
+				ThreeColumnTableHeader(file, L"Group Description", L"RS", L"Ride Shutdown");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeRideShutdown);
 
 				for (int t = 0; t < Constants::AvailableGroupTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].rideShutdown, ((float)GVisitorController->DailyStatsByGroup[t].rideShutdown / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].rideShutdown, ((double)GVisitorController->DailyStatsByGroup[t].rideShutdown / (double)largest) * 100.0f);
 				}
 
 				file << "</table>\n";
 
-				ThreeColumnTableHeader(file, "Group Description", "DT (m)", "Distance Travelled (metres)");
+				ThreeColumnTableHeader(file, L"Group Description", L"DT (m)", L"Distance Travelled (metres)");
 
 				int total_travelled = 0;
 
@@ -223,102 +223,102 @@ namespace ReportHTML
 
 				for (int t = 0; t < Constants::AvailableGroupTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].distanceTravelled, ((float)GVisitorController->DailyStatsByGroup[t].distanceTravelled / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].distanceTravelled, ((double)GVisitorController->DailyStatsByGroup[t].distanceTravelled / (double)largest) * 100.0f);
 
 					total_travelled += GVisitorController->DailyStatsByGroup[t].distanceTravelled;
 				}
 
-				ThreeColumnTableRow(file, Constants::AvailableVisitorTypes + 1, "Total travelled", total_travelled, -1);
+				ThreeColumnTableRow(file, Constants::AvailableVisitorTypes + 1, L"Total travelled", total_travelled, -1);
 
-				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageDistanceTravelled, ((float)GVisitorController->DailyStats.averageDistanceTravelled / (float)largest) * 100.0f);
+				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageDistanceTravelled, ((double)GVisitorController->DailyStats.averageDistanceTravelled / (double)largest) * 100.0f);
 
 				// ===
 
-				ThreeColumnTableHeader(file, "Group Description", "AIT", "Average Idle Time (minutes)");
+				ThreeColumnTableHeader(file, L"Group Description", L"AIT", L"Average Idle Time (minutes)");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeAverageIdleTime);
 
 				for (int t = 0; t < Constants::AvailableGroupTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].averageIdleTime, ((float)GVisitorController->DailyStatsByGroup[t].averageIdleTime / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].averageIdleTime, ((double)GVisitorController->DailyStatsByGroup[t].averageIdleTime / (double)largest) * 100.0f);
 				}
 
-				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageIdleTime, ((float)GVisitorController->DailyStats.averageIdleTime / (float)largest) * 100.0f);
+				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageIdleTime, ((double)GVisitorController->DailyStats.averageIdleTime / (double)largest) * 100.0f);
 
-				ThreeColumnTableHeader(file, "Group Description", "ATT", "Average Travelling Time (minutes)");
+				ThreeColumnTableHeader(file, L"Group Description", L"ATT", L"Average Travelling Time (minutes)");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeAverageTravellingTime);
 
 				for (int t = 0; t < Constants::AvailableGroupTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].averageTravellingTime, ((float)GVisitorController->DailyStatsByGroup[t].averageTravellingTime / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].averageTravellingTime, ((double)GVisitorController->DailyStatsByGroup[t].averageTravellingTime / (double)largest) * 100.0f);
 				}
 
-				ThreeColumnTableEnd(file, true, static_cast<int>(GVisitorController->DailyStats.averageTravellingTime), ((float)GVisitorController->DailyStats.averageTravellingTime / (float)largest) * 100.0f);
+				ThreeColumnTableEnd(file, true, static_cast<int>(GVisitorController->DailyStats.averageTravellingTime), ((double)GVisitorController->DailyStats.averageTravellingTime / (double)largest) * 100.0f);
 
-				ThreeColumnTableHeader(file, "Group Description", "AQT", "Average Queue Time (minutes)");
+				ThreeColumnTableHeader(file, L"Group Description", L"AQT", L"Average Queue Time (minutes)");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeAverageQueueTime);
 
 				for (int t = 0; t < Constants::AvailableGroupTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].averageQueueTime, ((float)GVisitorController->DailyStatsByGroup[t].averageQueueTime / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, Constants::GroupNames[t], GVisitorController->DailyStatsByGroup[t].averageQueueTime, ((double)GVisitorController->DailyStatsByGroup[t].averageQueueTime / (double)largest) * 100.0f);
 				}
 
-				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageQueueTime, ((float)GVisitorController->DailyStats.averageQueueTime / (float)largest) * 100.0f);
+				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageQueueTime, ((double)GVisitorController->DailyStats.averageQueueTime / (double)largest) * 100.0f);
 
-				ThreeColumnTableHeader(file, "Group Description", "ART", "Average Riding Time (minutes)");
+				ThreeColumnTableHeader(file, L"Group Description", L"ART", L"Average Riding Time (minutes)");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeAverageRidingTime);
 
 				for (int t = 0; t < Constants::AvailableGroupTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, Constants::GroupNames[t], static_cast<int>(GVisitorController->DailyStatsByGroup[t].averageRidingTime), ((float)GVisitorController->DailyStatsByGroup[t].averageRidingTime / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, Constants::GroupNames[t], static_cast<int>(GVisitorController->DailyStatsByGroup[t].averageRidingTime), ((double)GVisitorController->DailyStatsByGroup[t].averageRidingTime / (double)largest) * 100.0f);
 				}
 
-				ThreeColumnTableEnd(file, true, static_cast<int>(GVisitorController->DailyStats.averageRidingTime), ((float)GVisitorController->DailyStats.averageRidingTime / (float)largest) * 100.0f);
+				ThreeColumnTableEnd(file, true, static_cast<int>(GVisitorController->DailyStats.averageRidingTime), ((double)GVisitorController->DailyStats.averageRidingTime / (double)largest) * 100.0f);
 			}
 		}
 
 
-		void VisitorTypeList(std::ofstream& file)
+		void VisitorTypeList(std::wofstream& file)
 		{
 			if (GVisitorController->GroupCountCreated != 0)
 			{
-				ThreeColumnTableHeader(file, "Type Description", "NRA", "No Ride Available");
+				ThreeColumnTableHeader(file, L"Type Description", L"NRA", L"No Ride Available");
 
 				int largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeNoRideAvailable);
 
 				for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].noRideAvailable, ((float)GVisitorController->DailyStatsByType[t].noRideAvailable / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].noRideAvailable, ((double)GVisitorController->DailyStatsByType[t].noRideAvailable / (double)largest) * 100.0f);
 				}
 
 				file << "</table>\n";
 
-				ThreeColumnTableHeader(file, "Type Description", "WTTL", "Wait Time Too Long");
+				ThreeColumnTableHeader(file, L"Type Description", L"WTTL", L"Wait Time Too Long");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeWaitTimeTooLong);
 
 				for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].waitTimeTooLong, ((float)GVisitorController->DailyStatsByType[t].waitTimeTooLong / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].waitTimeTooLong, ((double)GVisitorController->DailyStatsByType[t].waitTimeTooLong / (double)largest) * 100.0f);
 				}
 
 				file << "</table>\n";
 
-				ThreeColumnTableHeader(file, "Type Description", "RS", "Ride Shutdown");
+				ThreeColumnTableHeader(file, L"Type Description", L"RS", L"Ride Shutdown");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeRideShutdown);
 
 				for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].rideShutdown, ((float)GVisitorController->DailyStatsByType[t].rideShutdown / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].rideShutdown, ((double)GVisitorController->DailyStatsByType[t].rideShutdown / (double)largest) * 100.0f);
 				}
 
 				file << "</table>\n";
 
-				ThreeColumnTableHeader(file, "Type Description", "DT (m)", "Distance Travelled (metres)");
+				ThreeColumnTableHeader(file, L"Type Description", L"DT (m)", L"Distance Travelled (metres)");
 
 				int total_travelled = 0;
 
@@ -326,82 +326,82 @@ namespace ReportHTML
 
 				for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].distanceTravelled, ((float)GVisitorController->DailyStatsByType[t].distanceTravelled / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].distanceTravelled, ((double)GVisitorController->DailyStatsByType[t].distanceTravelled / (double)largest) * 100.0f);
 
 					total_travelled += GVisitorController->DailyStatsByType[t].distanceTravelled;
 				}
 
-				ThreeColumnTableRow(file, Constants::AvailableVisitorTypes + 1, "Total travelled", total_travelled, -1);
+				ThreeColumnTableRow(file, Constants::AvailableVisitorTypes + 1, L"Total travelled", total_travelled, -1);
 
-				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageDistanceTravelled, ((float)GVisitorController->DailyStats.averageDistanceTravelled / (float)largest) * 100.0f);
+				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageDistanceTravelled, ((double)GVisitorController->DailyStats.averageDistanceTravelled / (double)largest) * 100.0f);
 
 				// ===
 
-				ThreeColumnTableHeader(file, "Type Description", "AIT", "Average Idle Time (minutes)");
+				ThreeColumnTableHeader(file, L"Type Description", L"AIT", L"Average Idle Time (minutes)");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeAverageIdleTime);
 
 				for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].averageIdleTime, ((float)GVisitorController->DailyStatsByType[t].averageIdleTime / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].averageIdleTime, ((double)GVisitorController->DailyStatsByType[t].averageIdleTime / (double)largest) * 100.0f);
 				}
 
-				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageIdleTime, ((float)GVisitorController->DailyStats.averageIdleTime / (float)largest) * 100.0f);
+				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageIdleTime, ((double)GVisitorController->DailyStats.averageIdleTime / (double)largest) * 100.0f);
 
-				ThreeColumnTableHeader(file, "Type Description", "ATT", "Average Travelling Time (minutes)");
+				ThreeColumnTableHeader(file, L"Type Description", L"ATT", L"Average Travelling Time (minutes)");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeAverageTravellingTime);
 
 				for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].averageTravellingTime, ((float)GVisitorController->DailyStatsByType[t].averageTravellingTime / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].averageTravellingTime, ((double)GVisitorController->DailyStatsByType[t].averageTravellingTime / (double)largest) * 100.0f);
 				}
 
-				ThreeColumnTableEnd(file, true, static_cast<int>(GVisitorController->DailyStats.averageTravellingTime), ((float)GVisitorController->DailyStats.averageTravellingTime / (float)largest) * 100.0f);
+				ThreeColumnTableEnd(file, true, static_cast<int>(GVisitorController->DailyStats.averageTravellingTime), ((double)GVisitorController->DailyStats.averageTravellingTime / (double)largest) * 100.0f);
 
-				ThreeColumnTableHeader(file, "Type Description", "AQT", "Average Queue Time (minutes)");
+				ThreeColumnTableHeader(file, L"Type Description", L"AQT", L"Average Queue Time (minutes)");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeAverageQueueTime);
 
 				for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].averageQueueTime, ((float)GVisitorController->DailyStatsByType[t].averageQueueTime / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), GVisitorController->DailyStatsByType[t].averageQueueTime, ((double)GVisitorController->DailyStatsByType[t].averageQueueTime / (double)largest) * 100.0f);
 				}
 
-				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageQueueTime, ((float)GVisitorController->DailyStats.averageQueueTime / (float)largest) * 100.0f);
+				ThreeColumnTableEnd(file, true, GVisitorController->DailyStats.averageQueueTime, ((double)GVisitorController->DailyStats.averageQueueTime / (double)largest) * 100.0f);
 
-				ThreeColumnTableHeader(file, "Type Description", "ART", "Average Riding Time (minutes)");
+				ThreeColumnTableHeader(file, L"Type Description", L"ART", L"Average Riding Time (minutes)");
 
 				largest = GVisitorController->GetLargestValueByType(kDailyStatsByTypeAverageRidingTime);
 
 				for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 				{
-					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), static_cast<int>(GVisitorController->DailyStatsByType[t].averageRidingTime), ((float)GVisitorController->DailyStatsByType[t].averageRidingTime / (float)largest) * 100.0f);
+					ThreeColumnTableRow(file, t, QWaitTypes::VisitorTypeToString(t), static_cast<int>(GVisitorController->DailyStatsByType[t].averageRidingTime), ((double)GVisitorController->DailyStatsByType[t].averageRidingTime / (double)largest) * 100.0f);
 				}
 
-				ThreeColumnTableEnd(file, true, static_cast<int>(GVisitorController->DailyStats.averageRidingTime), ((float)GVisitorController->DailyStats.averageRidingTime / (float)largest) * 100.0f);
+				ThreeColumnTableEnd(file, true, static_cast<int>(GVisitorController->DailyStats.averageRidingTime), ((double)GVisitorController->DailyStats.averageRidingTime / (double)largest) * 100.0f);
 			}
 		}
 
 
-		void VisitorRideList(std::ofstream& file)
+		void VisitorRideList(std::wofstream& file)
 		{
 			if (GVisitorController->GroupCountCreated != 0)
 			{
-				FourColumnTableHeader(file, "Ride count", "# Visitors", "% of total", "%");
+				FourColumnTableHeader(file, L"Ride count", L"# Visitors", L"% of total", L"%");
 
 				int most_rides_index = GVisitorController->GetLargestValueByType(kDailyStatsHighestRideCountByIndex);
 				int most_rides = GVisitorController->GetLargestValueByType(kDailyStatsHighestRideCountByValue);
 
-				float pc_graph = 0;
-				float pc_value = 0;
+				double pc_graph = 0;
+				double pc_value = 0;
 
 				for (int t = 0; t <= most_rides_index; t++)
 				{
-					pc_graph = ((float)GVisitorController->DailyStats.rideCount[t] / (float)most_rides) * 100.0f;
-					pc_value = ((float)GVisitorController->DailyStats.rideCount[t] / (float)GVisitorController->VisitorCountCreated) * 100.0f;
+					pc_graph = ((double)GVisitorController->DailyStats.rideCount[t] / (double)most_rides) * 100.0f;
+					pc_value = ((double)GVisitorController->DailyStats.rideCount[t] / (double)GVisitorController->VisitorCountCreated) * 100.0f;
 
-					FourColumnTableRow(file, t, std::to_string(t), GVisitorController->DailyStats.rideCount[t], pc_graph, static_cast<int>(pc_value));
+					FourColumnTableRow(file, t, std::to_wstring(t), GVisitorController->DailyStats.rideCount[t], pc_graph, static_cast<int>(pc_value));
 				}
 
 				FourColumnTableEnd(file, true, GVisitorController->DailyStats.averageRides, 0);
@@ -409,7 +409,7 @@ namespace ReportHTML
 		}
 
 
-		void MinuteByMinute(std::ofstream& file)
+		void MinuteByMinute(std::wofstream& file)
 		{
 			if (GConfiguration->FastPassMode == FastPassType::None)
 			{
@@ -438,11 +438,11 @@ namespace ReportHTML
 		}
 
 
-		std::string GraphTable(float max, float pc, int colour_mode)
+		std::wstring GraphTable(double max, double pc, int colour_mode)
 		{
 			if (pc < 0.01f)
 			{
-				return "";
+				return L"";
 			}
 
 			if (pc > 100.0f)
@@ -450,100 +450,100 @@ namespace ReportHTML
 				pc = 100.0f;
 			}
 
-			float width = (pc / 100.0f) * max;
+			double width = (pc / 100.0f) * max;
 
-			std::string colour = "#000000";
+			std::wstring colour = L"#000000";
 
 			switch (colour_mode)
 			{
 				case kGraphTypeGradient:
 					if (pc < 75.0f)
 					{
-						colour = "#" + kGraphGreen;
+						colour = L"#" + kGraphGreen;
 					}
 					else if (pc < 90.0f)
 					{
-						colour = "#" + kGraphYellow;
+						colour = L"#" + kGraphYellow;
 					}
 					else
 					{
-						colour = "#" + kGraphRed;
+						colour = L"#" + kGraphRed;
 					}
 					break;
 				case kGraphTypeSolidGreen:
-					colour = "#" + kGraphGreen;
+					colour = L"#" + kGraphGreen;
 					break;
 				case kGraphTypeAverage:
-					colour = "#" + kGraphAverage;
+					colour = L"#" + kGraphAverage;
 					break;
 			}
 
 			if (width <= 0)
 			{
-				return "&nbsp;";
+				return L"&nbsp;";
 			}
 
-			return "<table width=\"" + std::to_string(static_cast<int>(width)) + "\" border=\"0\" bgcolor=\"" + colour + "\" height=\"8\" cellpadding=\"0\" cellspacing=\"0\"><tr><td></td></tr></table>";
+			return L"<table width=\"" + std::to_wstring(static_cast<int>(width)) + L"\" border=\"0\" bgcolor=\"" + colour + L"\" height=\"8\" cellpadding=\"0\" cellspacing=\"0\"><tr><td></td></tr></table>";
 		}
 
 
-		void ThreeColumnTableHeader(std::ofstream& file, std::string col1, std::string col2, std::string col3)
+		void ThreeColumnTableHeader(std::wofstream& file, std::wstring col1, std::wstring col2, std::wstring col3)
 		{
-			file << "<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
-			file << "<tr bgcolor=\"#" << kRowTitle << "\">\n";
-			file << "<td width=\"400\" height=\"13\"><b>" << col1 << "</td>\n";
-			file << "<td width=\"80\" height=\"13\" align=\"right\"><b>" << col2 << "</b></td>\n";
-			file << "<td width=\"720\" height=\"13\" align=\"left\"><b>" << col3 << "</b></td>\n";
-			file << "</tr>\n";
+			file << L"<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
+			file << L"<tr bgcolor=\"#" << kRowTitle << L"\">\n";
+			file << L"<td width=\"400\" height=\"13\"><b>" << col1 << L"</td>\n";
+			file << L"<td width=\"80\" height=\"13\" align=\"right\"><b>" << col2 << L"</b></td>\n";
+			file << L"<td width=\"720\" height=\"13\" align=\"left\"><b>" << col3 << L"</b></td>\n";
+			file << L"</tr>\n";
 		}
 
 
-		void ThreeColumnTableRow(std::ofstream& file, int row, std::string col1, int col2, float graph_value)
+		void ThreeColumnTableRow(std::wofstream& file, int row, std::wstring col1, int col2, double graph_value)
 		{
 			if (row % 2 == 0)
 			{
-				file << "<tr bgcolor=\"#" << kRowColour1 << "\">\n";
+				file << L"<tr bgcolor=\"#" << kRowColour1 << L"\">\n";
 			}
 			else
 			{
-				file << "<tr bgcolor=\"#" << kRowColour2 << "\">\n";
+				file << L"<tr bgcolor=\"#" << kRowColour2 << L"\">\n";
 			}
 
-			file << "<td width=\"400\" height=\"13\">" << col1 << "</td>\n";
-			file << "<td width=\"80\" height=\"13\" align=\"right\">" << col2 << "</td>\n";
-			file << "<td width=\"720\" height=\"13\" align=\"left\">" << GraphTable(710.0f, graph_value, kGraphTypeGradient) << "</td>\n";
-			file << "</tr>\n";
+			file << L"<td width=\"400\" height=\"13\">" << col1 << L"</td>\n";
+			file << L"<td width=\"80\" height=\"13\" align=\"right\">" << col2 << L"</td>\n";
+			file << L"<td width=\"720\" height=\"13\" align=\"left\">" << GraphTable(710.0f, graph_value, kGraphTypeGradient) << "</td>\n";
+			file << L"</tr>\n";
 		}
 
 
-		void ThreeColumnTableEnd(std::ofstream& file, bool show_average, int average, float graph_value)
+		void ThreeColumnTableEnd(std::wofstream& file, bool show_average, int average, double graph_value)
 		{
 			if (show_average)
 			{
-				file << "<tr bgcolor=\"#" << kRowAverage << "\">\n";
-				file << "<td width=\"400\" height=\"13\">Average</td>\n";
-				file << "<td width=\"80\" height=\"13\" align=\"right\">" << average << "</td>\n";
-				file << "<td width=\"720\" height=\"13\" align=\"left\">" << GraphTable(710.0f, graph_value, kGraphTypeAverage) << "</td>\n";
-				file << "</tr>\n";
+				file << L"<tr bgcolor=\"#" << kRowAverage << "\">\n";
+				file << L"<td width=\"400\" height=\"13\">Average</td>\n";
+				file << L"<td width=\"80\" height=\"13\" align=\"right\">" << average << L"</td>\n";
+				file << L"<td width=\"720\" height=\"13\" align=\"left\">" << GraphTable(710.0f, graph_value, kGraphTypeAverage) << "</td>\n";
+				file << L"</tr>\n";
 			}
 
 			file << "</table>\n";
 		}
 
 
-		void FourColumnTableHeader(std::ofstream& file, std::string col1, std::string col2, std::string col3, std::string col4)
+		void FourColumnTableHeader(std::wofstream& file, std::wstring col1, std::wstring col2, std::wstring col3, std::wstring col4)
 		{
-			file << "<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
-			file << "<tr bgcolor=\"#" << kRowTitle << "\">\n";
-			file << "<td width=\"80\" height=\"13\"><b>" << col1 << "</td>\n";
-			file << "<td width=\"80\" height=\"13\" align=\"right\"><b>" << col2 << "</b></td>\n";
-			file << "<td width=\"990\" height=\"13\" align=\"left\"><b>" << col3 << "</b></td>\n";
-			file << "<td width=\"50\" height=\"13\" align=\"right\"><b>" << col4 << "</b></td>\n";
-			file << "</tr>\n";
+			file << L"<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
+			file << L"<tr bgcolor=\"#" << kRowTitle << "\">\n";
+			file << L"<td width=\"80\" height=\"13\"><b>" << col1 << "</td>\n";
+			file << L"<td width=\"80\" height=\"13\" align=\"right\"><b>" << col2 << "</b></td>\n";
+			file << L"<td width=\"990\" height=\"13\" align=\"left\"><b>" << col3 << "</b></td>\n";
+			file << L"<td width=\"50\" height=\"13\" align=\"right\"><b>" << col4 << "</b></td>\n";
+			file << L"</tr>\n";
 		}
 
 
-		void FourColumnTableEnd(std::ofstream& file, bool show_average, int average, float graph_value)
+		void FourColumnTableEnd(std::wofstream& file, bool show_average, int average, double graph_value)
 		{
 			if (show_average)
 			{
@@ -558,7 +558,7 @@ namespace ReportHTML
 		}
 
 
-		void FourColumnTableRow(std::ofstream& file, int row, std::string col1, int col2, float graph_value, int graph_percent)
+		void FourColumnTableRow(std::wofstream& file, int row, std::wstring col1, int col2, double graph_value, int graph_percent)
 		{
 			if (row % 2 == 0)
 			{
@@ -569,28 +569,28 @@ namespace ReportHTML
 				file << "<tr bgcolor=\"#" << kRowColour2 << "\">\n";
 			}
 
-			file << "<td width=\"80\" height=\"13\" align=\"right\"><b>" << col1 << "</td>\n";
-			file << "<td width=\"80\" height=\"13\" align=\"right\"><b>" << col2 << "</b></td>\n";
-			file << "<td width=\"990\" height=\"13\" align=\"left\">" << GraphTable(980.0f, graph_value, kGraphTypeGradient) << "</td>\n";
-			file << "<td width=\"50\" height=\"13\" align=\"right\"><b>" << graph_percent << "%</b></td>\n";
-			file << "</tr>\n";
+			file << L"<td width=\"80\" height=\"13\" align=\"right\"><b>" << col1 << "</td>\n";
+			file << L"<td width=\"80\" height=\"13\" align=\"right\"><b>" << col2 << "</b></td>\n";
+			file << L"<td width=\"990\" height=\"13\" align=\"left\">" << GraphTable(980.0f, graph_value, kGraphTypeGradient) << "</td>\n";
+			file << L"<td width=\"50\" height=\"13\" align=\"right\"><b>" << graph_percent << "%</b></td>\n";
+			file << L"</tr>\n";
 		}
 
 
-		void FiveColumnHeader(std::ofstream& file, std::string col1, std::string col2, std::string col3, std::string col4)
+		void FiveColumnHeader(std::wofstream& file, std::wstring col1, std::wstring col2, std::wstring col3, std::wstring col4)
 		{
-			file << "<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
-			file << "<tr bgcolor=\"#" << kRowTitle << "\">\n";
+			file << L"<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
+			file << L"<tr bgcolor=\"#" << kRowTitle << "\">\n";
 			file << "<td width=\"400\" height=\"13\"><b>" << col1 << "</b></td>\n";
-			file << "<td width=\"80\" height=\"13\" align=\"right\"><b>" << col2 << "</b></td>\n";
-			file << "<td width=\"80\" height=\"13\" align=\"right\"><b>" << col3 << "</b></td>\n";
-			file << "<td width=\"400\" height=\"13\"><b>" << col4 << "</b></td>\n";
-			file << "<td width=\"40\" height=\"13\" align=\"right\"><b>%</b></td>\n";
-			file << "</tr>\n";
+			file << L"<td width=\"80\" height=\"13\" align=\"right\"><b>" << col2 << "</b></td>\n";
+			file << L"<td width=\"80\" height=\"13\" align=\"right\"><b>" << col3 << "</b></td>\n";
+			file << L"<td width=\"400\" height=\"13\"><b>" << col4 << "</b></td>\n";
+			file << L"<td width=\"40\" height=\"13\" align=\"right\"><b>%</b></td>\n";
+			file << L"</tr>\n";
 		}
 
 
-		void FiveColumnTableRow(std::ofstream& file, int row, std::string col1, int col2, int col3, float graph_value, int graph_percent)
+		void FiveColumnTableRow(std::wofstream& file, int row, std::wstring col1, int col2, int col3, double graph_value, int graph_percent)
 		{
 			if (row % 2 == 0)
 			{
@@ -610,7 +610,7 @@ namespace ReportHTML
 		}
 
 
-		void MxMTableHeader(std::ofstream& file)
+		void MxMTableHeader(std::wofstream& file)
 		{
 			file << "<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
 			file << "<tr bgcolor=\"#" << kRowTitle << "\">\n";
@@ -630,7 +630,7 @@ namespace ReportHTML
 		}
 
 
-		void MxMTableHeaderFP(std::ofstream& file)
+		void MxMTableHeaderFP(std::wofstream& file)
 		{
 			file << "<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
 			file << "<tr bgcolor=\"#" << kRowTitle << "\">\n";
@@ -652,7 +652,7 @@ namespace ReportHTML
 		}
 
 
-		void MxMTableRow(std::ofstream& file, int row, std::string time, int in_park, int idle, int travelling, int queuing, int riding, int busy)
+		void MxMTableRow(std::wofstream& file, int row, std::wstring time, int in_park, int idle, int travelling, int queuing, int riding, int busy)
 		{
 			if (row % 2 == 0)
 			{
@@ -666,21 +666,21 @@ namespace ReportHTML
 			file << "<td height=\"13\" align=\"right\">" << time << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << in_park << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << idle << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(155.0f, ((float)(idle) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(155.0f, ((double)(idle) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << travelling << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(155.0f, ((float)(travelling) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(155.0f, ((double)(travelling) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << queuing << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(155.0f, ((float)(queuing) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(155.0f, ((double)(queuing) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << riding << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(155.0f, ((float)(riding) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(155.0f, ((double)(riding) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << busy << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(155.0f, ((float)(busy) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(155.0f, ((double)(busy) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "</tr>\n";
 		}
 
 
 		// fastpass version
-		void MxMTableRow(std::ofstream& file, int row, std::string time, int in_park, int idle, int travelling, int queuing, int queuing_fastpass, int riding, int busy)
+		void MxMTableRow(std::wofstream& file, int row, std::wstring time, int in_park, int idle, int travelling, int queuing, int queuing_fastpass, int riding, int busy)
 		{
 			if (row % 2 == 0)
 			{
@@ -694,22 +694,22 @@ namespace ReportHTML
 			file << "<td height=\"13\" align=\"right\">" << time << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << in_park << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << idle << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((float)(idle) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((double)(idle) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << travelling << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((float)(travelling) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((double)(travelling) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << queuing << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((float)(queuing) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((double)(queuing) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << queuing << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((float)(queuing_fastpass) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((double)(queuing_fastpass) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << riding << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((float)(riding) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((double)(riding) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "<td height=\"13\" align=\"right\">" << busy << "</td>\n";
-			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((float)(busy) / (float)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
+			file << "<td height=\"13\" align=\"left\">" << GraphTable(119.0f, ((double)(busy) / (double)(in_park)) * 100.0f, kGraphTypeGradient) << "</td>\n";
 			file << "</tr>\n";
 		}
 
 
-		void Footer(std::ofstream& file)
+		void Footer(std::wofstream& file)
 		{
 			file << "<table align=\"center\" width=\"1211\" border=\"0\" cellpadding=\"1\" cellspacing=\"1\" class=\"ctable1\">\n";
 			file << "<tr bgcolor=\"#" << kRowTitle << "\">\n";
@@ -718,7 +718,7 @@ namespace ReportHTML
 		}
 
 
-		void InsertSpacingTable(std::ofstream& file)
+		void InsertSpacingTable(std::wofstream& file)
 		{
 			file << "<table align=\"center\" width=\"770\" border=\"0\"><tr><td>&nbsp;</td></tr></table>\n";
 		}

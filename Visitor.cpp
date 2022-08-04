@@ -61,7 +61,7 @@ void Visitor::SetDefaults()
 }
 
 
-void Visitor::SetQueuingLengthStat(float queue_length)
+void Visitor::SetQueuingLengthStat(double queue_length)
 {
 	if (queue_length > Rides.longestQueue)
 	{
@@ -77,7 +77,7 @@ void Visitor::SetQueuingLengthStat(float queue_length)
 }
 
 
-void Visitor::SetQueuingFastPassLengthStat(float queue_length)
+void Visitor::SetQueuingFastPassLengthStat(double queue_length)
 {
 	if (queue_length > Rides.longestQueueFastPass)
 	{

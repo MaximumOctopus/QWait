@@ -18,5 +18,5 @@
 
 namespace MD5
 {
-	std::string GetMD5HashString(char* pcValue);
+	std::wstring GetMD5HashString(char* pcValue);
 }

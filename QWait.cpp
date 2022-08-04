@@ -9,7 +9,8 @@
 // 
 // =======================================================================
 
-
+#include <io.h>
+#include <fcntl.h>
 #include <iostream>
 #include <string.h>
 
@@ -29,7 +30,7 @@ extern ParkController* GParkController;
 extern VisitorController* GVisitorController;
 
 
-int DoWeJustNeedToShowHelp(int argc, char* argv[])
+int DoWeJustNeedToShowHelp(int argc, wchar_t* argv[])
 {
     if (argc == 1)
     {
@@ -38,14 +39,14 @@ int DoWeJustNeedToShowHelp(int argc, char* argv[])
 
     if (argc >= 2)
     {
-        std::string Parameter = argv[1];
+        std::wstring Parameter = argv[1];
 
-        if (Parameter.find("/?") != std::string::npos)
+        if (Parameter.find(L"/?") != std::wstring::npos)
         {
             return 1;
         }
 
-        if (Parameter.find(kCats) != std::string::npos)
+        if (Parameter.find(kCats) != std::wstring::npos)
         {
             return 2;
         }
@@ -59,34 +60,34 @@ void CreateOutput()
 {
     if (GConfiguration->DebugReports.SelectionChoiceCache)
     {
-        GReportController->SaveSelectionChoiceCacheCSV(Utility::DateTime(kDisplayModeFile) + "_sscc.csv");
+        GReportController->SaveSelectionChoiceCacheCSV(Utility::DateTime(kDisplayModeFile) + L"_sscc.csv");
     }
 
     if (GConfiguration->DebugReports.DistanceCache)
     {
-        GParkController->SaveDistanceCache(Utility::DateTime(kDisplayModeFile) + "_dctc.csv");
+        GParkController->SaveDistanceCache(Utility::DateTime(kDisplayModeFile) + L"_dctc.csv");
     }
 
     // ==========================================================================================
 
     if (GConfiguration->CSVReports.CompleteVisitorData)
     {
-        GReportController->SaveVisitorDataCSV(Utility::DateTime(kDisplayModeFile) + "_visitors.csv");
+        GReportController->SaveVisitorDataCSV(Utility::DateTime(kDisplayModeFile) + L"_visitors.csv");
     }
 
     if (GConfiguration->CSVReports.MinuteByMinute)
     {
-        GReportController->SaveMinuteByMinuteLogCSV(Utility::DateTime(kDisplayModeFile) + "_mxm.csv");
+        GReportController->SaveMinuteByMinuteLogCSV(Utility::DateTime(kDisplayModeFile) + L"_mxm.csv");
     }
 
     if (GConfiguration->CSVReports.VisitorLocation)
     {
-        GReportController->SaveVisitorLocationCSV(Utility::DateTime(kDisplayModeFile) + "_location.csv");
+        GReportController->SaveVisitorLocationCSV(Utility::DateTime(kDisplayModeFile) + L"_location.csv");
     }
 
     if (GConfiguration->CSVReports.VisitorRideList)
     {
-        GReportController->SaveVisitorRideListCSV(Utility::DateTime(kDisplayModeFile) + "_ridelist.csv");
+        GReportController->SaveVisitorRideListCSV(Utility::DateTime(kDisplayModeFile) + L"_ridelist.csv");
     }
 
     // ==========================================================================================
@@ -100,18 +101,22 @@ void CreateOutput()
 
     if (GConfiguration->TextReports.MinuteByMinute)
     {
-        GReportController->SaveMXMReportText(Utility::DateTime(kDisplayModeFile) + "_mxm.txt", GConfiguration->FastPassMode);
+        GReportController->SaveMXMReportText(Utility::DateTime(kDisplayModeFile) + L"_mxm.txt", GConfiguration->FastPassMode);
     }
 
     if (GConfiguration->TextReports.SimulationReport)
     {
-        GReportController->SaveSimulationReportText(Utility::DateTime(kDisplayModeFile) + "_sim.txt", GConfiguration->FastPassMode);
+        GReportController->SaveSimulationReportText(Utility::DateTime(kDisplayModeFile) + L"_sim.txt", GConfiguration->FastPassMode);
     }
 }
 
 
-int main(int argc, char* argv[])
+int wmain(int argc, wchar_t* argv[])
 {
+    _setmode(_fileno(stdout), _O_U16TEXT);
+
+    // ==========================================================================================
+
     int helporcats = DoWeJustNeedToShowHelp(argc, argv);
     
     if (helporcats == 1)
@@ -152,7 +157,7 @@ int main(int argc, char* argv[])
         }
         else
         {
-            std::cerr << "No visitors selected so simulation aborted." << std::endl;
+            std::wcerr << L"No visitors selected so simulation aborted.\n";
         }
     }
 
@@ -177,7 +182,7 @@ int main(int argc, char* argv[])
 
     if (!GConfiguration->DebugConfig.DisableConsoleOutput)
     {
-        std::cout << "\n" << "Done." << std::endl;
+        std::wcout << "\n" << "Done." << std::endl;
         std::cin.get();
     }
 
