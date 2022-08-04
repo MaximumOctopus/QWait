@@ -1,8 +1,8 @@
  ===============================================================================
  =                                                                             =
- =  QWait 0.6 beta                                                             =
+ =  QWait 0.6.1 beta                                                           =
  =                                                                             =
- =  July 9th 2022                                                              =
+ =  August 4th 2022                                                            =
  =                                                                             =
  =  www.freshney.org // paul@freshney.org                                      =
  =                                                                             =
@@ -103,6 +103,16 @@ Rides now have the option of accepting any of: babies, children, and adults.
 
 I've added a few new reports, improved existing reports, and added more
 debug output options.
+
+========================================================================
+== Updates for 0.6.1 beta ==============================================
+========================================================================
+
+A few tweaks to the visitor/group randomness.
+
+Added a simple graph to the console for group/visitor stats, and also
+one on the engine update (default 15 mins) which shows percentage of
+visitors riding or queuing.
 
 ========================================================================
 == Updates for 0.5 beta ================================================
