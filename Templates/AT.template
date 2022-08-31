@@ -7,6 +7,7 @@ entrancex=100
 entrancey=740
 fastpasttype=0
 ridecount=27
+eaterycount=12
 
 // blank entry for a show type ride
 
@@ -16,7 +17,7 @@ type=s
 length=45
 rideexittype=1
 starttimemins=60
-hourlythroughput=1000
+hourlythroughput=300
 showcapacity=1000
 popularity=10
 x=0
@@ -337,3 +338,147 @@ x=158
 y=618
 isfastpass=0
 fpreservepercent=0
+
+[eatery1]
+name=Tower's Street Hot Dogs
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=16
+y=70
+w=10
+
+[eatery2]
+name=Corner Coffee
+foodvalid=false
+drinkvalid=true
+throughput=3
+x=-36
+y=78
+w=10
+
+[eatery3]
+name=Eastern Express
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=175
+y=113
+w=15
+
+[eatery4]
+name=Donut Factory
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-231
+y=268
+w=10
+
+[eatery5]
+name=Woodcutter's Bar and Grill
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=15
+y=434
+w=15
+
+[eatery6]
+name=Pizza and Pasta
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=434
+y=107
+w=15
+
+[eatery7]
+name=Just Chicken
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-199
+y=424
+w=15
+
+[eatery8]
+name=Nemice's Donuts
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=487
+y=415
+w=10
+
+[eatery9]
+name=Rollercoaster
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=634
+y=512
+w=15
+
+[eatery10]
+name=Little Explorer's Lunchbox
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-74
+y=17
+w=15
+
+[eatery11]
+name=Coffee Lounge
+foodvalid=false
+drinkvalid=true
+throughput=3
+x=-39
+y=719
+w=15
+
+[eatery12]
+name=Burger Kitchen
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=609
+y=467
+w=10
+
+[eatery13]
+name=Welcom-Inn
+foodvalid=true
+drinkvalid=true
+throughput=2
+x=162
+y=185
+w=15
+
+[eatery14]
+name=Courtyard Nachos/Waffles/Hotdogs
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=162
+y=185
+w=10
+
+[eatery15]
+name=Wafflemeister
+foodvalid=true
+drinkvalid=true
+throughput=2
+x=380
+y=375
+w=15
+
+[eatery16]
+name=Nitrogenie
+foodvalid=true
+drinkvalid=true
+throughput=2
+x=510
+y=209
+w=10

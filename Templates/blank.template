@@ -7,6 +7,7 @@ entrancex=0
 entrancey=0
 fastpasttype=
 ridecount=
+eaterycount=
 averagevisitors=
 adult=
 adultadvanced=
@@ -48,3 +49,12 @@ isfastpass=
 fpreservepercent=
 adultvalid=1
 childvalid=1
+
+[eatery1]
+name=
+foodvalid=
+drinkvalid=
+throughput=
+x=
+y=
+w=

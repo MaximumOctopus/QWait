@@ -7,6 +7,7 @@ entrancex=0
 entrancey=0
 fastpasttype=1
 ridecount=12
+eaterycount=29
 
 [ride1]
 name=The American Adventure
@@ -14,7 +15,7 @@ type=s
 length=29
 rideexittype=1
 starttimemins=60
-hourlythroughput=1024
+hourlythroughput=324
 showcapacity=1024
 popularity=9
 x=0
@@ -153,3 +154,264 @@ x=-151
 y=192
 isfastpass=1
 fpreservepercent=70
+
+[eatery1]
+name=Akershus Royal Banquet Hall
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=254
+y=638
+w=15
+
+[eatery2]
+name=L'Artisan des Glaces
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-331
+y=829
+w=10
+
+[eatery3]
+name=Biergarten
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=254
+y=901
+w=15
+
+[eatery4]
+name=Boulangerie Patisserie
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-349
+y=842
+w=10
+
+[eatery5]
+name=La Cantina
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=171
+y=561
+w=15
+
+[eatery6]
+name=Le Cellier
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-211
+y=518
+w=15
+
+[eatery7]
+name=Chefs de France
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-316
+y=813
+w=15
+
+[eatery8]
+name=Coral Reef
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-109
+y=131
+w=15
+
+[eatery9]
+name=Electric Umbrella
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=38
+y=235
+w=15
+
+[eatery10]
+name=Garden Grill
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-263
+y=256
+w=15
+
+[eatery11]
+name=Kringla Bakeri og Cafe
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=229
+y=609
+w=15
+
+[eatery12]
+name=Liberty Inn
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=40
+y=970
+w=15
+
+[eatery13]
+name=Lotus Blossom Cafe
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=282
+y=668
+w=15
+
+[eatery14]
+name=Nine Dragons
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=254
+y=675
+w=15
+
+[eatery15]
+name=Restaurant Marrakesh
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-263
+y=938
+w=15
+
+[eatery16]
+name=Rose and Crown Pub
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-209
+y=638
+w=15
+		
+[eatery17]
+name=Sam Angel Inn
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=127
+y=496
+w=15
+
+[eatery18]
+name=Sommerfest
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=231
+y=905
+w=15
+
+[eatery19]
+name=Spice Road Table
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-211
+y=851
+w=15
+
+[eatery20]
+name=Sunshine Season Food Fair
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-263
+y=256
+w=15
+
+[eatery21]
+name=Tangierine Cafe
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-263
+y=878
+w=15
+
+[eatery22]
+name=Teppan Edo
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-131
+y=931
+w=15
+
+[eatery23]
+name=Tutto Italia
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=141
+y=960
+w=15
+
+[eatery24]
+name=Via Napoli
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=128
+y=996
+w=15
+
+[eatery25]
+name=Yakitori House
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-94
+y=954
+w=15
+
+[eatery26]
+name=Yorkshire County Fish Shop
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-222
+y=656
+w=10
+
+[eatery27]
+name=La Cava del Tequila
+foodvalid=false
+drinkvalid=true
+throughput=3
+x=219
+y=514
+w=15
+
+[eatery28]
+name=Club Cool
+foodvalid=false
+drinkvalid=true
+throughput=3
+x=-34
+y=319
+w=15
+
+[eatery29]
+name=Tutto Gusto
+foodvalid=false
+drinkvalid=true
+throughput=3
+x=137
+y=974
+w=15

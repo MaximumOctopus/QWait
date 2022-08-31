@@ -7,6 +7,7 @@ entrancex=0
 entrancey=0
 fastpasttype=1
 ridecount=14
+eaterycount=13
 
 [ride1]
 name=Indiana Jones Epic Stunt Spectacular!
@@ -53,7 +54,7 @@ name=Beauty and the Beast Live on Stage
 type=c
 length=30
 rideexittype=3
-hourlythroughput=100
+hourlythroughput=30
 popularity=11
 x=118
 y=23
@@ -179,3 +180,120 @@ x=-25
 y=192
 isfastpass=2
 fpreservepercent=70
+
+[eatery1]
+name=50's Prime-Time Cafe
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-91
+y=18
+w=15
+
+[eatery2]
+name=ABC Commissary
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-166
+y=161
+w=15
+
+[eatery3]
+name=Backlot Express
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-250
+y=35
+w=10
+
+[eatery4]
+name=The Hollywood Brown Derby
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-27
+y=144
+w=15
+
+[eatery5]
+name=Hollywood and Vine
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-43
+y=40
+w=15
+
+[eatery6]
+name=Mama Melrose's
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-387
+y=147
+w=15
+
+[eatery7]
+name=Rizzo's Pizza
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-320
+y=113
+w=15
+
+[eatery8]
+name=Sci-Fi Dine-in Theater
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-229
+y=143
+w=15
+
+[eatery9]
+name=Starring Rolls Cafe
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=10
+y=108
+w=15
+
+[eatery10]
+name=Sunset Blvd. Courtyard
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=127
+y=105
+w=15
+
+[eatery11]
+name=Hollywood Brown Derby Lounge
+foodvalid=false
+drinkvalid=true
+throughput=3
+x=-26
+y=127
+w=15
+
+[eatery12]
+name=Trolly Car Cafe
+foodvalid=false
+drinkvalid=true
+throughput=3
+x=-18
+y=77
+w=15
+
+[eatery13]
+name=Tune-in Lounge
+foodvalid=false
+drinkvalid=true
+throughput=3
+x=-70
+y=29
+w=15

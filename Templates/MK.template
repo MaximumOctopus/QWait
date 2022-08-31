@@ -7,6 +7,7 @@ entrancex=0
 entrancey=0
 fastpasttype=3
 ridecount=18
+eaterycount=16
 
 [ride1]
 name=it’s a small world
@@ -97,7 +98,7 @@ name=Peter Pan’s Flight
 type=c
 length=3
 rideexittype=1
-hourlythroughput=1075
+hourlythroughput=375
 popularity=8
 x=-77
 y=407
@@ -222,3 +223,146 @@ x=167
 y=165
 isfastpass=3
 fpreservepercent=70
+
+[eatery1]
+name=Be Our Guest
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=34
+y=517
+w=15
+
+[eatery2]
+name=Casey's Corner
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=8
+y=144
+w=15
+
+[eatery3]
+name=Cinderall's Royal Table
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=12
+y=327
+w=15
+
+[eatery4]
+name=Columbia Harbour House
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-145
+y=387
+w=15
+
+[eatery5]
+name=Crystal Palace
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=127
+y=306
+w=15
+
+[eatery6]
+name=Gaston's Tavern
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-73
+y=150
+w=15
+
+[eatery7]
+name=Goldern Oak Outpost
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=62
+y=525
+w=15
+
+[eatery8]
+name=Liberty Tree Tavern
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-356
+y=227
+w=15
+		
+[eatery9]
+name=Main Street Bakery
+foodvalid=true
+drinkvalid=true
+x=-133
+y=265
+w=15
+
+[eatery10]
+name=Main Street Confectionary
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=8
+y=51
+w=10
+
+[eatery11]
+name=Pecos Bill Tall Tale Cafe
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-323
+y=231
+w=15
+
+[eatery12]
+name=Pinocchio Village Haus
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-20
+y=433
+w=15
+		
+[eatery13]
+name=Plaza Ice Cream
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=25
+y=128
+w=10
+
+[eatery14]
+name=Tomorrowland Terrace
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=80
+y=170
+w=15
+
+[eatery15]
+name=Tony's Town Square Restaurant
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=45
+y=19
+w=15
+
+[eatery16]
+name=Tortuga Tavern
+foodvalid=true
+drinkvalid=true
+throughput=3
+x=-292
+y=191
+w=15
