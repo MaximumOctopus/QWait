@@ -7,7 +7,8 @@ entrancex=100
 entrancey=740
 fastpasttype=0
 ridecount=27
-eaterycount=12
+eaterycount=17
+maxcapacity=28000
 
 // blank entry for a show type ride
 
@@ -346,7 +347,7 @@ drinkvalid=true
 throughput=3
 x=16
 y=70
-w=10
+wait=10
 
 [eatery2]
 name=Corner Coffee
@@ -355,7 +356,7 @@ drinkvalid=true
 throughput=3
 x=-36
 y=78
-w=10
+wait=10
 
 [eatery3]
 name=Eastern Express
@@ -364,7 +365,7 @@ drinkvalid=true
 throughput=3
 x=175
 y=113
-w=15
+wait=15
 
 [eatery4]
 name=Donut Factory
@@ -373,7 +374,7 @@ drinkvalid=true
 throughput=3
 x=-231
 y=268
-w=10
+wait=10
 
 [eatery5]
 name=Woodcutter's Bar and Grill
@@ -382,7 +383,7 @@ drinkvalid=true
 throughput=3
 x=15
 y=434
-w=15
+wait=15
 
 [eatery6]
 name=Pizza and Pasta
@@ -391,7 +392,7 @@ drinkvalid=true
 throughput=3
 x=434
 y=107
-w=15
+wait=15
 
 [eatery7]
 name=Just Chicken
@@ -400,7 +401,7 @@ drinkvalid=true
 throughput=3
 x=-199
 y=424
-w=15
+wait=15
 
 [eatery8]
 name=Nemice's Donuts
@@ -409,7 +410,7 @@ drinkvalid=true
 throughput=3
 x=487
 y=415
-w=10
+wait=10
 
 [eatery9]
 name=Rollercoaster
@@ -418,7 +419,7 @@ drinkvalid=true
 throughput=3
 x=634
 y=512
-w=15
+wait=15
 
 [eatery10]
 name=Little Explorer's Lunchbox
@@ -427,7 +428,7 @@ drinkvalid=true
 throughput=3
 x=-74
 y=17
-w=15
+wait=15
 
 [eatery11]
 name=Coffee Lounge
@@ -436,7 +437,7 @@ drinkvalid=true
 throughput=3
 x=-39
 y=719
-w=15
+wait=15
 
 [eatery12]
 name=Burger Kitchen
@@ -445,7 +446,7 @@ drinkvalid=true
 throughput=3
 x=609
 y=467
-w=10
+wait=10
 
 [eatery13]
 name=Welcom-Inn
@@ -454,7 +455,7 @@ drinkvalid=true
 throughput=2
 x=162
 y=185
-w=15
+wait=15
 
 [eatery14]
 name=Courtyard Nachos/Waffles/Hotdogs
@@ -463,7 +464,7 @@ drinkvalid=true
 throughput=3
 x=162
 y=185
-w=10
+wait=10
 
 [eatery15]
 name=Wafflemeister
@@ -472,7 +473,7 @@ drinkvalid=true
 throughput=2
 x=380
 y=375
-w=15
+wait=15
 
 [eatery16]
 name=Nitrogenie
@@ -481,4 +482,13 @@ drinkvalid=true
 throughput=2
 x=510
 y=209
-w=10
+wait=10
+
+[eatery17]
+name=Vending Machines
+foodvalid=false
+drinkvalid=true
+throughput=8
+x=-229
+y=268
+wait=5

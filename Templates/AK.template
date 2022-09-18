@@ -8,6 +8,7 @@ entrancey=0
 fastpasttype=1
 ridecount=14
 eaterycount=8
+maxcapacity=60000
 
 [ride1]
 name=Feathered Friends in Flight!
@@ -189,7 +190,7 @@ foodvalid=true
 drinkvalid=true
 x=77
 y=220
-w=15
+wait=15
 
 [eatery2]
 name=Picnic in the Park
@@ -197,7 +198,7 @@ foodvalid=true
 drinkvalid=true
 x=-79
 y=184
-w=15
+wait=15
 
 [eatery3]
 name=Pizzafari
@@ -205,7 +206,7 @@ foodvalid=true
 drinkvalid=true
 x=-132
 y=205
-w=10
+wait=10
 
 [eatery4]
 name=Rainforest Cafe
@@ -213,7 +214,7 @@ foodvalid=true
 drinkvalid=true
 x=-58
 y=-90
-w=15
+wait=15
 
 [eatery5]
 name=Restaurantosaurus
@@ -221,7 +222,7 @@ foodvalid=true
 drinkvalid=true
 x=122
 y=68
-w=15
+wait=15
 
 [eatery6]
 name=Tusker House
@@ -229,7 +230,7 @@ foodvalid=true
 drinkvalid=true
 x=-198
 y=367
-w=15
+wait=15
 
 [eatery7]
 name=Tak and Yeti
@@ -237,7 +238,7 @@ foodvalid=true
 drinkvalid=true
 x=64
 y=371
-w=15
+wait=15
 
 [eatery8]
 name=Royal Anandapur Tea
@@ -245,4 +246,4 @@ foodvalid=true
 drinkvalid=false
 x=80
 y=337
-w=15
+wait=15

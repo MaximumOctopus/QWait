@@ -8,6 +8,7 @@ entrancey=0
 fastpasttype=1
 ridecount=14
 eaterycount=13
+maxcapacity=60000
 
 [ride1]
 name=Indiana Jones Epic Stunt Spectacular!
@@ -188,7 +189,7 @@ drinkvalid=true
 throughput=3
 x=-91
 y=18
-w=15
+wait=15
 
 [eatery2]
 name=ABC Commissary
@@ -197,7 +198,7 @@ drinkvalid=true
 throughput=3
 x=-166
 y=161
-w=15
+wait=15
 
 [eatery3]
 name=Backlot Express
@@ -206,7 +207,7 @@ drinkvalid=true
 throughput=3
 x=-250
 y=35
-w=10
+wait=10
 
 [eatery4]
 name=The Hollywood Brown Derby
@@ -215,7 +216,7 @@ drinkvalid=true
 throughput=3
 x=-27
 y=144
-w=15
+wait=15
 
 [eatery5]
 name=Hollywood and Vine
@@ -224,7 +225,7 @@ drinkvalid=true
 throughput=3
 x=-43
 y=40
-w=15
+wait=15
 
 [eatery6]
 name=Mama Melrose's
@@ -233,7 +234,7 @@ drinkvalid=true
 throughput=3
 x=-387
 y=147
-w=15
+wait=15
 
 [eatery7]
 name=Rizzo's Pizza
@@ -242,7 +243,7 @@ drinkvalid=true
 throughput=3
 x=-320
 y=113
-w=15
+wait=15
 
 [eatery8]
 name=Sci-Fi Dine-in Theater
@@ -251,7 +252,7 @@ drinkvalid=true
 throughput=3
 x=-229
 y=143
-w=15
+wait=15
 
 [eatery9]
 name=Starring Rolls Cafe
@@ -260,7 +261,7 @@ drinkvalid=true
 throughput=3
 x=10
 y=108
-w=15
+wait=15
 
 [eatery10]
 name=Sunset Blvd. Courtyard
@@ -269,7 +270,7 @@ drinkvalid=true
 throughput=3
 x=127
 y=105
-w=15
+wait=15
 
 [eatery11]
 name=Hollywood Brown Derby Lounge
@@ -278,7 +279,7 @@ drinkvalid=true
 throughput=3
 x=-26
 y=127
-w=15
+wait=15
 
 [eatery12]
 name=Trolly Car Cafe
@@ -287,7 +288,7 @@ drinkvalid=true
 throughput=3
 x=-18
 y=77
-w=15
+wait=15
 
 [eatery13]
 name=Tune-in Lounge
@@ -296,4 +297,4 @@ drinkvalid=true
 throughput=3
 x=-70
 y=29
-w=15
+wait=15
