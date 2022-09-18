@@ -41,6 +41,8 @@ static const std::wstring kTemplateFile = L"/templatefile";
 static const std::wstring kTemplate = L"/template";
 static const std::wstring kVisitors = L"/visitors";
 static const std::wstring kFastPassMode = L"/fastpassmode";
+static const std::wstring kFoodDrink = L"/fooddrink";
+static const std::wstring kTemperature = L"/temperature";
 static const std::wstring kUserConfigFile = L"/useconfigfile";
 static const std::wstring kGetVisitorNames = L"/getvisitornames";
 
@@ -98,6 +100,11 @@ struct SimulationInput {
 };
 
 
+struct SimulationClimate {
+	int Temperature = 20;
+};
+
+
 class Configuration
 {
 	std::vector<ParameterData> Parameters;
@@ -123,8 +130,11 @@ class Configuration
 	void HandleVisitors(const std::wstring);
 	void HandleFastPassMode(const std::wstring);
 	void HandleUseConfigFile(std::wstring);
+	void HandleTemperature(const std::wstring);
 
 public:
+
+	SimulationClimate Climate;
 
 	DebugOutput DebugReports;
 	CSVOutput CSVReports;
@@ -143,6 +153,8 @@ public:
 	bool GetVisitorNames = false;
 
 	FastPassType FastPassMode = FastPassType::None;
+
+	bool HandleFoodDrink = false;
 
 	int ParkOpenTime = 0;	// 24-hour clock
 	int ParkCloseTime = 0;  // 24-hour clock

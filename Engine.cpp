@@ -25,7 +25,7 @@ extern ParkController* GParkController;
 extern VisitorController* GVisitorController;
 
 
-Engine::Engine(FastPassType fast_pass, int park_open_time, int park_close_time, bool show_output, int update_rate)
+Engine::Engine(FastPassType fast_pass, int park_open_time, int park_close_time, bool show_output, int update_rate, bool handle_food_drink, int temp)
 {
 	UpdateRate = update_rate;
 
@@ -34,6 +34,8 @@ Engine::Engine(FastPassType fast_pass, int park_open_time, int park_close_time, 
 	ShowOutput = show_output;
 
 	FastPassMode = fast_pass;
+
+	HandleFoodDrink = handle_food_drink;
 
 	GParkController->FastPassMode = FastPassMode;
 
@@ -44,6 +46,8 @@ Engine::Engine(FastPassType fast_pass, int park_open_time, int park_close_time, 
 	TimeParkCloses = park_close_time + 1;
 
 	VisitorsInPark = 0;
+
+	Temperature = temp;
 }
 
 
@@ -113,9 +117,15 @@ void Engine::Run(bool report_mxm, bool report_visitor_location)
 
 				break;
 
-			case GroupParkStatus::Travelling:
+			case GroupParkStatus::QueuingFood:
 
-				ParkStatusTravelling(g);
+				GVisitorController->Groups[g].SetStatForAllVisitors(GroupVisitorStat::TimeSpentQueuingFood);
+
+				break;
+
+			case GroupParkStatus::TravellingRide:
+
+				ParkStatusTravellingRide(g);
 
 				break;
 
@@ -125,14 +135,36 @@ void Engine::Run(bool report_mxm, bool report_visitor_location)
 
 				break;
 
-			case GroupParkStatus::Exited:
+			case GroupParkStatus::TravellingFood:
 
+				ParkStatusTravellingFood(g);
+
+				break;
+
+			case GroupParkStatus::Eating:
+
+				ParkStatusEating(g);
+
+				break;
+
+			case GroupParkStatus::Exited:
 				break;
 			}
 
 			if (report_visitor_location)
 			{
 				GVisitorController->Groups[g].SaveMinuteStats();
+			}
+
+			// ========================================================================================================
+			// == Food and Drink ======================================================================================
+			// ========================================================================================================
+
+			if (HandleFoodDrink)
+			{
+				GVisitorController->Groups[g].UpdateConsumption(Temperature);
+
+				GVisitorController->Groups[g].Behaviour.consumption.TimeSinceDrink++;
 			}
 		}
 
@@ -161,6 +193,20 @@ void Engine::Run(bool report_mxm, bool report_visitor_location)
 				GParkController->Rides[r].UpdateMinuteStats();
 			}
 		}
+
+		// ========================================================================================================
+		// == Food Drink Processing ===============================================================================
+		// ========================================================================================================
+
+		if (HandleFoodDrink)
+		{
+			for (int e = 0; e < GParkController->Eateries.size(); e++)
+			{
+				EateryProcessQueue(e);
+			}
+		}
+
+		// ========================================================================================================
 
 		if (report_mxm)
 		{
@@ -684,6 +730,62 @@ void Engine::RideEmptyQueue(int ride)
 
 
 // =================================================================================================================
+// == Food Drink Processing ========================================================================================
+// =================================================================================================================
+
+
+void Engine::EateryProcessQueue(int eatery)
+{
+	if (GParkController->Eateries[eatery].Queue.size() != 0)
+	{
+		auto count = 0;
+
+		int group;
+
+		do
+		{
+			group = GParkController->Eateries[eatery].RemoveFromQueue();
+
+			if (group != Constants::kNotValidGroup)
+			{
+				GVisitorController->Groups[group].SetStatusForAllVisitors(GroupParkStatus::Eating, VisitorParkStatus::Eating);
+
+				GVisitorController->Groups[group].Behaviour.waitingTime += GParkController->Eateries[eatery].GetWaitTime(GVisitorController->Groups[group].Configuration.type);
+
+				GParkController->Eateries[eatery].Statistics.Customers += GVisitorController->Groups[group].Visitors.size();
+
+				GParkController->Eateries[eatery].Statistics.Spend += (GVisitorController->Groups[group].AdultCount * GParkController->Eateries[eatery].AveragePriceAdult) +
+																	  (GVisitorController->Groups[group].ChildCount * GParkController->Eateries[eatery].AveragePriceChild);
+
+				count++;
+			}
+
+		} while (count < GParkController->Eateries[eatery].Throughput && group != Constants::kNotValidGroup);
+	}
+}
+
+
+void Engine::EateryEmptyQueue(int eatery)
+{
+	if (GParkController->Eateries[eatery].Queue.size() != 0)
+	{
+		int group = Constants::kNotValidGroup;
+
+		do
+		{
+			group = GParkController->Eateries[eatery].RemoveFromQueue();
+
+			if (group != Constants::kNotValidGroup)
+			{
+				GVisitorController->Groups[group].SetStatusForAllVisitors(GroupParkStatus::Idle, VisitorParkStatus::Idle);
+			}
+
+		} while (group != Constants::kNotValidGroup);
+	}
+}
+
+
+// =================================================================================================================
 // == Visitor status processing ====================================================================================
 // =================================================================================================================
 
@@ -709,21 +811,48 @@ void Engine::ParkStatusIdle(int group)
 	}
 	else
 	{
-		// lets find something to ride
-		QWaitTypes::GetRide NewRide = GetRide(group);
+		bool FindRide = true;
 
-		if (NewRide.ride != Constants::kNoSelectedRide)
+		if (HandleFoodDrink)
 		{
-			GVisitorController->Groups[group].SetNewRide(NewRide.ride, NewRide.fastPassTicket,
-														 GParkController->GetDistanceBetweenInMinutes(GVisitorController->Groups[group].Behaviour.currentRide, NewRide.ride),
-														 GParkController->GetDistanceBetweenInMetres(GVisitorController->Groups[group].Behaviour.currentRide, NewRide.ride),
-														 GParkController->Rides[NewRide.ride].RideOperation.position);
+			if (GVisitorController->Groups[group].Behaviour.consumption.Drink > GVisitorController->Groups[group].Behaviour.consumption.Threshold)
+			{
+				QWaitTypes::GetEatery eatery = GParkController->GetClosestEatery(GVisitorController->Groups[group].Behaviour.location, GVisitorController->Groups[group].GetMaximumWaitingTimeFood());
+
+				if (eatery.eatery != -1)
+				{
+					GVisitorController->Groups[group].SetNewEatery(eatery.eatery,
+						static_cast<int>((double)eatery.distance / (double)Constants::WalkSpeedMetresPerMinute),
+						eatery.distance,
+						eatery.location);
+
+					FindRide = false;
+				}
+				else
+				{
+					GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::EateryQueueTooLong);
+				}
+			}
 		}
-		else
-		{
-			GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::NoRideAvailable);
 
-			GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::TimeSpentIdle);
+		if (FindRide)
+		{
+			// lets find something to ride
+			QWaitTypes::GetRide NewRide = GetRide(group);
+
+			if (NewRide.ride != Constants::kNoSelectedRide)
+			{
+				GVisitorController->Groups[group].SetNewRide(NewRide.ride, NewRide.fastPassTicket,
+					GParkController->GetDistanceBetweenInMinutes(GVisitorController->Groups[group].Behaviour.currentRide, NewRide.ride),
+					GParkController->GetDistanceBetweenInMetres(GVisitorController->Groups[group].Behaviour.currentRide, NewRide.ride),
+					GParkController->Rides[NewRide.ride].RideOperation.position);
+			}
+			else
+			{
+				GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::NoRideAvailable);
+
+				GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::TimeSpentIdle);
+			}
 		}
 	}
 }
@@ -754,7 +883,7 @@ void Engine::ParkStatusRiding(int group)
 }
 
 
-void Engine::ParkStatusTravelling(int group)
+void Engine::ParkStatusTravellingRide(int group)
 {
 	if (GVisitorController->Groups[group].Behaviour.travelling.minutesLeft == 0)
 	{
@@ -766,7 +895,7 @@ void Engine::ParkStatusTravelling(int group)
 			int Ride = GVisitorController->Groups[group].Behaviour.travelling.toRide;
 
 			// if they travel there and find the queue has changed then they are willing to wait a bit longer
-			if (GParkController->Rides[Ride].WaitTime(GVisitorController->Groups[group].Behaviour.travelling.fastPass) < (double)GVisitorController->Groups[group].Behaviour.maximumRideWaitingTime * 1.10f)
+			if (GParkController->Rides[Ride].WaitTime(GVisitorController->Groups[group].Behaviour.travelling.fastPass) < (double)GVisitorController->Groups[group].Behaviour.maximumRideWaitingTime * 1.10)
 			{
 				QWaitTypes::Riders riders;
 
@@ -864,6 +993,64 @@ void Engine::ParkStatusWaiting(int group)
 }
 
 
+void Engine::ParkStatusTravellingFood(int group)
+{
+	if (GVisitorController->Groups[group].Behaviour.travelling.minutesLeft == 0)
+	{
+		GVisitorController->Groups[group].UpdateLocation(GParkController->Eateries[GVisitorController->Groups[group].Behaviour.travelling.toEatery].X,
+			GParkController->Eateries[GVisitorController->Groups[group].Behaviour.travelling.toEatery].Y);
+
+		if (ParkOpen)
+		{
+			int Eatery = GVisitorController->Groups[group].Behaviour.travelling.toEatery;
+
+			GParkController->Eateries[Eatery].AddToQueue(group);
+
+			GVisitorController->Groups[group].SetAtEateryQueuing(Eatery);
+		}
+		else
+		{
+			GVisitorController->Groups[group].UpdateLocation(Constants::kLocationExitedPark, Constants::kLocationExitedPark);
+		}
+	}
+	else
+	{
+		GVisitorController->Groups[group].Behaviour.travelling.minutesLeft--;
+
+		GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::TimeSpentTravellingFood);// to do
+
+		GVisitorController->Groups[group].UpdateTravellingLocation();
+	}
+}
+
+
+void Engine::ParkStatusEating(int group)
+{
+	if ((CurrentTime.minutes >= GVisitorController->Groups[group].Configuration.departureTime.minutes && CurrentTime.hours == GVisitorController->Groups[group].Configuration.departureTime.hours)
+		|| !ParkOpen)
+	{
+		GVisitorController->Groups[group].UpdateLocation(Constants::kLocationExitedPark, Constants::kLocationExitedPark);
+
+		VisitorsInPark -= GVisitorController->Groups[group].Visitors.size();
+	}
+	else
+	{
+		if (GVisitorController->Groups[group].Behaviour.waitingTime == 0)
+		{
+			GVisitorController->Groups[group].SetStatusForAllVisitors(GroupParkStatus::Idle, VisitorParkStatus::Idle);
+
+			GVisitorController->Groups[group].ResetFoodDrink();
+		}
+		else
+		{
+			GVisitorController->Groups[group].SetStatForAllVisitors(GroupVisitorStat::TimeSpentEating);
+
+			GVisitorController->Groups[group].Behaviour.waitingTime--;
+		}
+	}
+}
+
+
 // =================================================================================================================
 // == Stats ========================================================================================================
 // =================================================================================================================
@@ -890,7 +1077,7 @@ void Engine::ShowLiveStats()
 
 	if (VisitorsInPark != 0)
 	{
-		pcriding = static_cast<int>(((double)AtRide / (double)VisitorsInPark) * 100.0f);
+		pcriding = static_cast<int>(((double)AtRide / (double)VisitorsInPark) * 100.0);
 	}
 
 	if (FastPassMode == FastPassType::None)

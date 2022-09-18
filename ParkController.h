@@ -18,6 +18,7 @@
 
 
 #include "Constants.h"
+#include "Eatery.h"
 #include "RidePricing.h"
 #include "QWaitTypes.h"
 #include "Ride.h"
@@ -40,6 +41,7 @@ struct Entrance
 	int fastPassType = 0; // 0, none; 1, types 1 and 2 fastpass; 3, type 3 park
 
 	int averageVisitors = 0; // an average visitor value for this park
+	int maximumCapacity = 0; // maximum visitor number
 
 	RidePricing Prices;
 
@@ -57,6 +59,7 @@ struct DistanceInfo {
 class ParkController
 {
 	bool ShowOutput;
+	bool FoodDrink = false;
 
 	std::vector<int> EntranceQueue;
 
@@ -96,8 +99,9 @@ public:
 	int Minutes; // how many minutes of data are stored
 
 	std::vector<Ride> Rides;
+	std::vector<Eatery> Eateries;
 
-	ParkController(bool, const std::wstring);
+	ParkController(bool, bool, const std::wstring);
 
 	bool BuildFromTemplate(const std::wstring);
 
@@ -109,7 +113,9 @@ public:
 	void AddNewRideContinuousWithHours(const std::wstring, int, RideExitType, int, int, int, int, int, int, int, int, int, int, bool, bool, bool);		// eg it's a small world
 	void AddNewRideShowWithHours(const std::wstring, int, RideExitType, int, int, int, int, int, int, int, int, int, int, int, int, bool, bool, bool);	// eg lion king show
 
-	void SetEntrance(const std::wstring, int, int, int, int, int, int, int, int, int, int);
+	void AddFoodDrink(const std::wstring, int, bool, bool, int, int, int, int, int);
+
+	void SetEntrance(const std::wstring, int, int, int, int, int, int, int, int, int, int, int);
 
 	void BuildRides(ParkTemplate, const std::wstring);
 
@@ -128,6 +134,9 @@ public:
 
 	void ShowConfig();
 	void ShowStatistics(int);
+	int TotalEaterySpending();
 
 	bool SaveDistanceCache(const std::wstring);
+
+	QWaitTypes::GetEatery GetClosestEatery(QWaitTypes::Coords, int);
 };

@@ -18,37 +18,42 @@
 #include "QWaitTypes.h"
 #include "Visitor.h"
 
-
 enum class GroupType { Family = 0, AdultCouple = 1, AdultGroup = 2, Single = 3 };
 
-static const double kFamilyChildrenCount[4] = { 20.0f, 70.0f, 95.0f, 99.0f };
-static const double kAdultGroupCount[4]     = { 10.0f, 25.0f, 40.0f, 75.0f };
+static const double kFamilyChildrenCount[4] = { 20.0, 70.0, 95.0, 99.0 };
+static const double kAdultGroupCount[4]     = { 10.0, 25.0, 40.0, 75.0 };
 
 static const int kBasePostRideWaitTime = 1;
 
-static const double kVisitorTypeCoeff[7][6] = { { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// generic test
-											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Animal Kingdom
-											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Epcot
-											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Hollywood Studios
-											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Magic Kingdom
-											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f },	// Arcade
-											    { 0.06f, 0.11f, 0.40f, 0.45f, 0.75f, 0.98f } };	// Alton Towers
+static const int kFamilyConsumptionThreshold = 1000;
+static const int kAdultCoupleConsumptionThreshold = 1000;
+static const int kAdultGroupConsumptionThreshold = 1000;
+static const int kSingleConsumptionThreshold = 1000;
+
+static const double kVisitorTypeCoeff[7][6] = { { 0.06, 0.11, 0.40, 0.45, 0.75, 0.98 },	// generic test
+											    { 0.06, 0.11, 0.40, 0.45, 0.75, 0.98 },	// Animal Kingdom
+											    { 0.06, 0.11, 0.40, 0.45, 0.75, 0.98 },	// Epcot
+											    { 0.06, 0.11, 0.40, 0.45, 0.75, 0.98 },	// Hollywood Studios
+											    { 0.06, 0.11, 0.40, 0.45, 0.75, 0.98 },	// Magic Kingdom
+											    { 0.06, 0.11, 0.40, 0.45, 0.75, 0.98 },	// Arcade
+											    { 0.06, 0.11, 0.40, 0.45, 0.75, 0.98 } };	// Alton Towers
 
 											  // Family AdultCouple AdultGroup Single 
-static const double kGroupTypeCoeff[7][3] =   { { 0.50f, 0.75f, 0.990f },	// generic test
-										  	    { 0.50f, 0.75f, 0.990f },	// Animal Kingdom
-											    { 0.50f, 0.75f, 0.990f },	// Epcot
-											    { 0.50f, 0.75f, 0.990f },	// Hollywood Studios
-											    { 0.50f, 0.75f, 0.990f },	// Magic Kingdom
-											    { 0.50f, 0.75f, 0.990f },	// Arcade
-											    { 0.40f, 0.75f, 0.990f } };	// Alton Towers
+static const double kGroupTypeCoeff[7][3] =   { { 0.50, 0.75, 0.990 },	// generic test
+										  	    { 0.50, 0.75, 0.990 },	// Animal Kingdom
+											    { 0.50, 0.75, 0.990 },	// Epcot
+											    { 0.50, 0.75, 0.990 },	// Hollywood Studios
+											    { 0.50, 0.75, 0.990 },	// Magic Kingdom
+											    { 0.50, 0.75, 0.990 },	// Arcade
+											    { 0.40, 0.75, 0.990 } };	// Alton Towers
 
 enum class GroupParkStatus { OnWay = 0, AtEntrance = 1, Idle = 2, Riding = 3, Queuing = 4, 
-	                         QueuingFastPass = 5, Travelling = 6, Waiting = 7, Exited = 8};
+	                         QueuingFastPass = 5, QueuingFood = 6, TravellingRide = 7, Waiting = 8, TravellingFood = 9, Eating = 10, Exited = 11 };
 
 enum class GroupVisitorStat {
-	NoRideAvailable = 0, RideShutdown = 1, WaitTimeTooLong = 2, NoFastPassRideForMe = 3, TimeSpentRiding = 4,
-	TimeSpentIdle = 5, TimeSpentQueuing = 6, TimeSpentTravelling = 7, TimeSpentWaiting = 8, NooneCanRideInGroup = 9
+	NoRideAvailable = 0, RideShutdown = 1, WaitTimeTooLong = 2, NoFastPassRideForMe = 3, TimeSpentRiding = 4, TimeSpentIdle = 5, TimeSpentQueuing = 6,
+	TimeSpentQueuingFood = 7, TimeSpentTravelling = 8, TimeSpentTravellingFood = 9, TimeSpentWaiting = 10, TimeSpentEating = 11, NooneCanRideInGroup = 12,
+	EateryQueueTooLong = 13
 };
 
 
@@ -57,6 +62,7 @@ struct GroupTravel {
 	QWaitTypes::Coords to = { 0, 0 };
 
 	int toRide = 0;
+	int toEatery = 0;
 	int minutesLeft = 0;
 	int minutesStart = 0;
 	int fastPass = 0;
@@ -143,9 +149,24 @@ struct GroupStatistics {
 };
 
 
-struct ParkBehaviour {
-	
+struct Consumption
+{
+	double Food = 0;
+	double Drink = 0;
+
+	int TimeSinceFood = 0;
+	int TimeSinceDrink = 0;
+
+	double Threshold = 1000;
+};
+
+
+struct ParkBehaviour 
+{
+	Consumption consumption;
+
 	int currentRide = Constants::kNoSelectedRide;
+	int currentEatery = Constants::kNoSelectedEatery;
 
 	GroupParkStatus parkStatus = GroupParkStatus::OnWay;
 
@@ -167,6 +188,8 @@ struct GroupRiding
 
 class Group
 {
+	void Demographics();
+
 	void SetGroupSettings();
 
 	void BuildFamily(double);
@@ -186,6 +209,7 @@ class Group
 public:
 
 	std::vector<int> RideList;		// list of every ride this group has ridden today
+	std::vector<int> EateryList;		// list of every eatery this group has eaten at today
 		
 	std::vector<QWaitTypes::FastPass> FastPassTickets;
 
@@ -194,6 +218,9 @@ public:
 	ParkBehaviour Behaviour;
 
 	std::vector<Visitor> Visitors;
+
+	int AdultCount = 0;
+	int ChildCount = 0;
 
 	GroupConfiguration Configuration;
 
@@ -214,7 +241,7 @@ public:
 
 	void SetRiding(QWaitTypes::Riders, int, int, bool);
 	void SetNewRide(int, int, int, int, QWaitTypes::Coords);
-	void SetTravellingMinutesLeft(int);
+	void SetTravellingMinutesLeft(int, bool);
 	void SetAtRideQueuing(int);
 	void SetAtRideQueuingFastPass(int);
 
@@ -226,6 +253,7 @@ public:
 	void SetStatusForAllVisitors(GroupParkStatus, VisitorParkStatus);
 
 	int GetMaximumWaitingTime();
+	int GetMaximumWaitingTimeFood();
 
 	void UpdateLocation(int, int);
 	void UpdateTravellingLocation(void);
@@ -242,4 +270,10 @@ public:
 	void SortFastPassTickets();
 
 	std::wstring GetVisitorAgesString();
+
+	void SetNewEatery(int, int, int, QWaitTypes::Coords);
+
+	void ResetFoodDrink();
+	void SetAtEateryQueuing(int);
+	void UpdateConsumption(int);
 };

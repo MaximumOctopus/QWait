@@ -42,6 +42,7 @@ namespace ReportHTML
 
 		void TicketList(std::wofstream&);
 		void RideList(std::wofstream&);
+		void EateryList(std::wofstream&);
 		void GroupTypeList(std::wofstream&);
 		void VisitorTypeList(std::wofstream&);
 		void VisitorRideList(std::wofstream&);
@@ -57,6 +58,9 @@ namespace ReportHTML
 
 		void FiveColumnHeader(std::wofstream&, std::wstring, std::wstring, std::wstring, std::wstring);
 		void FiveColumnTableRow(std::wofstream&, int, std::wstring, int, int, double, int);
+
+		void FiveColumnAltHeader(std::wofstream&, std::wstring, std::wstring, std::wstring, std::wstring, std::wstring);
+		void FiveColumnAltTableRow(std::wofstream&, int row, std::wstring, int, int, double, int);
 
 		void MxMTableHeader(std::wofstream&);
 		void MxMTableHeaderFP(std::wofstream&);

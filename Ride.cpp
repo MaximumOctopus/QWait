@@ -123,7 +123,7 @@ void Ride::InitFastPass()
 // tickets left per hour
 int Ride::ResetFastPassTicketsLeft()
 {
-	double percentage = (double)FastPass.percentage / 100.0f;
+	double percentage = (double)FastPass.percentage / 100.0;
 
 	return static_cast<int>((double)RideThroughput.totalPerHour * percentage);
 }
@@ -135,22 +135,22 @@ void Ride::ConfigureThroughput(int hourly_throughput)
 
 	if (FastPass.mode != 0)
 	{
-		RideThroughput.perMinuteTotal = (double)hourly_throughput / 60.0f;
+		RideThroughput.perMinuteTotal = (double)hourly_throughput / 60.0;
 
-		RideThroughput.perMinute = ((double)hourly_throughput * (Constants::StandardHourlyPercent / 100.0f)) / 60.0f;
+		RideThroughput.perMinute = ((double)hourly_throughput * (Constants::StandardHourlyPercent / 100.0)) / 60.0;
 		RideThroughput.perMinuteI = static_cast<int>(std::lround(RideThroughput.perMinute));
 
-		RideThroughput.perMinuteFastPass = ((double)hourly_throughput * (Constants::FastPassHourlyPercent / 100.0f)) / 60.0f;
+		RideThroughput.perMinuteFastPass = ((double)hourly_throughput * (Constants::FastPassHourlyPercent / 100.0)) / 60.0;
 		RideThroughput.perMinuteIFastPass = static_cast<int>(std::lround(RideThroughput.perMinuteFastPass));
 	}
 	else
 	{
-		RideThroughput.perMinuteTotal = (double)hourly_throughput / 60.0f;
+		RideThroughput.perMinuteTotal = (double)hourly_throughput / 60.0;
 
-		RideThroughput.perMinute = (double)hourly_throughput / 60.0f;
+		RideThroughput.perMinute = (double)hourly_throughput / 60.0;
 		RideThroughput.perMinuteI = static_cast<int>(std::lround(RideThroughput.perMinute));
 
-		RideThroughput.perMinuteFastPass = 0.0f;
+		RideThroughput.perMinuteFastPass = 0.0;
 		RideThroughput.perMinuteIFastPass = 0;
 	}
 }
@@ -162,7 +162,7 @@ void Ride::ConfigureShowThroughput(int show_capacity, int fastpass_percent)
 
 	if (FastPass.mode != 0)
 	{
-		RideThroughput.showCapacityFastPass = static_cast<int>((double)show_capacity * ((double)fastpass_percent / 100.0f));
+		RideThroughput.showCapacityFastPass = static_cast<int>((double)show_capacity * ((double)fastpass_percent / 100.0));
 	}
 	else
 	{

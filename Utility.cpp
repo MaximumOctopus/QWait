@@ -121,7 +121,7 @@ namespace Utility
 				output = L" " + output;
 			}
 
-			return input;
+			return output;
 		}
 
 		return input;
@@ -149,7 +149,7 @@ namespace Utility
 	// duration in minutes between From and To
 	int Duration(QWaitTypes::Time from, QWaitTypes::Time to)
 	{
-		return static_cast<int>(((double)to.hours - (double)from.hours) * 60.0f + (to.minutes - from.minutes));
+		return static_cast<int>(((double)to.hours - (double)from.hours) * 60.0 + (to.minutes - from.minutes));
 	}
 
 

@@ -16,6 +16,7 @@
 //   https://crooksinwdw.wordpress.com/2013/12/14/theoreticaloperational-hourly-ride-capacity-at-wdw/
 //   https://eu.azcentral.com/story/travel/destinations/california/2019/08/16/disneyland-ride-capacity-how-long-will-you-have-wait-line/1927184001/
 //   https://magicguides.com/disney-world-statistics/
+//   https://www.wdwvacationtips.com/disney-world-capacity-limits
 //
 //   https://www.mousehacking.com/blog/best-animal-kingdom-rides
 //   https://www.mousehacking.com/blog/every-walt-disney-world-ride-ranked
@@ -39,6 +40,7 @@
 
 #include "Configuration.h"
 #include "Constants.h"
+#include "Eatery.h"
 #include "Ini.h"
 #include "ParkController.h"
 #include "Ride.h"
@@ -65,11 +67,12 @@ bool sortByDistance(const DistanceInfo& r1, const DistanceInfo& r2)
 }
 
 
-ParkController::ParkController(bool show_config, const std::wstring ride_template_file)
+ParkController::ParkController(bool show_config, bool food_drink, const std::wstring ride_template_file)
 {
 	entrance.ParkName = L"None.";
 
 	ShowOutput = show_config;
+	FoodDrink = food_drink;
 
 	FastPassMode = GConfiguration->FastPassMode;
 
@@ -92,7 +95,7 @@ ParkController::ParkController(bool show_config, const std::wstring ride_templat
 }
 
 
-void ParkController::SetEntrance(const std::wstring name, int x, int y, int fast_pass_type, int average_visitors, int adult, int adult_advance, int child, int child_advance, int babies, int babies_advance)
+void ParkController::SetEntrance(const std::wstring name, int x, int y, int fast_pass_type, int average_visitors, int adult, int adult_advance, int child, int child_advance, int babies, int babies_advance, int max_capacity)
 {
 	entrance.ParkName = name;
 
@@ -103,6 +106,7 @@ void ParkController::SetEntrance(const std::wstring name, int x, int y, int fast
 	entrance.fastPassType = fast_pass_type;
 
 	entrance.averageVisitors = average_visitors;
+	entrance.maximumCapacity = max_capacity;
 
 	entrance.Prices.Adult = adult;
 	entrance.Prices.AdultAdvance = adult_advance;
@@ -201,6 +205,14 @@ void ParkController::AddNewRideShowWithHours(const std::wstring name, int ride_l
 }
 
 
+void ParkController::AddFoodDrink(const std::wstring name, int throughput, bool food, bool drink, int x, int y, int wait_time, int average_adult, int average_child)
+{
+	Eatery e(name, throughput, x, y, food, drink, wait_time, average_adult, average_child);
+
+	Eateries.push_back(e);
+}
+
+
 void ParkController::BuildRides(ParkTemplate park_template, const std::wstring file_name)
 {
 	if (file_name != L"")
@@ -272,8 +284,6 @@ int ParkController::GetDistanceBetweenInMetres(int ride1, int ride2)
 
 void ParkController::BuildDistanceCache()
 {
-	static const int kWalkSpeedMetresPerMinute = 70;
-
 	for (int r1 = 0; r1 <= Rides.size(); r1++)
 	{
 		for (int r2 = 0; r2 <= Rides.size(); r2++)
@@ -316,7 +326,7 @@ void ParkController::BuildDistanceCache()
 			}
 			else
 			{
-				WalkTimeCache[r1][r2]     = static_cast<int>(sqrt((double)dx * dx + dy * dy) / kWalkSpeedMetresPerMinute) + 3;
+				WalkTimeCache[r1][r2]     = static_cast<int>(sqrt((double)dx * dx + dy * dy) / Constants::WalkSpeedMetresPerMinute) + 3;
 				WalkDistanceCache[r1][r2] = static_cast<int>(sqrt((double)dx * dx + dy * dy));
 			}
 		}
@@ -460,6 +470,7 @@ void ParkController::ShowConfig()
 		std::wcout << L"Number of rides in park       : " << Rides.size() << "\n";
 		std::wcout << L"Theoretical hourly throughput : " << TheoreticalHourThroughputTotal << "\n";
 		std::wcout << L"Theoretical daily throughput  : " << TheoreticalHourThroughputTotalDay << "\n";
+		std::wcout << L"Start temperature             : " << GConfiguration->Climate.Temperature << "°C\n";
 		std::wcout << "\n";
 	}
 }
@@ -472,7 +483,7 @@ void ParkController::BuildFromTemplate(ParkTemplate park_template)
 	case ParkTemplate::Test:
 
 		SetEntrance(L"Super Cat Park", 0, 0, 0, 10000,
-			8, 8, 5, 5, 0, 0);
+			8, 8, 5, 5, 0, 0, 12000);
 
 		AddNewRideShow(L"Cats throughout the ages", 30,             RideExitType::Short, 60, 2000, 2000,  1, -200,  50, 0, 0, true, true, false);
 		AddNewRideShow(L"Idea of a certain cat", 10,                RideExitType::Short, 15, 1000,  250, 12,    3, 300, 0, 0, true, true, false);
@@ -491,7 +502,7 @@ void ParkController::BuildFromTemplate(ParkTemplate park_template)
 	case ParkTemplate::WDWAnimalKingdom:
 
 		SetEntrance(L"Animal Kingdom", 0, 0, 1, 38000,
-			118, 118, 112, 112, 0, 0);
+			118, 118, 112, 112, 0, 0, 60000);
 
 		AddNewRideShow(L"Feathered Friends in Flight!",           35, RideExitType::Short,       60, 1000, 1000, 12,   10, 389, 2, 70, true, true, false); // temp replaces "UP! A Great Bird Adventure"
 		AddNewRideShow(L"Festival of the Lion King",              30, RideExitType::Short,       60, 1500, 1500,  6, -265, 337, 2, 70, true, true, false);
@@ -509,12 +520,21 @@ void ParkController::BuildFromTemplate(ParkTemplate park_template)
 		AddNewRideContinuous(L"TriceraTop Spin",                   2, RideExitType::Short,      850, 10,  186, 107, 0,  0, true, true, false); // 800-900
 		AddNewRideContinuous(L"Wildlife Express Train",            7, RideExitType::Short,     1500,  8, -123, 476, 0,  0, true, true, false); // 1000-1250 (per station, two trains operating)
 
+		AddFoodDrink(L"Flame Tree Barbecue", 3, true, true,  77,  220, 15, 10, 8);
+		AddFoodDrink(L"Picnic in the Park",  3, true, true, -79,  184, 15, 10, 8);
+		AddFoodDrink(L"Pizzafari",           3, true, true, -132, 205, 10, 10, 8);
+		AddFoodDrink(L"Rainforest Cafe",     3, true, true,  -58, -90, 15, 10, 8);
+		AddFoodDrink(L"Restaurantosaurus",   3, true, true,  122,  68, 15, 10, 8);
+		AddFoodDrink(L"Tusker House",        3, true, true, -198, 367, 15, 10, 8);
+		AddFoodDrink(L"Tak and Yeti",        3, true, true,   64, 371, 15, 10, 8);
+		AddFoodDrink(L"Royal Anandapur Tea", 3, true, false,  80, 337, 15, 10, 8);
+
 		break;
 
 	case ParkTemplate::WDWEpcot:
 
 		SetEntrance(L"EPCOT", 0, 0, 1, 34000,
-			118, 118, 112, 112, 0, 0);
+			118, 118, 112, 112, 0, 0, 110000);
 
 		AddNewRideShow(L"The American Adventure", 29, RideExitType::Short, 60, 1024, 1024, 9, 0, 925, 0, 0, true, true, false);
 
@@ -529,13 +549,44 @@ void ParkController::BuildFromTemplate(ParkTemplate park_template)
 		AddNewRideContinuous(L"Spaceship Earth",                                15, RideExitType::Short, 2400,  3,    0,  85, 2, 70, true, true, false);
 		AddNewRideContinuous(L"Test Track",                                      4, RideExitType::Shop,  1600,  1, -177, 337, 1, 70, true, true, false);
 		AddNewRideContinuous(L"The Seas with Nemo & Friends",                    4, RideExitType::Shop,  2000, 10,  145, 124, 0,  0, true, true, false); // 2000-2200
+
+		AddFoodDrink(L"Akershus Royal Banquet Hall", 3, true, true, 254, 638, 15, 10, 8);
+		AddFoodDrink(L"L'Artisan des Glaces", 3, true, true, -331, 829, 10, 10, 8);
+		AddFoodDrink(L"Biergarten", 3, true, true, 254, 901, 15, 10, 8);
+		AddFoodDrink(L"Boulangerie Patisserie", 3, true, true, -349, 842, 10, 10, 8);
+		AddFoodDrink(L"La Cantina", 3, true, true, 171, 561, 15, 10, 8);
+		AddFoodDrink(L"Le Cellier", 3, true, true, -211, 518, 15, 10, 8);
+		AddFoodDrink(L"Chefs de France", 3, true, true, -316, 813, 15, 10, 8);
+		AddFoodDrink(L"Coral Reef", 3, true, true, -109, 131, 15, 10, 8);
+		AddFoodDrink(L"Electric Umbrella", 3, true, true, 38, 235, 15, 10, 8);
+		AddFoodDrink(L"Garden Grill", 3, true, true, -263, 256, 15, 10, 8);
+		AddFoodDrink(L"Kringla Bakeri og Cafe", 3, true, true, 229, 609, 15, 10, 8);
+		AddFoodDrink(L"Liberty Inn", 3, true, true, 40, 970, 15, 10, 8);
+		AddFoodDrink(L"Lotus Blossom Cafe", 3, true, true, 282, 668, 15, 10, 8);
+		AddFoodDrink(L"Nine Dragons", 3, true, true, 254, 675, 15, 10, 8);
+		AddFoodDrink(L"Restaurant Marrakesh", 3, true, true, -263, 938, 15, 10, 8);
+		AddFoodDrink(L"Rose and Crown Pub", 3, true, true, -209, 638, 15, 10, 8);
+		AddFoodDrink(L"Sam Angel Inn", 3, true, true, 127, 496, 15, 10, 8);
+		AddFoodDrink(L"Sommerfest", 3, true, true, 231, 905, 15, 10, 8);
+		AddFoodDrink(L"Spice Road Table", 3, true, true, -211, 851, 15, 10, 8);
+		AddFoodDrink(L"Sunshine Season Food Fair", 3, true, true, -263, 256, 15, 10, 8);
+		AddFoodDrink(L"Tangierine Cafe", 3, true, true, -263, 878, 15, 10, 8);
+		AddFoodDrink(L"Teppan Edo", 3, true, true, -131, 931, 15, 10, 8);
+		AddFoodDrink(L"Tutto Italia", 3, true, true, 141, 960, 15, 10, 8);
+		AddFoodDrink(L"Via Napoli", 3, true, true, 128, 996, 15, 10, 8);
+		AddFoodDrink(L"Yakitori House", 3, true, true, -94, 954, 15, 10, 8);
+		AddFoodDrink(L"Yorkshire County Fish Shop", 3, true, true, -222, 656, 10, 10, 8);
+
+		AddFoodDrink(L"La Cava del Tequila", 3, false, true, 219, 514, 15, 10, 8);
+		AddFoodDrink(L"Club Cool", 3, false, true, -34, 319, 15, 10, 8);
+		AddFoodDrink(L"Tutto Gusto", 3, false, true, 137, 974, 15, 10, 8);
 		
 		break;
 
 	case ParkTemplate::WDWHollywoodStudios:
 
 		SetEntrance(L"Hollywood Studios", 0, 0, 1, 31000,
-			118, 118, 112, 112, 0, 0);
+			118, 118, 112, 112, 0, 0, 60000);
 
 		AddNewRideShow(L"Indiana Jones Epic Stunt Spectacular!",            30, RideExitType::Short,   60, 2000, 2000, 10, -190, 0, 2, 70, true, true, false);
 		AddNewRideShow(L"Muppet*Vision 3-D",                                15, RideExitType::Short,   15, 2256, 564, 8, -290, 142, 2, 70, true, true, false); // 564 per show
@@ -553,12 +604,26 @@ void ParkController::BuildFromTemplate(ParkTemplate park_template)
 		AddNewRideContinuous(L"Toy Story Midway Mania!",                     8, RideExitType::Short, 1600,  3, -155, 261, 2, 70, true, true, false); // 1600-1700
 		AddNewRideContinuous(L"Voyage of the Little Mermaid",               15, RideExitType::Short, 1900, 12,  -25, 192, 2, 70, true, true, false);
 	            
+		AddFoodDrink(L"50's Prime-Time Cafe", 3, true, true, -91, 18, 15, 10, 8);
+		AddFoodDrink(L"ABC Commissary", 3, true, true, -166, 161, 15, 10, 8);
+		AddFoodDrink(L"Backlot Express", 3, true, true, -250, 35, 10, 10, 8);
+		AddFoodDrink(L"The Hollywood Brown Derby", 3, true, true, -27, 144, 15, 10, 8);
+		AddFoodDrink(L"Hollywood and Vine", 3, true, true, -43, 40, 15, 10, 8);
+		AddFoodDrink(L"Mama Melrose's", 3, true, true, -387, 147, 15, 10, 8);
+		AddFoodDrink(L"Rizzo's Pizza", 3, true, true, -320, 113, 15, 10, 8);
+		AddFoodDrink(L"Sci-Fi Dine-in Theater", 3, true, true, -229, 143, 15, 10, 8);
+		AddFoodDrink(L"Starring Rolls Cafe", 3, true, true, 10, 108, 15, 10, 8);
+		AddFoodDrink(L"Sunset Blvd. Courtyard", 3, true, true, 127, 105, 15, 10, 8);
+		AddFoodDrink(L"Hollywood Brown Derby Lounge", 3, false, true, -26, 127, 15, 10, 8);
+		AddFoodDrink(L"Trolly Car Cafe", 3, false, true, -18, 77, 15, 10, 8);
+		AddFoodDrink(L"Tune-in Lounge", 3, false, true, -70, 29, 15, 10, 8);
+
 		break;
 
 	case ParkTemplate::WDWMagicKingdom:
 
 		SetEntrance(L"Magic Kingdom", 0, 0, 3, 57000,
-			118, 118, 112, 112, 0, 0);
+			118, 118, 112, 112, 0, 0, 100000);
 
 		AddNewRideContinuous(L"it’s a small world",                           11, RideExitType::Short, 2000,  9,  -73, 428, 3, 70, true, true, false); // the best ride in the whole universe
 		AddNewRideContinuous(L"Astro Orbiter",                                 2, RideExitType::Short,  300, 15,  270, 201, 0,  0, true, true, false);
@@ -579,12 +644,29 @@ void ParkController::BuildFromTemplate(ParkTemplate park_template)
 		AddNewRideContinuous(L"Under the Sea: Journey of the Little Mermaid",  7, RideExitType::Short, 1800, 17,  142, 472, 3, 70, true, true, false); // 1800-1994
 		AddNewRideContinuous(L"Walt Disney’s Carousel of Progress",           21, RideExitType::Short, 3600, 16,  190, 114, 0,  0, true, true, false); // 240 per show
 	                           
+		AddFoodDrink(L"Be Our Guest", 3, true, true, 34, 517, 15, 10, 8);
+		AddFoodDrink(L"Casey's Corner", 3, true, true, 8, 144, 15, 10, 8);
+		AddFoodDrink(L"Cinderall's Royal Table", 3, true, true, 12, 327, 15, 10, 8);
+		AddFoodDrink(L"Columbia Harbour House", 3, true, true, -145, 387, 15, 10, 8);
+		AddFoodDrink(L"Crystal Palace", 3, true, true, 127, 306, 15, 10, 8);
+		AddFoodDrink(L"Gaston's Tavern", 3, true, true, -73, 150, 15, 10, 8);
+		AddFoodDrink(L"Goldern Oak Outpost", 3, true, true, 62, 525, 15, 10, 8);
+		AddFoodDrink(L"Liberty Tree Tavern", 3, true, true, -356, 227, 15, 10, 8);
+		AddFoodDrink(L"Main Street Bakery", 3, true, true, -133, 265, 15, 10, 8);
+		AddFoodDrink(L"Main Street Confectionary", 3, true, true, 8, 51, 10, 10, 8);
+		AddFoodDrink(L"Pecos Bill Tall Tale Cafe", 3, true, true, -323, 231, 15, 10, 8);
+		AddFoodDrink(L"Pinocchio Village Haus", 3, true, true, -20, 433, 15, 10, 8);
+		AddFoodDrink(L"Plaza Ice Cream", 3, true, true, 25, 128, 10, 10, 8);
+		AddFoodDrink(L"Tomorrowland Terrace", 3, true, true, 80, 170, 15, 10, 8);
+		AddFoodDrink(L"Tony's Town Square Restaurant", 3, true, true, 45, 19, 15, 10, 8);
+		AddFoodDrink(L"Tortuga Tavern", 3, true, true, -292, 191, 15, 10, 8);
+
 		break;
 
 	case ParkTemplate::Arcade:
 
 		SetEntrance(L"Arcade", 0, 0, 0, 5000,
-			        5, 5, 5, 5, 0, 0);
+			        5, 5, 5, 5, 0, 0, 6000);
 
 		AddNewRideContinuous(L"Outrun",            2, RideExitType::Short, 120, 1, -20, 10, 0, 0, true, true, false);
 		AddNewRideContinuous(L"Pac-Man",           2, RideExitType::Short, 120, 1, -10, 10, 0, 0, true, true, false);
@@ -621,7 +703,7 @@ void ParkController::BuildFromTemplate(ParkTemplate park_template)
 	case ParkTemplate::AltonTowers:
 
 		SetEntrance(L"Alton Towers", 100, 740, 0, 25000,
-					80, 44, 74, 44, 0, 0);
+					80, 44, 74, 44, 0, 0, 28000);
 
 		AddNewRideShow(L"The Alton Towers Dungeon", 45, RideExitType::Short, 60, 1000, 1000, 10, 0, 0, 0, 0, true, true, false);
 
@@ -653,6 +735,25 @@ void ParkController::BuildFromTemplate(ParkTemplate park_template)
 		AddNewRideContinuous(L"Octonauts Rollercoaster Adventure",     2, RideExitType::Short,  580, 24,   40, 567, 0,  0, true, true,  false);
 		AddNewRideContinuous(L"Funk'n'Fly",                            2, RideExitType::Short,  480, 25,  700, 245, 0,  0, true, true,  false);
 		AddNewRideContinuous(L"Skyride",                               5, RideExitType::Short, 2800, 26,  158, 618, 0,  0, true, true,  false);
+
+		AddFoodDrink(L"Tower's Street Hot Dogs", 3, true, true, 16, 70, 10, 10, 8);
+		AddFoodDrink(L"Corner Coffee", 3, false, true, -36, 78, 10, 10, 8);
+		AddFoodDrink(L"Eastern Express", 3, true, true, 175, 113, 15, 10, 8);
+		AddFoodDrink(L"Donut Factory", 3, true, true, -231, 268, 10, 10, 8);
+		AddFoodDrink(L"Woodcutter's Bar and Grill", 3, true, true, 15, 434, 15, 10, 8);
+		AddFoodDrink(L"Pizza and Pasta", 3, true, true, 434, 107, 15, 10, 8);
+		AddFoodDrink(L"Just Chicken", 3, true, true, -199, 424, 15, 10, 8);
+		AddFoodDrink(L"Nemice's Donuts", 3, true, true, 487, 415, 10, 10, 8);
+		AddFoodDrink(L"Rollercoaster", 3, true, true, 634, 512, 15, 10, 8);
+		AddFoodDrink(L"Little Explorer's Lunchbox", 3, true, true, -74, 17, 15, 10, 8);
+		AddFoodDrink(L"Coffee Lounge", 3, false , true, -39, 719, 15, 10, 8);
+		AddFoodDrink(L"Burger Kitchen", 3, true, true, 609, 467, 10, 10, 8);
+		AddFoodDrink(L"Welcom-Inn", 2, true, true, 162, 185, 15, 10, 8);
+		AddFoodDrink(L"Courtyard Nachos/Waffles/Hotdogs", 3, true, true, 162, 185, 10, 10, 8);
+		AddFoodDrink(L"Wafflemeister", 2, true, true, 380, 375, 15, 10, 8);
+		AddFoodDrink(L"Nitrogenie", 2, true, true, 510, 209, 10, 10, 8);
+
+		AddFoodDrink(L"Vending Machines", 8, false, true, -229, 268, 5, 1, 1);
 
 		break;
 	}
@@ -687,6 +788,87 @@ void ParkController::OutputStatus(const std::wstring status)
 	{
 		std::wcout << status << std::endl;
 	}
+}
+
+
+// =================================================================================================================
+// == Food and Drink ===============================================================================================
+// =================================================================================================================
+
+
+// get the closest eatery (from the top 3) that has a wait time less than the group requirement
+QWaitTypes::GetEatery ParkController::GetClosestEatery(QWaitTypes::Coords position, int max_wait_time)
+{
+	int eatery[5] = { -1, -1, -1, -1, -1 };
+	double distance[5] = { 99999, 99999, 99999, 99999, 99999 };
+
+	for (int e = 0; e < Eateries.size(); e++)
+	{
+		int dx = abs(position.x - Eateries[e].X);
+		int dy = abs(position.y - Eateries[e].Y);
+
+		double d = static_cast<int>(sqrt((double)dx * dx + dy * dy));
+
+		if (d < distance[0])
+		{
+			distance[4] = distance[3];
+			distance[3] = distance[2];
+			distance[2] = distance[1];
+			distance[1] = distance[0];
+			distance[0] = d;
+
+			eatery[4] = eatery[3];
+			eatery[3] = eatery[2];
+			eatery[2] = eatery[1];
+			eatery[1] = eatery[0];
+			eatery[0] = e;
+		}
+		else if (d < distance[1])
+		{
+			distance[4] = distance[3];
+			distance[3] = distance[2];
+			distance[2] = distance[1];
+			distance[1] = d;
+
+			eatery[4] = eatery[3];
+			eatery[3] = eatery[2];
+			eatery[2] = eatery[1];
+			eatery[1] = e;
+		}
+		else if (d < distance[2])
+		{
+			distance[4] = distance[3];
+			distance[3] = distance[2];
+			distance[2] = d;
+
+			eatery[4] = eatery[3];
+			eatery[3] = eatery[2];
+			eatery[2] = e;
+		}
+		else if (d < distance[3])
+		{
+			distance[4] = distance[3];
+			distance[3] = d;
+
+			eatery[4] = eatery[3];
+			eatery[3] = e;
+		}
+		else if (d < distance[4])
+		{
+			distance[4] = d;
+			eatery[4] = e;
+		}
+	}
+
+	for (int t = 0; t < 5; t++)
+	{
+		if (Eateries[eatery[t]].QueueWaitTime() <= max_wait_time)
+		{
+			return { eatery[t], distance[t], -1, {Eateries[eatery[t]].X, Eateries[eatery[t]].Y} };
+		}
+	}
+
+	return { -1, -1, -1, { -1, -1 } };
 }
 
 
@@ -767,7 +949,9 @@ bool ParkController::BuildFromTemplate(const std::wstring file_name)
 		int ey = config->ReadInteger(L"main", L"entrancey", 0);
 		int fptype = config->ReadInteger(L"main", L"fastpasttype", 0);
 		int ridecount = config->ReadInteger(L"main", L"ridecount", 0);
+		int eatery_count = config->ReadInteger(L"main", L"eaterycount", 0);
 		int average_visitors = config->ReadInteger(L"main", L"averagevisitors", 0);
+		int max_capacity = config->ReadInteger(L"main", L"maxcapacity", 0);
 
 		int adult = config->ReadInteger(L"main", L"adult", 0);
 		int adult_advanced = config->ReadInteger(L"main", L"adultadvanced", 0);
@@ -776,7 +960,7 @@ bool ParkController::BuildFromTemplate(const std::wstring file_name)
 		int baby = config->ReadInteger(L"main", L"baby", 0);
 		int baby_advanced = config->ReadInteger(L"main", L"babyadvanced", 0);
 
-		SetEntrance(name, ex, ey, fptype, average_visitors, adult, adult_advanced, child, child_advanced, baby, baby_advanced);
+		SetEntrance(name, ex, ey, fptype, average_visitors, adult, adult_advanced, child, child_advanced, baby, baby_advanced, max_capacity);
 
 		if (ridecount != 0)
 		{
@@ -798,9 +982,9 @@ bool ParkController::BuildFromTemplate(const std::wstring file_name)
 					int i = config->ReadInteger(L"ride" + std::to_wstring(r), L"isfastpass", 0);
 					int f = config->ReadInteger(L"ride" + std::to_wstring(r), L"fpreservepercent", 0);
 
-					int u = config->ReadBoolean(L"ride" + std::to_wstring(r), L"adultvalid", true);
-					int v = config->ReadBoolean(L"ride" + std::to_wstring(r), L"childvalid", true);
-					int w = config->ReadBoolean(L"ride" + std::to_wstring(r), L"babyvalid", false);
+					bool u = config->ReadBoolean(L"ride" + std::to_wstring(r), L"adultvalid", true);
+					bool v = config->ReadBoolean(L"ride" + std::to_wstring(r), L"childvalid", true);
+					bool w = config->ReadBoolean(L"ride" + std::to_wstring(r), L"babyvalid", false);
 
 					if (l == 0 || h == 0 || s == 0 || f == 0)
 					{
@@ -822,9 +1006,9 @@ bool ParkController::BuildFromTemplate(const std::wstring file_name)
 					int i = config->ReadInteger(L"ride" + std::to_wstring(r), L"isfastpass", 0);
 					int f = config->ReadInteger(L"ride" + std::to_wstring(r), L"fpreservepercent", 0);
 
-					int u = config->ReadBoolean(L"ride" + std::to_wstring(r), L"adultvalid", true);
-					int v = config->ReadBoolean(L"ride" + std::to_wstring(r), L"childvalid", true);
-					int w = config->ReadBoolean(L"ride" + std::to_wstring(r), L"babyvalid", false);
+					bool u = config->ReadBoolean(L"ride" + std::to_wstring(r), L"adultvalid", true);
+					bool v = config->ReadBoolean(L"ride" + std::to_wstring(r), L"childvalid", true);
+					bool w = config->ReadBoolean(L"ride" + std::to_wstring(r), L"babyvalid", false);
 
 					if (l == 0 || h == 0 || f == 0)
 					{
@@ -846,6 +1030,35 @@ bool ParkController::BuildFromTemplate(const std::wstring file_name)
 		else
 		{
 			std::wcerr << name << L" : ridecount cannot be zero!" << std::endl;
+		}
+
+		if (eatery_count != 0)
+		{
+			for (int e = 1; e <= eatery_count; e++)
+			{
+				std::wstring name = config->ReadString(L"eatery" + std::to_wstring(e), L"name", L"unknown");
+				bool f = config->ReadBoolean(L"eatery" + std::to_wstring(e), L"foodvalid", false);
+				bool d = config->ReadBoolean(L"eatery" + std::to_wstring(e), L"drinkvalid", false);
+
+				int t = config->ReadInteger(L"eatery" + std::to_wstring(e), L"throughput", 3);
+
+				int x = config->ReadInteger(L"eatery" + std::to_wstring(e), L"x", 0);
+				int y = config->ReadInteger(L"eatery" + std::to_wstring(e), L"y", 0);
+
+				int w = config->ReadInteger(L"eatery" + std::to_wstring(e), L"wait", 0);
+
+				int a = config->ReadInteger(L"eatery" + std::to_wstring(e), L"adultspend", 0);
+				int c = config->ReadInteger(L"eatery" + std::to_wstring(e), L"childspend", 0);
+
+				if (f && d && w != 0)
+				{
+					AddFoodDrink(name, t, f, d, x, y, w, a, c);
+				}
+				else
+				{
+					std::wcerr << name << L" : foodvalid or drinkvalid must be true (1), wait must be non-zero" << std::endl;
+				}
+			}
 		}
 	}
 	else
@@ -1012,6 +1225,19 @@ bool ParkController::SaveDistanceCache(const std::wstring file_name)
 // =================================================================================================================
 
 
+int ParkController::TotalEaterySpending()
+{
+	int total = 0;
+
+	for (int t = 0; t < Eateries.size(); t++)
+	{
+		total += Eateries[t].Statistics.Spend;
+	}
+
+	return total;
+}
+
+
 int ParkController::GetLargestTicketCategory()
 {
 	int result = GParkController->entrance.Tickets.Adult;
@@ -1051,14 +1277,24 @@ void ParkController::ShowStatistics(int park_open_hours)
 
 		for (int r = 0; r < Rides.size(); r++)
 		{
-			int pc = static_cast<int>((((double)Rides[r].DailyStatistics.totalRiders / ((double)park_open_hours + 1.0f)) / (double)Rides[r].RideThroughput.totalPerHour) * (double)100);
+			int pc = static_cast<int>((((double)Rides[r].DailyStatistics.totalRiders / ((double)park_open_hours + 1.0)) / (double)Rides[r].RideThroughput.totalPerHour) * (double)100);
 			int ph = static_cast<int>(Rides[r].DailyStatistics.totalRiders / (park_open_hours + 1));
 
-			std::wcout << Utility::PadRight(ph, 6) << " riders per hour vs " << Utility::PadRight(Rides[r].RideThroughput.totalPerHour, 5) << " (" << Utility::PadRight(pc, 3) << "%), longest q " << Utility::PadRight(Rides[r].DailyStatistics.maxQueueLength, 6) << " " << Rides[r].RideOperation.name << "\n";
+			std::wcout << Utility::PadRight(ph, 6) << L" riders per hour vs " << Utility::PadRight(Rides[r].RideThroughput.totalPerHour, 5) << L" (" << Utility::PadRight(pc, 3) << L"%), longest q " << Utility::PadRight(Rides[r].DailyStatistics.maxQueueLength, 6) << " " << Rides[r].RideOperation.name << "\n";
 
 			TotalRidersToday += Rides[r].DailyStatistics.totalRiders;
 		}
 
-		std::wcout << "\n" << "Total rides today: " << TotalRidersToday << " (theortical: " << TheoreticalHourThroughputTotal * (park_open_hours + 1) << ")" << std::endl;
+		if (FoodDrink)
+		{
+			std::wcout << "\n";
+
+			for (int e = 0; e < Eateries.size(); e++)
+			{
+				std::wcout << Utility::PadRight(Eateries[e].Statistics.Customers, 6) << L" customers, longest q " << Utility::PadRight(Eateries[e].Statistics.MaxQueue, 6) << " " << Eateries[e].Name << "\n";
+			}
+		}
+
+		std::wcout << "\n" << L"Total rides today: " << TotalRidersToday << L" (theortical: " << TheoreticalHourThroughputTotal * (park_open_hours + 1) << ")" << std::endl;
 	}
 }

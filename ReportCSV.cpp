@@ -58,7 +58,14 @@ namespace ReportCSV
 			OutputStatus(L"Saving Visitor data...");
 
 			// header
-			file << "Group,Group Type,Name,Spent,Type,Distance Travelled,Distance Travelled per ride,Time spent queuing,Time spent travelling,Time riding,Ride count,Queuing+Travelling/Riding Time,No ride available,Wait time too long,Shutdown,Shortest queue,longest queue,Fastpass rides" << "\n";
+			if (GConfiguration->HandleFoodDrink)
+			{
+				file << "Group,Group Type,Name,Spent,Type,Distance Travelled,Distance Travelled per ride,Time spent queuing,Time spent travelling,Time riding,Ride count,Queuing+Travelling/Riding Time,No ride available,Wait time too long,Shutdown,Eatery Queue Too Long,Shortest queue,longest queue,Fastpass rides" << "\n";
+			}
+			else
+			{
+				file << "Group,Group Type,Name,Spent,Type,Distance Travelled,Distance Travelled per ride,Time spent queuing,Time spent travelling,Time riding,Ride count,Queuing+Travelling/Riding Time,No ride available,Wait time too long,Shutdown,Shortest queue,longest queue,Fastpass rides" << "\n";
+			}
 
 			for (int g = 0; g < GVisitorController->Groups.size(); g++)
 			{
@@ -79,7 +86,14 @@ namespace ReportCSV
 						tqttbtr = (double)(vx.TimeSpent.queuing + (double)vx.TimeSpent.travelling) / (double)vx.TimeSpent.riding;
 					}
 
-					file << g << "," << GVisitorController->Groups[g].Configuration.GetTypeToInt() << L"," << vx.Configuration.Name << L"," << vx.Configuration.MoneySpent << "," << vx.Configuration.TypeInt << "," << vx.Rides.distanceTravelled << "," << dtbrc << "," << vx.TimeSpent.queuing << "," << vx.TimeSpent.travelling << "," << vx.TimeSpent.riding << "," << vx.Rides.count << "," << tqttbtr << "," << vx.Rides.noRideAvailable << "," << vx.Rides.waitTimeTooLong << "," << vx.Rides.rideShutdown << "," << vx.Rides.shortestQueue << "," << vx.Rides.longestQueue << "," << vx.Rides.fastPassRides << "\n";
+					if (GConfiguration->HandleFoodDrink)
+					{
+						file << g << "," << GVisitorController->Groups[g].Configuration.GetTypeToInt() << L"," << vx.Configuration.Name << L"," << vx.Configuration.MoneySpent << "," << vx.Configuration.TypeInt << "," << vx.Rides.distanceTravelled << "," << dtbrc << "," << vx.TimeSpent.queuing << "," << vx.TimeSpent.travelling << "," << vx.TimeSpent.riding << "," << vx.Rides.count << "," << tqttbtr << "," << vx.Rides.noRideAvailable << "," << vx.Rides.waitTimeTooLong << "," << vx.Rides.rideShutdown << "," << vx.Rides.eateryQueueTooLong << "," << vx.Rides.shortestQueue << "," << vx.Rides.longestQueue << "," << vx.Rides.fastPassRides << "\n";
+					}
+					else
+					{
+						file << g << "," << GVisitorController->Groups[g].Configuration.GetTypeToInt() << L"," << vx.Configuration.Name << L"," << vx.Configuration.MoneySpent << "," << vx.Configuration.TypeInt << "," << vx.Rides.distanceTravelled << "," << dtbrc << "," << vx.TimeSpent.queuing << "," << vx.TimeSpent.travelling << "," << vx.TimeSpent.riding << "," << vx.Rides.count << "," << tqttbtr << "," << vx.Rides.noRideAvailable << "," << vx.Rides.waitTimeTooLong << "," << vx.Rides.rideShutdown << "," << vx.Rides.shortestQueue << "," << vx.Rides.longestQueue << "," << vx.Rides.fastPassRides << "\n";
+					}
 				}
 			}
 
@@ -252,6 +266,42 @@ namespace ReportCSV
 		else
 		{
 			std::cerr << L"Unable to save Visitor Ride List." << std::endl;
+		}
+	}
+
+	void SaveEateryList(const std::wstring file_name)
+	{
+		std::wofstream file(file_name);
+
+		if (file)
+		{
+			OutputStatus(L"Saving Eatery List report...");
+
+			std::wstring output = L"";
+
+			file << L"Group ID,Eatery Count,Eatery List" << "\n";
+
+			for (int g = 0; g < GVisitorController->Groups.size(); g++)
+			{
+				output = L"," + std::to_wstring(GVisitorController->Groups[g].EateryList.size());
+
+				if (GVisitorController->Groups[g].EateryList.size() != 0)
+				{
+					for (int r = 0; r < GVisitorController->Groups[g].EateryList.size(); r++)
+					{
+						output += L"," + GParkController->Eateries[GVisitorController->Groups[g].EateryList[r]].Name;
+					}
+				}
+
+				file << g << L"," << output << "\n";
+
+			}
+
+			file.close();
+		}
+		else
+		{
+			std::cerr << L"Unable to save Eatery List." << std::endl;
 		}
 	}
 

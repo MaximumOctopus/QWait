@@ -27,11 +27,15 @@ class Engine
 	bool ParkOpen;
 	FastPassType FastPassMode;
 
+	bool HandleFoodDrink = false;
+
 	QWaitTypes::Time CurrentTime;
 	int TimeParkCloses;
 	int TimeRidesClose;
 
-	int UpdateRate = 15;
+	int Temperature = 20;
+
+	int UpdateRate = 15; // every n minutes
 
 	void UpdateClock();
 
@@ -54,11 +58,17 @@ class Engine
 	void RideShowProcessQueue(int);
 	void RideEmptyQueue(int);
 
+	void EateryProcessQueue(int);
+	void EateryEmptyQueue(int);
+
 	void ParkStatusEntrance(int);
 	void ParkStatusIdle(int);
 	void ParkStatusRiding(int);
-	void ParkStatusTravelling(int);
+	void ParkStatusTravellingRide(int);
 	void ParkStatusWaiting(int);
+
+	void ParkStatusTravellingFood(int);
+	void ParkStatusEating(int);
 
 	void ShowLiveStats();
 
@@ -66,7 +76,7 @@ public:
 
 	int VisitorsInPark = 0;
 
-	Engine(FastPassType, int, int, bool, int);
+	Engine(FastPassType, int, int, bool, int, bool, int);
 
 	void Run(bool, bool);	
 };

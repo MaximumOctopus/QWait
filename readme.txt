@@ -1,8 +1,8 @@
  ===============================================================================
  =                                                                             =
- =  QWait 0.6.1 beta                                                           =
+ =  QWait 0.7 beta                                                             =
  =                                                                             =
- =  August 4th 2022                                                            =
+ =  September 18th 2022                                                        =
  =                                                                             =
  =  www.freshney.org // paul@freshney.org                                      =
  =                                                                             =
@@ -70,6 +70,7 @@
   https://www.mousehacking.com/blog/every-walt-disney-world-ride-ranked
   https://magicguides.com/best-epcot-attractions/
   https://www.mousehacking.com/blog/disney-world-height-requirements
+  https://www.wdwvacationtips.com/disney-world-capacity-limits
  
   https://www.disneytouristblog.com/paid-lightning-lanes-genie-replace-free-fastpass-disney-world/
 
@@ -81,6 +82,14 @@
   https://www.themeparkjames.co.uk/theme-parks/europe/uk/alton-towers/
   https://www.youtube.com/watch?v=cVUlHjQximM
   
+
+========================================================================
+== Updates for 0.7 beta ================================================
+========================================================================
+
+Added rudimentary food/drink requirements system. Added restaurants/cafes/etc.
+to theme parks based on real data.
+
 ========================================================================
 == Updates for 0.6 beta ================================================
 ========================================================================

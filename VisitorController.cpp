@@ -29,7 +29,7 @@
 VisitorController* GVisitorController;
 
 
-VisitorController::VisitorController(int count, bool show_output, ParkTemplate park_template, bool visitor_name)
+VisitorController::VisitorController(int count, bool show_output, bool food_drink, ParkTemplate park_template, bool visitor_name)
 {
 	GetVisitorName = visitor_name;
 
@@ -39,6 +39,8 @@ VisitorController::VisitorController(int count, bool show_output, ParkTemplate p
 	ExpectedVisitorCount = count;
 
 	ShowOutput = show_output;
+
+	FoodDrink = food_drink;
 
 	SetDefaults();
 }
@@ -99,7 +101,7 @@ void VisitorController::Run(bool save_visitor_list, const std::wstring save_file
 		{
 			std::random_device rd;
 			std::default_random_engine eng(rd());
-			std::uniform_real_distribution<double> distr(0.0f, 1.0f);
+			std::uniform_real_distribution<double> distr(0.0, 1.0);
 
 			GroupType group_type = GetGroupType(distr(eng));
 
@@ -172,16 +174,16 @@ void VisitorController::ShowConfig()
 {
 	if (ShowOutput)
 	{
-		std::wcout << L"Family       :    " << Utility::PadRight(GroupTypeCount[0], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[0] / (double)GroupCountCreated) * 100.0f)) << "\n";
-		std::wcout << L"Adult Couple :    " << Utility::PadRight(GroupTypeCount[1], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[1] / (double)GroupCountCreated) * 100.0f)) << "\n";
-		std::wcout << L"Adult Group  :    " << Utility::PadRight(GroupTypeCount[2], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[2] / (double)GroupCountCreated) * 100.0f)) << "\n";
-		std::wcout << L"Single       :    " << Utility::PadRight(GroupTypeCount[3], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[3] / (double)GroupCountCreated) * 100.0f)) << "\n";
+		std::wcout << L"Family       :    " << Utility::PadRight(GroupTypeCount[0], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[0] / (double)GroupCountCreated) * 100.0)) << "\n";
+		std::wcout << L"Adult Couple :    " << Utility::PadRight(GroupTypeCount[1], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[1] / (double)GroupCountCreated) * 100.0)) << "\n";
+		std::wcout << L"Adult Group  :    " << Utility::PadRight(GroupTypeCount[2], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[2] / (double)GroupCountCreated) * 100.0)) << "\n";
+		std::wcout << L"Single       :    " << Utility::PadRight(GroupTypeCount[3], 6) << L" " << ReportUtility::BarGraph(static_cast<int>(((double)GroupTypeCount[3] / (double)GroupCountCreated) * 100.0)) << "\n";
 		std::wcout << L"=========================\n";
 		std::wcout << L"      Total  :    " << Utility::PadRight(GroupCountCreated, 6) << "\n\n";
 
 		for (int t = 0; t < Constants::AvailableVisitorTypes; t++)
 		{
-			int pc = static_cast<int>(((double)TypeCount[t] / (double)VisitorCountCreated) * 100.0f);
+			int pc = static_cast<int>(((double)TypeCount[t] / (double)VisitorCountCreated) * 100.0);
 
 			std::wcout << L"Type         : " << t << "  " << Utility::PadRight(TypeCount[t], 6) << L" " << ReportUtility::BarGraph(pc) << "\n";
 		}                            
@@ -298,6 +300,12 @@ int VisitorController::GetLargestValueByType(int parameter)
 				result = static_cast<int>(DailyStatsByType[t].averageTravellingTime);
 			}
 			break;
+		case kDailyStatsByTypeEateryQueueTooLong:
+			if (DailyStatsByType[t].eateryQueueTooLong > result)
+			{
+				result = DailyStatsByType[t].eateryQueueTooLong;
+			}
+			break;
 		case kDailyStatsHighestRideCountByIndex:
 			result = kDailyRideCount - 1;
 
@@ -332,7 +340,7 @@ void VisitorController::UpdateMinuteStats(const std::wstring current_time)
 
 	m.time = current_time;
 
-	int Data[11] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	int Data[13] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	int RideCount = 0;
 
 	for (int g = 0; g < Groups.size(); g++)
@@ -361,11 +369,20 @@ void VisitorController::UpdateMinuteStats(const std::wstring current_time)
 				case VisitorParkStatus::QueuingFastPass:
 					Data[Constants::ParkStatusQueuingFastPass]++;
 					break;
-				case VisitorParkStatus::Travelling:
+				case VisitorParkStatus::QueuingFood:
+					Data[Constants::ParkStatusQueuingFoodDrink]++;
+					break;
+				case VisitorParkStatus::TravellingRide:
 					Data[Constants::ParkStatusTravelling]++;
 					break;
 				case VisitorParkStatus::Waiting:
 					Data[Constants::ParkStatusWaiting]++;
+					break;
+				case VisitorParkStatus::TravellingFood:
+					Data[Constants::ParkStatusTravellingFoodDrink]++;
+					break;
+				case VisitorParkStatus::Eating:
+					Data[Constants::ParkStatusEating]++;
 					break;
 				case VisitorParkStatus::WaitingForOthersInParty:
 					Data[Constants::ParkStatusWaitingForOthersInParty]++;
@@ -401,8 +418,11 @@ void VisitorController::UpdateMinuteStats(const std::wstring current_time)
 	m.riding          = Data[Constants::ParkStatusRiding];
 	m.queuing         = Data[Constants::ParkStatusQueuing];
 	m.queuingFastPass = Data[Constants::ParkStatusQueuingFastPass];
+	m.queuingFood     = Data[Constants::ParkStatusQueuingFoodDrink];
 	m.travelling      = Data[Constants::ParkStatusTravelling];
 	m.waiting         = Data[Constants::ParkStatusWaiting];
+	m.travellingFood  = Data[Constants::ParkStatusTravellingFoodDrink];
+	m.eating          = Data[Constants::ParkStatusEating];
 	m.exited          = Data[Constants::ParkStatusExited];
 
 	if (RideCount != 0 && VisitorCountCreated != 0)
@@ -442,7 +462,7 @@ MinuteDataV VisitorController::GetMinuteDataStructFor(int minute)
 }
 
 
-void VisitorController::CalculateStatistics()
+void VisitorController::CalculateStatistics(int eatery_spending)
 {
 	for (int g = 0; g < Groups.size(); g++)
 	{
@@ -465,6 +485,17 @@ void VisitorController::CalculateStatistics()
 			DailyStats.waitTimeTooLong += visitor.Rides.waitTimeTooLong;
 			DailyStats.rideShutdown += visitor.Rides.rideShutdown;
 			DailyStats.distanceTravelled += visitor.Rides.distanceTravelled;
+
+			if (FoodDrink)
+			{
+				DailyStats.eateryQueueTooLong += visitor.Rides.eateryQueueTooLong;
+
+				DailyStats.totalEatingTime += visitor.TimeSpent.eating;
+				DailyStats.totalQueueFoodTime += visitor.TimeSpent.queuingFood;
+				DailyStats.totalTravellingFoodTime += visitor.TimeSpent.travellingFood;
+
+				DailyStats.totalEateriesVisited += visitor.Rides.eateriesVisited;
+			}
 
 			if (visitor.Rides.count >= 50)
 			{
@@ -531,6 +562,7 @@ void VisitorController::CalculateStatistics()
 			DailyStatsByGroup[GroupType].waitTimeTooLong += visitor.Rides.waitTimeTooLong;
 			DailyStatsByGroup[GroupType].rideShutdown += visitor.Rides.rideShutdown;
 			DailyStatsByGroup[GroupType].distanceTravelled += visitor.Rides.distanceTravelled;
+			DailyStatsByGroup[GroupType].eateryQueueTooLong += visitor.Rides.eateryQueueTooLong;
 
 			DailyStatsByGroup[GroupType].typeCount++;
 
@@ -575,6 +607,7 @@ void VisitorController::CalculateStatistics()
 			DailyStatsByType[visitor.Configuration.TypeInt].waitTimeTooLong += visitor.Rides.waitTimeTooLong;
 			DailyStatsByType[visitor.Configuration.TypeInt].rideShutdown += visitor.Rides.rideShutdown;
 			DailyStatsByType[visitor.Configuration.TypeInt].distanceTravelled += visitor.Rides.distanceTravelled;
+			DailyStatsByType[visitor.Configuration.TypeInt].eateryQueueTooLong += visitor.Rides.eateryQueueTooLong;
 
 			DailyStatsByType[visitor.Configuration.TypeInt].typeCount++;
 		}
@@ -594,6 +627,17 @@ void VisitorController::CalculateStatistics()
 	if (DailyStats.totalRidingTime != 0)
 	{
 		DailyStats.queueTimePerRideTime = static_cast<int>((double)DailyStats.totalQueueTime / (double)DailyStats.totalRidingTime);
+	}
+
+	if (FoodDrink)
+	{
+		DailyStats.averageQueueFoodTime = (double)DailyStats.totalQueueFoodTime / (double)VisitorCountCreated;
+		DailyStats.averageTravellingFoodTime = (double)DailyStats.totalTravellingFoodTime / (double)VisitorCountCreated;
+		DailyStats.averageEatingTime = (double)DailyStats.totalEatingTime / (double)VisitorCountCreated;
+
+		DailyStats.averageEateriesVisited = (double)DailyStats.totalEateriesVisited / (double)VisitorCountCreated;
+
+		DailyStats.averageTimePerEateryVisit = DailyStats.averageEatingTime / DailyStats.averageEateriesVisited;
 	}
 
 	// =====================================================================================================
@@ -648,9 +692,15 @@ void VisitorController::CalculateStatistics()
 
 	// =====================================================================================================
 
-	DailyStats.totalSpend = TotalSpending();
+	if (FoodDrink)
+	{
+		DailyStats.totalEaterySpend = eatery_spending;
+		DailyStats.averageEaterySpend = (double)eatery_spending / (double)VisitorCountCreated;
+	}
 
-	DailyStats.totalSpendPerRide = (double)DailyStats.totalSpend / (double)DailyStats.totalRides;
+	DailyStats.totalRideSpend = TotalSpending();
+
+	DailyStats.totalSpendPerRide = (double)DailyStats.totalRideSpend / (double)DailyStats.totalRides;
 }
 
 
@@ -662,11 +712,11 @@ void VisitorController::ShowStatistics()
 	{
 		if (DailyStats.totalFastPastRides != 0)
 		{
-			std::wcout << "Total rides: " << DailyStats.totalRides << " (fp: " << DailyStats.totalFastPastRides << "); " << "Max rides " << DailyStats.maxRides << ", min rides " << DailyStats.minRides << ", average " << DailyStats.averageRides << "\n";
+			std::wcout << "Total rides: " << DailyStats.totalRides << " (fp: " << DailyStats.totalFastPastRides << "); Max rides " << DailyStats.maxRides << ", min rides " << DailyStats.minRides << ", average " << DailyStats.averageRides << "\n";
 		}
 		else
 		{
-			std::wcout << "Total rides: " << DailyStats.totalRides << "; " << "Max rides " << DailyStats.maxRides << ", min rides " << DailyStats.minRides << ", average " << DailyStats.averageRides << "\n";
+			std::wcout << "Total rides: " << DailyStats.totalRides << "; Max rides " << DailyStats.maxRides << ", min rides " << DailyStats.minRides << ", average " << DailyStats.averageRides << "\n";
 		}
 
 		std::wcout << "Avg.queue time: " << DailyStats.averageQueueTime << " mins; Avg.idle time: " << DailyStats.averageIdleTime << " mins; Avg.travel time : " << DailyStats.averageTravellingTime << " mins; Avg. wait time: " << DailyStats.averageWaitingTime << " mins\n";
@@ -676,7 +726,18 @@ void VisitorController::ShowStatistics()
 		std::wcout << "\n";
 		std::wcout << "Queue minutes per ride minute: " << DailyStats.queueTimePerRideTime << "\n";
 		std::wcout << "\n";
-		std::wcout << "Spending $" << DailyStats.totalSpend << "\n\n"; // it's only $ cos I couldn't get £ to work in cout ;)
+
+		if (FoodDrink)
+		{
+			std::wcout << "Total travel food: " << DailyStats.totalTravellingFoodTime << " mins; total queue food: " << DailyStats.totalQueueFoodTime << " mins; total eat time " << DailyStats.totalEatingTime << " mins\n";
+			std::wcout << "Total eateries visited: " << DailyStats.totalEateriesVisited << "\n";
+			std::wcout << "\n";
+			std::wcout << "Avg. travel food: " << DailyStats.averageTravellingFoodTime << " mins; avg. queue food: " << DailyStats.averageQueueFoodTime << " mins; avg. eat time " << DailyStats.averageEatingTime << " mins\n";
+			std::wcout << "Avg. eateries visited: " << DailyStats.averageEateriesVisited << "; avg time per visit: " << DailyStats.averageTimePerEateryVisit << " mins.\n";
+			std::wcout << "\n";
+		}
+
+		std::wcout << "Ride spending $" << DailyStats.totalRideSpend << "; eatery spending $" << DailyStats.totalEaterySpend << "; total = $" << DailyStats.totalEaterySpend + DailyStats.totalRideSpend << "\n\n"; // it's only $ cos I couldn't get £ to work in cout ;)
 	}
 }
 

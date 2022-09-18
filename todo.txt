@@ -6,9 +6,7 @@
 
 in progress:
 
-- New visitor types. the current options seem very unrealistic. the next update will have a complete rewrite, including groups, families, singles 
-
-- visitor spending information. how much they pay etc.
+- visitor spending information. how much they pay etc. Basic implementation
 
 - more park types (hopefully using real-world data) (ongoing research)
 

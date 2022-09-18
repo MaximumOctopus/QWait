@@ -109,6 +109,10 @@ void Configuration::SetFromCommandLine()
 			{
 				DebugConfig.NoExecution = true;
 			}
+			else if (Parameters[p].command.find(kFoodDrink) != std::wstring::npos)
+			{
+				HandleFoodDrink = true;
+			}
 			else if (Parameters[p].command.find(kReportCVD) != std::wstring::npos)
 			{
 				CSVReports.CompleteVisitorData = true;
@@ -173,6 +177,10 @@ void Configuration::SetFromCommandLine()
 			else if (Parameters[p].command.find(kUserConfigFile) != std::wstring::npos)
 			{
 				HandleUseConfigFile(Parameters[p].property);
+			}
+			else if (Parameters[p].command.find(kTemperature) != std::wstring::npos)
+			{
+				HandleTemperature(Parameters[p].property);
 			}
 		}
 	}
@@ -313,7 +321,7 @@ void Configuration::HandleFastPassMode(const std::wstring property)
 		}
 		catch (...)
 		{
-			std::wcout << L"Invalid FastPass mode parameter: " << property << std::endl;
+			std::wcerr << L"Invalid FastPass mode parameter: " << property << std::endl;
 		}
 	}
 	else
@@ -337,6 +345,28 @@ void Configuration::HandleUseConfigFile(std::wstring file_name)
 	if (!LoadConfigurationFromIni(file_name))
 	{
 		std::wcerr << L"Error, couldn't load config \"" + file_name + L"\". Ignored." << std::endl;
+	}
+}
+
+
+void Configuration::HandleTemperature(const std::wstring input)
+{
+	if (input == L"")
+	{
+		Climate.Temperature = 22;
+	}
+	else
+	{
+		try
+		{
+			int t = std::stoi(input);
+
+			Climate.Temperature = t;
+		}
+		catch (...)
+		{
+			std::wcerr << L"Invalid Temperature: " << input << std::endl;
+		}
 	}
 }
 
@@ -410,6 +440,10 @@ bool Configuration::IsValidParameter(const std::wstring input)
 		return true;
 	}
 	else if (parameter == kGetVisitorNames)
+	{
+		return true;
+	}
+	else if (parameter == kFoodDrink)
 	{
 		return true;
 	}

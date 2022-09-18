@@ -22,8 +22,8 @@
 enum class AgeGroup { Baby = 0, Child = 1, Adult = 2 };
 
 enum class VisitorParkStatus {
-	OnWay = 0, AtEntrance = 1, Idle = 2, Riding = 3, Queuing = 4, QueuingFastPass = 5,
-	Travelling = 6, Waiting = 7, WaitingForOthersInParty = 8, Exited = 9
+	OnWay = 0, AtEntrance = 1, Idle = 2, Riding = 3, Queuing = 4, QueuingFastPass = 5, QueuingFood = 6,
+	TravellingRide = 7, Waiting = 8, TravellingFood = 9, Eating = 10, WaitingForOthersInParty = 11, Exited = 12
 };
 
 
@@ -34,8 +34,8 @@ struct NewVisitorConfiguration {
 
 	VisitorType type = VisitorType::Enthusiast;
 
-	double maxWaitTime = 0.0f;
-	double preference = 0.0f;
+	double maxWaitTime = 0.0;
+	double preference = 0.0;
 };
 
 
@@ -43,14 +43,17 @@ struct TimeStats {
 	int idle = 0;
 	int riding = 0;
 	int travelling = 0;
+	int travellingFood = 0;
 	int queuing = 0;
+	int queuingFood = 0;
 	int waiting = 0;
+	int eating = 0;
 };
 
 
 struct RideStats {
-	double maxWaitTime = 0.0f;    // max wait time for a ride (minutes)
-	double preference = 0.0f;     // scale from 0 = rides only, 1 = attractions only (actually high priority to low)
+	double maxWaitTime = 0.0;    // max wait time for a ride (minutes)
+	double preference = 0.0;     // scale from 0 = rides only, 1 = attractions only (actually high priority to low)
 
 	int count = 0;
 
@@ -61,16 +64,19 @@ struct RideStats {
 	int noFastPassRideForMe = 0;
 	int nooneCanRideInGroup = 0;
 	int rideNotSuitableForMe = 0;
+	int eateryQueueTooLong = 0;
 
-	double shortestQueue = 0.0f;
-	double longestQueue = 0.0f;
+	double shortestQueue = 0.0;
+	double longestQueue = 0.0;
 
-	double shortestQueueFastPass = 0.0f;
-	double longestQueueFastPass = 0.0f;
+	double shortestQueueFastPass = 0.0;
+	double longestQueueFastPass = 0.0;
 
 	int fastPassRides = 0;
 
 	int currentRide = Constants::kNoSelectedRide;
+
+	int eateriesVisited = 0;
 };
 
 

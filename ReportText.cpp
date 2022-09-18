@@ -39,7 +39,7 @@ namespace ReportText
 		{
 			OutputStatus(L"Saving Simulation report...");
 
-			GVisitorController->CalculateStatistics();
+			GVisitorController->CalculateStatistics(GParkController->TotalEaterySpending());
 
 			// =======================================================================================================================
 
@@ -49,6 +49,15 @@ namespace ReportText
 			file << "  Number of rides in park      : " << GParkController->Rides.size() << "\n";
 			file << "  Theoretical hourly capacity  : " << GParkController->TheoreticalHourThroughputTotal << "\n";
 			file << "  FastPass mode                : " << QWaitTypes::FastPassModeToString(fast_pass_mode) << "\n";
+			file << "  Start temperature            : " << GConfiguration->Climate.Temperature << "\n";
+			if (GConfiguration->HandleFoodDrink)
+			{
+				file << "  Handling food/drink          : Yes\n";
+			}
+			else
+			{
+				file << "  Handling food/drink          : No\n";
+			}
 			file << "\n";
 			file << "  Tickets purchased:";
 			file << "    Adult                      : " << GParkController->entrance.Tickets.Adult << "\n";
@@ -66,7 +75,17 @@ namespace ReportText
 			file << "    Baby                       $ " << GParkController->entrance.Prices.Babies << "\n";
 			file << "    Baby (advanced)            $ " << GParkController->entrance.Prices.BabiesAdvance << "\n";
 			file << "\n\n";
-			file << "    Total                      $ " << GVisitorController->DailyStats.totalSpend << "\n";
+			file << "    Ride Spending              $ " << GVisitorController->DailyStats.totalRideSpend << "\n";
+
+			if (GConfiguration->HandleFoodDrink)
+			{
+				file << "    Eatery Spending            $ " << GVisitorController->DailyStats.totalEaterySpend + GVisitorController->DailyStats.totalRideSpend << "\n";
+				file << "    Average per visitor        $ " << GVisitorController->DailyStats.averageEaterySpend << "\n";
+				file << "\n";
+				file << "    Total Spending             $ " << GVisitorController->DailyStats.totalRideSpend << "\n";
+			}
+
+			file << "\n";
 
 			// =======================================================================================================================
 
@@ -81,10 +100,23 @@ namespace ReportText
 			file << "    Average Queue Time (mins)  : " << GVisitorController->DailyStats.averageQueueTime << "\n";
 			file << "\n";
 
+			if (GConfiguration->HandleFoodDrink)
+			{
+		        file << "  Eateries visited             : " << GVisitorController->DailyStats.totalEateriesVisited << "\n";
+				file << "  Average eateries visited     : " << GVisitorController->DailyStats.averageEateriesVisited << "\n";
+				file << "\n";
+			}
+
 			file << "  No ride available            : " << GVisitorController->DailyStats.noRideAvailable << "\n";
 			file << "  Ride shutdown                : " << GVisitorController->DailyStats.rideShutdown << "\n";
 			file << "  Wait too long                : " << GVisitorController->DailyStats.waitTimeTooLong << "\n";
 			file << "\n";
+
+			if (GConfiguration->HandleFoodDrink)
+			{
+				file << "  Eatery queue too long        : " << GVisitorController->DailyStats.eateryQueueTooLong << "\n";
+				file << "\n";
+			}
 
 			file << "  Distance Travelled (m)       : " << GVisitorController->DailyStats.distanceTravelled << "\n";
 			file << "  Avg. Distance Travelled (m)  : " << GVisitorController->DailyStats.averageDistanceTravelled << "\n";
@@ -108,6 +140,23 @@ namespace ReportText
 
 			file << "  Queue time per ride time (m) : " << GVisitorController->DailyStats.queueTimePerRideTime << "\n";
 			file << "\n";
+
+			if (GConfiguration->HandleFoodDrink)
+			{
+				file << "Average time (min) for food" << "\n";
+				file << "  Queuing                      : " << GVisitorController->DailyStats.averageQueueFoodTime << "\n";
+				file << "  Travelling                   : " << GVisitorController->DailyStats.averageTravellingFoodTime << "\n";
+				file << "  Eating                       : " << GVisitorController->DailyStats.averageEaterySpend << "\n";
+				file << "\n";
+				file << "  Per visit                    : " << GVisitorController->DailyStats.averageTimePerEateryVisit << "\n";
+				file << "\n";
+
+				file << "Total time (min) for food" << "\n";
+				file << "  Queuing                      : " << GVisitorController->DailyStats.totalQueueFoodTime << "\n";
+				file << "  Travelling                   : " << GVisitorController->DailyStats.totalTravellingFoodTime << "\n";
+				file << "  Eating                       : " << GVisitorController->DailyStats.totalTravellingFoodTime << "\n";
+				file << "\n";
+			}
 
 			// =======================================================================================================================
 
@@ -233,9 +282,9 @@ namespace ReportText
 
 			for (int i = 0; i < GParkController->Rides.size(); i++)
 			{
-				double tpc = ((double)GParkController->Rides[i].DailyStatistics.totalRiders / ((double)GParkController->Rides[i].RideThroughput.totalPerHour * (double)GParkController->Rides[i].RideOperation.operationHours)) * 100.0f;
+				double tpc = ((double)GParkController->Rides[i].DailyStatistics.totalRiders / ((double)GParkController->Rides[i].RideThroughput.totalPerHour * (double)GParkController->Rides[i].RideOperation.operationHours)) * 100.0;
 
-				file << GParkController->Rides[i].RideOperation.name << L"   [" << kRideTypeNames[GParkController->Rides[i].RideOperation.rideTypeAsInt()] << "]   x: " << GParkController->Rides[i].RideOperation.position.x << " y: " << GParkController->Rides[i].RideOperation.position.y << "\n";
+				file << GParkController->Rides[i].RideOperation.name << L"   [" << kRideTypeNames[GParkController->Rides[i].RideOperation.rideTypeAsInt()] << "] (x: " << GParkController->Rides[i].RideOperation.position.x << " y: " << GParkController->Rides[i].RideOperation.position.y << ")\n";
 				file << L"    Unique ID           : " << GParkController->Rides[i].GetUniqueReference() << "\n";
 				file << L"    Open                : " << Utility::FormatTime(GParkController->Rides[i].RideOperation.open) << L" until " << Utility::FormatTime(GParkController->Rides[i].RideOperation.close) << "\n";
 				file << L"    Length              : " << GParkController->Rides[i].RideOperation.rideLength << L" minutes, capacity " << GParkController->Rides[i].RideThroughput.totalPerHour << " per hour" << "\n";
@@ -264,6 +313,27 @@ namespace ReportText
 			}
 
 			file << "===============================================================================\n";
+
+			// =======================================================================================================================
+
+			if (GConfiguration->HandleFoodDrink)
+			{
+				if (GParkController->Eateries.size() != 0)
+				{
+					for (int e = 0; e < GParkController->Eateries.size(); e++)
+					{
+						file << GParkController->Eateries[e].Name << L"  (x: " << GParkController->Eateries[e].X << ", y: " << GParkController->Eateries[e].Y << ")\n";
+						file << L"    Food                : " << GParkController->Eateries[e].Food << "\n";
+						file << L"    Drink               : " << GParkController->Eateries[e].Drink << "\n";
+						file << L"    Customers           : " << GParkController->Eateries[e].Statistics.Customers << "\n";
+						file << L"    Maximum Queue       : " << GParkController->Eateries[e].Statistics.MaxQueue << "\n";
+						file << L"    Spend             $ : " << GParkController->Eateries[e].Statistics.Spend << "\n";
+						file << "\n";
+					}
+
+					file << "===============================================================================\n";
+				}
+			}
 
 			// =======================================================================================================================
 
@@ -317,11 +387,11 @@ namespace ReportText
 
 		if (mdv.visitorsInPark != 0)
 		{
-			pIdle    = Utility::PadRight(static_cast<int>((double)(mdv.idle) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
-			pTravel  = Utility::PadRight(static_cast<int>((double)(mdv.travelling) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
-			pQueuing = Utility::PadRight(static_cast<int>((double)(mdv.queuing) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
-			pRiding  = Utility::PadRight(static_cast<int>((double)(mdv.riding) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
-			pBusy    = Utility::PadRight(static_cast<int>((double)(mdv.waiting) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
+			pIdle    = Utility::PadRight(static_cast<int>((double)(mdv.idle) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
+			pTravel  = Utility::PadRight(static_cast<int>((double)(mdv.travelling) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
+			pQueuing = Utility::PadRight(static_cast<int>((double)(mdv.queuing) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
+			pRiding  = Utility::PadRight(static_cast<int>((double)(mdv.riding) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
+			pBusy    = Utility::PadRight(static_cast<int>((double)(mdv.waiting) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
 		}
 
 		file << Utility::PadRight(mdv.time, 6) << L"  In park : " << Utility::PadRight(mdv.visitorsInPark, 6) << L"  Idle : " << Utility::PadRight(mdv.idle, 6) << L" (" << pIdle << L")  Travelling : " << Utility::PadRight(mdv.travelling, 6) << L" (" << pTravel << L")  Queuing : " << Utility::PadRight(mdv.queuing, 6) << L" (" << pQueuing << L")  Riding : " << Utility::PadRight(mdv.travelling, 6) << L" (" << pRiding << L")    Busy : " << Utility::PadRight(mdv.waiting, 6) << L" (" << pIdle << L")  Average Rides : " << Utility::PadRight(mdv.averageRides, 3) << "\n";
@@ -339,12 +409,12 @@ namespace ReportText
 
 		if (mdv.visitorsInPark != 0)
 		{
-			pIdle      = Utility::PadRight(static_cast<int>((double)(mdv.idle) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
-			pTravel    = Utility::PadRight(static_cast<int>((double)(mdv.travelling) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
-			pQueuing   = Utility::PadRight(static_cast<int>((double)(mdv.queuing) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
-			pQueuingFP = Utility::PadRight(static_cast<int>((double)(mdv.queuingFastPass) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
-			pRiding    = Utility::PadRight(static_cast<int>((double)(mdv.riding) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
-			pBusy      = Utility::PadRight(static_cast<int>((double)(mdv.waiting) / (double)(mdv.visitorsInPark)) * 100.0f, 3) + L"%";
+			pIdle      = Utility::PadRight(static_cast<int>((double)(mdv.idle) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
+			pTravel    = Utility::PadRight(static_cast<int>((double)(mdv.travelling) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
+			pQueuing   = Utility::PadRight(static_cast<int>((double)(mdv.queuing) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
+			pQueuingFP = Utility::PadRight(static_cast<int>((double)(mdv.queuingFastPass) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
+			pRiding    = Utility::PadRight(static_cast<int>((double)(mdv.riding) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
+			pBusy      = Utility::PadRight(static_cast<int>((double)(mdv.waiting) / (double)(mdv.visitorsInPark)) * 100.0, 3) + L"%";
 		}
 
 		file << Utility::PadRight(mdv.time, 6) << L"  In park : " << Utility::PadRight(mdv.visitorsInPark, 6) << L"  Idle : " << Utility::PadRight(mdv.idle, 6) << L" (" << pIdle << L")  Travelling : " << Utility::PadRight(mdv.travelling, 6) << L" (" << pTravel << L")  Queuing : " << Utility::PadRight(mdv.queuing, 6) << L" (" << pQueuing << L")  Queuing : " << Utility::PadRight(mdv.queuingFastPass, 6) << L" (" << pQueuingFP << L")  Riding : " << Utility::PadRight(mdv.travelling, 6) << L" (" << pRiding << L")    Busy : " << Utility::PadRight(mdv.waiting, 6) << L" (" << pIdle << L")  Average Rides : " << Utility::PadRight(mdv.averageRides, 3) << "\n";

@@ -60,6 +60,14 @@ namespace QWaitTypes
 		int fastPassTicket = 0;
 	};
 
+	struct GetEatery {
+		int eatery = 0;
+		double distance = 0;
+		int time = 0;
+
+		QWaitTypes::Coords location = { 0, 0 };
+	};
+
 	// represents a group (or part therof) in a ride queue.
 	// group id in the Groups array, members: one visitor array index per member of the group in the queue
 

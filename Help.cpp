@@ -41,6 +41,8 @@ namespace Help
         std::wcout << L"                                the specified file is used. Companion of /ReportVisitorDemo.\n";
         std::wcout << L"                                ignores the value set from /Visitors;x\n";
         std::wcout << "\n";
+        std::wcout << L"    /FoodDrink                  enabled visitors' food/drink requirements.\n";
+        std::wcout << "\n";
         std::wcout << L"    /DebugSCC                   export selection choice cache.\n";
         std::wcout << L"                                this is the data used by the visitor types to pick rides.\n";
         std::wcout << L"    /DebugDistanceCache         export the time and distance caches to a csv file.\n";

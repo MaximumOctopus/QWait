@@ -29,14 +29,14 @@ namespace GlobalControllers
 	{
 		GConfiguration     = new Configuration(argc, argv);
 
-		GParkController = new ParkController(!GConfiguration->DebugConfig.DisableConsoleOutput, GConfiguration->RideTemplateFile);
+		GParkController = new ParkController(!GConfiguration->DebugConfig.DisableConsoleOutput, GConfiguration->HandleFoodDrink, GConfiguration->RideTemplateFile);
 
 		if (GConfiguration->VisitorCount == VisitorCountUseParkAverage)
 		{
 			GConfiguration->VisitorCount = GParkController->entrance.averageVisitors;
 		}
 
-		GVisitorController = new VisitorController(GConfiguration->VisitorCount, !GConfiguration->DebugConfig.DisableConsoleOutput, GConfiguration->RideTemplate, GConfiguration->GetVisitorNames);
+		GVisitorController = new VisitorController(GConfiguration->VisitorCount, !GConfiguration->DebugConfig.DisableConsoleOutput, GConfiguration->HandleFoodDrink, GConfiguration->RideTemplate, GConfiguration->GetVisitorNames);
 		
 		return 0;
 	}

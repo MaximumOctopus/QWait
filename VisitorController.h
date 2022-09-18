@@ -31,9 +31,10 @@ static const int kDailyStatsByTypeAverageQueueTime = 4;
 static const int kDailyStatsByTypeAverageIdleTime = 5;
 static const int kDailyStatsByTypeAverageRidingTime = 6;
 static const int kDailyStatsByTypeAverageTravellingTime = 7;
-static const int kDailyStatsHighestRideCountByIndex = 8;
-static const int kDailyStatsHighestRideCountByValue = 9;
-static const int kDailyStatsHighestAverageRideCountByValue = 10;
+static const int kDailyStatsByTypeEateryQueueTooLong = 8;
+static const int kDailyStatsHighestRideCountByIndex = 9;
+static const int kDailyStatsHighestRideCountByValue = 10;
+static const int kDailyStatsHighestAverageRideCountByValue = 11;
 
 static const int kDailyRideCount = 51;
 
@@ -49,7 +50,10 @@ struct MinuteDataV {
 	int riding = 0;			//
 	int queuing = 0;		//
 	int queuingFastPass = 0;//
+	int queuingFood = 0;//
 	int travelling = 0;		//	
+	int travellingFood = 0;
+	int eating = 0;
 	int waiting = 0;		//
 	int exited = 0;			//
 
@@ -73,20 +77,32 @@ struct DailyStatistics {
 	int averageQueueTime = 0;
 
 	int totalIdleTime = 0;
-	double averageIdleTime = 0.0f;
+	double averageIdleTime = 0.0;
 
 	int totalRidingTime = 0;
-	double averageRidingTime = 0.0f;
+	double averageRidingTime = 0.0;
 
 	int totalTravellingTime = 0;
-	double averageTravellingTime = 0.0f;
+	double averageTravellingTime = 0.0;
 
 	int totalWaitingTime = 0;
-	double averageWaitingTime = 0.0f;
+	double averageWaitingTime = 0.0;
+
+	int totalQueueFoodTime = 0;
+	int totalTravellingFoodTime = 0;
+	int totalEateriesVisited = 0;
+	int totalEatingTime = 0;
+
+	double averageQueueFoodTime = 0;
+	double averageTravellingFoodTime = 0;
+	double averageEatingTime = 0;
+	double averageEateriesVisited = 0;
+	double averageTimePerEateryVisit = 0;
 
 	int noRideAvailable = 0;
 	int waitTimeTooLong = 0;
 	int rideShutdown = 0;
+	int eateryQueueTooLong = 0;
 	int distanceTravelled = 0; // metres
 	int averageDistanceTravelled = 0; // metres
 
@@ -95,8 +111,11 @@ struct DailyStatistics {
 									   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // each slot represents the number of visitors to ride that many times
 	int typeCount = 0;
 
-	int totalSpend = 0;
-	double totalSpendPerRide = 0.0f;
+	int totalRideSpend = 0;
+	double totalSpendPerRide = 0.0;
+
+	int totalEaterySpend = 0;
+	double averageEaterySpend = 0;
 };
 
 
@@ -116,6 +135,7 @@ class VisitorController
 	int TemplateIDint = 1;
 
 	bool ShowOutput = true;
+	bool FoodDrink = false;
 
 	bool GetVisitorName = false;
 
@@ -146,7 +166,7 @@ public:
 
 	std::vector<Group> Groups;
 
-	VisitorController(int, bool, ParkTemplate, bool);
+	VisitorController(int, bool, bool, ParkTemplate, bool);
 
 	int LoadVisitorList(const std::wstring);
 	void SaveVisitorList(const std::wstring);
@@ -166,7 +186,7 @@ public:
 
 	void CalculateDemographics();
 
-	void CalculateStatistics();
+	void CalculateStatistics(int);
 
 	void ShowStatistics();
 };

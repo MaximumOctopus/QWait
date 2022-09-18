@@ -37,6 +37,18 @@
     <Filter Include="Source Files\Groups">
       <UniqueIdentifier>{b03c2a90-be8c-42ba-9b07-451d81bef887}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Weather">
+      <UniqueIdentifier>{7b7e5378-ea0e-4140-9fe8-64308aa938a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Weather">
+      <UniqueIdentifier>{0fdae187-4077-41b6-89ef-4daf45671fc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\FoodDrink">
+      <UniqueIdentifier>{d4de5616-507e-402a-a3a9-2f9a5e9d5d69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FoodDrink">
+      <UniqueIdentifier>{4db74e1f-bd2b-417c-b7c7-313976fc2849}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="QWait.cpp">
@@ -98,6 +110,9 @@
     </ClCompile>
     <ClCompile Include="ReportUtility.cpp">
       <Filter>Source Files\Reports</Filter>
+    </ClCompile>
+    <ClCompile Include="Eatery.cpp">
+      <Filter>Source Files\FoodDrink</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="ReportUtility.h">
       <Filter>Header Files\Reports</Filter>
+    </ClInclude>
+    <ClInclude Include="Eatery.h">
+      <Filter>Header Files\FoodDrink</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

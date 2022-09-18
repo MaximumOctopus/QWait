@@ -30,6 +30,7 @@ namespace ReportCSV
 	void SaveVisitorLocation(const std::wstring);
 
 	void SaveVisitorRideList(const std::wstring);
+	void SaveEateryList(const std::wstring);
 
 	void OutputStatus(const std::wstring);
 }

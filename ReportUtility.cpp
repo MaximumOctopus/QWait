@@ -33,7 +33,7 @@ namespace ReportUtility
 		}
 		else
 		{
-			bar_count = static_cast<int>((double)percent / 2.5f);
+			bar_count = static_cast<int>((double)percent / 2.5);
 		}
 
 		std::wstring bar = L"";
@@ -44,7 +44,7 @@ namespace ReportUtility
 			add_half = true;
 		}
 
-		bar_count = static_cast<int>((double)bar_count / 2.0f);
+		bar_count = static_cast<int>((double)bar_count / 2.0);
 
 		for (int t = 0; t < bar_count; t++)
 		{

@@ -56,6 +56,8 @@ Group::Group(GroupType group_type, int template_id)
 	}
 
 	Behaviour.maximumRideWaitingTime = GetMaximumWaitingTime();
+
+	Demographics();
 }
 
 
@@ -86,6 +88,24 @@ Group::Group(int type, int template_id, int stay_duration, bool staying_on_site,
 	Configuration.departureTime = { depart_hours, depart_minutes };
 
 	Behaviour.maximumRideWaitingTime = GetMaximumWaitingTime();
+
+	Demographics();
+}
+
+
+void Group::Demographics()
+{
+	for (int t = 0; t < Visitors.size(); t++)
+	{
+		if (Visitors[t].Configuration.Age == AgeGroup::Adult)
+		{
+			AdultCount++;
+		}
+		else if (Visitors[t].Configuration.Age == AgeGroup::Child)
+		{
+			ChildCount++;
+		}
+	}
 }
 
 
@@ -121,17 +141,23 @@ void Group::BuildFamily(double random)
 	{
 		Visitors.push_back(Visitor(GetVisitorGenericChild()));
 	}
+
+	Behaviour.consumption.Threshold = kFamilyConsumptionThreshold;
 }
 
 
 void Group::BuildAdultCouple(double random)
 {
-	double r = ((double)rand() / double(RAND_MAX)) * 0.75f;
+	double r = ((double)rand() / double(RAND_MAX)) * 0.75;
 
 	NewVisitorConfiguration vtc = GetBaseVisitorConfiguration(GetType(r));
 
+	vtc.age = AgeGroup::Adult;
+
 	Visitors.push_back(Visitor(vtc));
 	Visitors.push_back(Visitor(vtc));
+
+	Behaviour.consumption.Threshold = kAdultCoupleConsumptionThreshold;
 }
 
 
@@ -164,12 +190,16 @@ void Group::BuildAdultGroup(double random)
 	{
 		Visitors.push_back(Visitor(GetBaseVisitorConfiguration(GetType((double)rand() / double(RAND_MAX)))));
 	}
+
+	Behaviour.consumption.Threshold = kAdultGroupConsumptionThreshold;
 }
 
 
 void Group::BuildSingle(double random)
 {
 	Visitors.push_back(Visitor(GetBaseVisitorConfiguration(GetType((double)rand() / double(RAND_MAX)))));
+
+	Behaviour.consumption.Threshold = kSingleConsumptionThreshold;
 }
 
 
@@ -294,43 +324,43 @@ NewVisitorConfiguration Group::GetBaseVisitorConfiguration(VisitorType type)
 	switch (type)
 	{
 	case VisitorType::Enthusiast:
-		vtc.maxWaitTime = 240.0f;
+		vtc.maxWaitTime = 240.0;
 		vtc.preference = Constants::VisitorTypesRidePreference[Constants::VisitorTypeEnthusiast];
 
 		break;
 
 	case VisitorType::Fan:
-		vtc.maxWaitTime = 120.0f;
+		vtc.maxWaitTime = 120.0;
 		vtc.preference = Constants::VisitorTypesRidePreference[Constants::VisitorTypeFan];
 
 		break;
 
 	case VisitorType::Tourist:
-		vtc.maxWaitTime = 90.0f;
+		vtc.maxWaitTime = 90.0;
 		vtc.preference = Constants::VisitorTypesRidePreference[Constants::VisitorTypeTourist];
 
 		break;
 
 	case VisitorType::Activity:
-		vtc.maxWaitTime = 70.0f;
+		vtc.maxWaitTime = 70.0;
 		vtc.preference = Constants::VisitorTypesRidePreference[Constants::VisitorTypeActivity];
 
 		break;
 
 	case VisitorType::Passholder:
-		vtc.maxWaitTime = 60.0f;
+		vtc.maxWaitTime = 60.0;
 		vtc.preference = Constants::VisitorTypesRidePreference[Constants::VisitorTypePassholder];
 
 		break;
 
 	case VisitorType::EPassHolder:
-		vtc.maxWaitTime = 60.0f;
+		vtc.maxWaitTime = 60.0;
 		vtc.preference = Constants::VisitorTypesRidePreference[Constants::VisitorTypeEPassHolder];
 
 		break;
 
 	case VisitorType::TikToker:
-		vtc.maxWaitTime = 45.0f;
+		vtc.maxWaitTime = 45.0;
 		vtc.preference = Constants::VisitorTypesRidePreference[Constants::VisitorTypeTikToker];
 
 		break;
@@ -371,7 +401,20 @@ int Group::GetMaximumWaitingTime()
 		mwt += Visitors[v].Rides.maxWaitTime;
 	}
 
-	return static_cast<int>((mwt / (double)Visitors.size()) * 1.05f);
+	return static_cast<int>((mwt / (double)Visitors.size()) * 1.05);
+}
+
+
+int Group::GetMaximumWaitingTimeFood()
+{
+	double mwt = 0;
+
+	for (int v = 0; v < Visitors.size(); v++)
+	{
+		mwt += Visitors[v].Rides.maxWaitTime;
+	}
+
+	return static_cast<int>((mwt / (double)Visitors.size()) * 0.33);
 }
 
 
@@ -571,7 +614,7 @@ void Group::SetNewRide(int ride, int fastpass_ticket, int minutes_left, int dist
 	Behaviour.travelling.toRide = ride; 
 	Behaviour.travelling.fastPass = fastpass_ticket;
 
-	SetTravellingMinutesLeft(minutes_left);
+	SetTravellingMinutesLeft(minutes_left, true);
 
 	for (int v = 0; v < Visitors.size(); v++)
 	{
@@ -583,7 +626,7 @@ void Group::SetNewRide(int ride, int fastpass_ticket, int minutes_left, int dist
 }
 
 
-void Group::SetTravellingMinutesLeft(int minutes)
+void Group::SetTravellingMinutesLeft(int minutes, bool ride)
 {
 	switch (Configuration.type)
 	{
@@ -616,7 +659,14 @@ void Group::SetTravellingMinutesLeft(int minutes)
 
 	Statistics.timeSpent.travelling += Behaviour.travelling.minutesLeft;
 
-	SetStatusForAllVisitors(GroupParkStatus::Travelling, VisitorParkStatus::Travelling);
+	if (ride)
+	{
+		SetStatusForAllVisitors(GroupParkStatus::TravellingRide, VisitorParkStatus::TravellingRide);
+	}
+	else
+	{
+		SetStatusForAllVisitors(GroupParkStatus::TravellingFood, VisitorParkStatus::TravellingFood);
+	}
 }
 
 
@@ -696,6 +746,30 @@ void Group::UpdateLastRidesList()
 // =================================================================================================================
 
 
+void Group::SetNewEatery(int eatery, int minutes_left, int distance, QWaitTypes::Coords location)
+{
+	Behaviour.travelling.toEatery = eatery;
+	Behaviour.travelling.toRide = Constants::kNoCurrentRide;
+
+	SetTravellingMinutesLeft(minutes_left, false);
+
+	for (int v = 0; v < Visitors.size(); v++)
+	{
+		Visitors[v].Rides.distanceTravelled += distance; // to do? maybe add eatery category!/
+
+		Visitors[v].Rides.eateriesVisited++;             // as above
+	}
+
+	Behaviour.travelling.to.x = location.x;
+	Behaviour.travelling.to.y = location.y;
+}
+
+
+// =================================================================================================================
+// =================================================================================================================
+// =================================================================================================================
+
+
 void Group::AddFastPassTicket(int type, int ride, QWaitTypes::Time entry_time)
 {
 	QWaitTypes::FastPass fp = { type, ride, entry_time };
@@ -708,6 +782,71 @@ void Group::AddFastPassTicket(int type, int ride, QWaitTypes::Time entry_time)
 void Group::SortFastPassTickets()
 {
 	std::sort(FastPassTickets.begin(), FastPassTickets.end(), sortByTime);
+}
+
+
+// =================================================================================================================
+// == Food and Drink ===============================================================================================
+// =================================================================================================================
+
+
+void Group::SetAtEateryQueuing(int eatery)
+{
+	Behaviour.currentEatery = eatery;
+
+	SetStatusForAllVisitors(GroupParkStatus::QueuingFood, VisitorParkStatus::QueuingFood);
+
+	Behaviour.travelling.toEatery = Constants::kNoDestinationEatery;
+
+	EateryList.push_back(eatery);
+
+	UpdateLastRidesList();
+}
+
+
+void Group::UpdateConsumption(int temp)
+{
+	double deltat = (0.3333 * (double)Behaviour.consumption.TimeSinceDrink * sqrt(temp));
+	double modifier = 1;
+
+	switch (Behaviour.parkStatus)
+	{
+	case GroupParkStatus::OnWay:
+	case GroupParkStatus::AtEntrance:
+	case GroupParkStatus::Exited:
+	case GroupParkStatus::QueuingFood:
+	case GroupParkStatus::Eating:
+		return;
+	
+	case GroupParkStatus::Idle:
+	case GroupParkStatus::Waiting:
+		modifier = 0.3;
+		break;
+		
+	case GroupParkStatus::Riding:
+		modifier = 0.9;
+		break;
+		
+	case GroupParkStatus::Queuing:
+	case GroupParkStatus::QueuingFastPass:
+		modifier = 0.6;
+		break;
+
+	case GroupParkStatus::TravellingRide:
+	case GroupParkStatus::TravellingFood:
+		modifier = 1;
+		break;
+	}
+
+	Behaviour.consumption.Drink += modifier * (deltat * deltat);
+}
+
+
+void Group::ResetFoodDrink()
+{
+	Behaviour.consumption.Drink = 0;
+	Behaviour.consumption.Food = 0;
+	Behaviour.consumption.TimeSinceDrink = 0;
 }
 
 
@@ -869,15 +1008,26 @@ void Group::SetStatForAllVisitors(GroupVisitorStat stat_id)
 			case GroupVisitorStat::TimeSpentQueuing:
 				Visitors[v].TimeSpent.queuing++;
 				break;
+			case GroupVisitorStat::TimeSpentQueuingFood:
+				Visitors[v].TimeSpent.queuingFood++;
+				break;
 			case GroupVisitorStat::TimeSpentTravelling:
 				Visitors[v].TimeSpent.travelling++;
+				break;
+			case GroupVisitorStat::TimeSpentTravellingFood:
+				Visitors[v].TimeSpent.travellingFood++;
 				break;
 			case GroupVisitorStat::TimeSpentWaiting:
 				Visitors[v].TimeSpent.waiting++;
 				break;
+			case GroupVisitorStat::TimeSpentEating:
+				Visitors[v].TimeSpent.eating++;
+				break;
 			case GroupVisitorStat::NooneCanRideInGroup:
 				Visitors[v].Rides.nooneCanRideInGroup++;
 				break;
+			case GroupVisitorStat::EateryQueueTooLong:
+				Visitors[v].Rides.eateryQueueTooLong++;
 		}
 	}
 }
@@ -912,14 +1062,20 @@ void Group::SaveMinuteStats()
 	case GroupParkStatus::QueuingFastPass:
 		m.parkStatusInt = 5;
 		break;
-	case GroupParkStatus::Travelling:
+	case GroupParkStatus::TravellingRide:
 		m.parkStatusInt = 6;
 		break;
 	case GroupParkStatus::Waiting:
 		m.parkStatusInt = 7;
 		break;
-	case GroupParkStatus::Exited:
+	case GroupParkStatus::TravellingFood:
 		m.parkStatusInt = 8;
+		break;
+	case GroupParkStatus::Eating:
+		m.parkStatusInt = 9;
+		break;
+	case GroupParkStatus::Exited:
+		m.parkStatusInt = 10;
 		break;
 	}
 

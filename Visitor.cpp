@@ -45,8 +45,8 @@ void Visitor::SetDefaults()
 	Rides.count = 0;
 	Rides.fastPassRides = 0;
 
-	Rides.shortestQueue = 9999.0f;
-	Rides.longestQueue = 0.0f;
+	Rides.shortestQueue = 9999.0;
+	Rides.longestQueue = 0.0;
 
 	Rides.shortestQueueFastPass = 9999;
 	Rides.longestQueueFastPass = 0;

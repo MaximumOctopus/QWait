@@ -151,7 +151,13 @@ int wmain(int argc, wchar_t* argv[])
     {
         if (GConfiguration->VisitorCount > 0)
         {
-            Engine e(GConfiguration->FastPassMode, GConfiguration->ParkOpenTime, GConfiguration->ParkCloseTime, !GConfiguration->DebugConfig.DisableConsoleOutput, GConfiguration->DebugConfig.UpdateRate);
+            Engine e(GConfiguration->FastPassMode, 
+                GConfiguration->ParkOpenTime, 
+                GConfiguration->ParkCloseTime, 
+                !GConfiguration->DebugConfig.DisableConsoleOutput, 
+                GConfiguration->DebugConfig.UpdateRate,
+                GConfiguration->HandleFoodDrink,
+                GConfiguration->Climate.Temperature);
 
             e.Run(GConfiguration->CSVReports.MinuteByMinute || GConfiguration->HTMLReports.SimulationReport || GConfiguration->TextReports.MinuteByMinute, GConfiguration->CSVReports.VisitorLocation);
         }
@@ -163,7 +169,7 @@ int wmain(int argc, wchar_t* argv[])
 
     // ==========================================================================================
 
-    GVisitorController->CalculateStatistics();
+    GVisitorController->CalculateStatistics(GParkController->TotalEaterySpending());
 
     if (!GConfiguration->DebugConfig.DisableConsoleOutput)
     {

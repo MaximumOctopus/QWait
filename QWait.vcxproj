@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Eatery.cpp" />
     <ClCompile Include="Help.cpp" />
     <ClCompile Include="Ini.cpp" />
     <ClCompile Include="MD5.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="VisitorController.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Eatery.h" />
     <ClInclude Include="Group.h" />
     <ClInclude Include="ReportCSV.h" />
     <ClInclude Include="ReportText.h" />
